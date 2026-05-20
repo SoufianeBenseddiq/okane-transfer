@@ -1,0 +1,268 @@
+classDiagram
+direction TB
+    class Utilisateur {
+	    +Long id
+	    +String nom
+	    +String prenom
+	    +String email
+	    +String motDePasseHash
+	    +String telephone
+	    +String pays
+	    +RoleEnum role
+	    +Boolean actif
+	    +LocalDateTime creeLe
+	    +seConnecter()
+	    +changerMotDePasse()
+    }
+
+    class Administrateur {
+	    +gererDevises()
+	    +gererAgences()
+	    +gererUtilisateurs()
+	    +configurerFrais()
+	    +voirJournalAudit()
+	    +gererListeOFAC()
+    }
+
+    class ResponsableAgence {
+	    +Agence agence
+	    +validerOperationSensible()
+	    +gererAgents()
+	    +voirRapportAgence()
+	    +demanderRevisionPlafond()
+    }
+
+    class Agent {
+	    +Agence agence
+	    +BigDecimal soldesCaisse
+	    +enregistrerEnvoi()
+	    +payerTransfert()
+	    +cloturerCaisse()
+	    +signalerEcartCaisse()
+    }
+
+    class Client {
+	    +Boolean twoFactorActive
+	    +suivreTransfert()
+	    +voirHistorique()
+	    +gererProfil()
+	    +demanderEffacement()
+    }
+
+    class Agence {
+	    +Long id
+	    +String nom
+	    +String adresse
+	    +String pays
+	    +BigDecimal plafondJournalier
+	    +BigDecimal montantTraiteAujourdhui
+	    +Boolean active
+	    +verifierPlafond()
+	    +calculerCommissions()
+    }
+
+    class Transfert {
+	    +Long id
+	    +String codeRetrait
+	    +String numeroReference
+	    +BigDecimal montantEnvoye
+	    +BigDecimal montantRecu
+	    +BigDecimal frais
+	    +StatutEnum statut
+	    +LocalDateTime creeLe
+	    +LocalDateTime payeLe
+	    +genererCodeRetrait()
+	    +changerStatut()
+	    +verifierExpiration()
+    }
+
+    class StatutEnum {
+	    EN_ATTENTE
+	    PAYE
+	    ANNULE
+	    EXPIRE
+	    BLOQUE
+    }
+
+    class RoleEnum {
+	    ROLE_ADMIN
+	    ROLE_MANAGER
+	    ROLE_AGENT
+	    ROLE_CLIENT
+    }
+
+    class Devise {
+	    +Long id
+	    +String code
+	    +String nom
+	    +String symbole
+	    +Boolean active
+	    +BigDecimal tauxVersEuro
+	    +LocalDateTime derniereMaj
+	    +String sourceTaux
+    }
+
+    class Corridor {
+	    +Long id
+	    +Devise deviseSource
+	    +Devise deviseDestination
+	    +Boolean actif
+	    +LocalDate dateActivation
+	    +convertir()
+	    +estActif()
+    }
+
+    class GrilleTarifaire {
+	    +Long id
+	    +BigDecimal montantMin
+	    +BigDecimal montantMax
+	    +BigDecimal fraisFixe
+	    +BigDecimal fraisPourcentage
+	    +BigDecimal partAgence
+	    +BigDecimal partCentrale
+	    +calculerFrais()
+    }
+
+    class HistoriqueTaux {
+	    +Long id
+	    +Devise devise
+	    +BigDecimal ancienTaux
+	    +BigDecimal nouveauTaux
+	    +LocalDateTime date
+	    +String source
+    }
+
+    class Expediteur {
+	    +Long id
+	    +String nom
+	    +String prenom
+	    +String numeroPiece
+	    +TypePieceEnum typePiece
+	    +String telephone
+	    +String pays
+    }
+
+    class Beneficiaire {
+	    +Long id
+	    +String nom
+	    +String prenom
+	    +String telephone
+	    +String pays
+	    +Boolean surListeSurveillance
+    }
+
+    class CaisseOperation {
+	    +Long id
+	    +Agent agent
+	    +TypeOperationEnum type
+	    +BigDecimal montant
+	    +LocalDateTime dateHeure
+	    +String reference
+    }
+
+    class ClotureCaisse {
+	    +Long id
+	    +Agent agent
+	    +LocalDate date
+	    +BigDecimal soldeTheorique
+	    +BigDecimal soldeSaisi
+	    +BigDecimal ecart
+	    +Boolean signale
+    }
+
+    class JournalAudit {
+	    +Long id
+	    +Utilisateur acteur
+	    +String action
+	    +String entiteCible
+	    +Long idCible
+	    +String detailAvant
+	    +String detailApres
+	    +LocalDateTime dateHeure
+	    +String ipAdresse
+    }
+
+    class ListeSurveillanceOFAC {
+	    +Long id
+	    +String nom
+	    +String prenom
+	    +String alias
+	    +String pays
+	    +String motifInscription
+	    +LocalDate dateAjout
+	    +Boolean actif
+	    +Boolean ajoutManuel
+    }
+
+    class DeclarationSoupcon {
+	    +Long id
+	    +Transfert transfert
+	    +Client client
+	    +String motif
+	    +BigDecimal montantTotal
+	    +LocalDateTime genereLe
+	    +Boolean traitee
+	    +generer()
+    }
+
+    class RegleAML {
+	    +Long id
+	    +String nom
+	    +String description
+	    +BigDecimal seuilMontant
+	    +Integer seuilNbTransactions
+	    +Integer fenêtreTempsMinutes
+	    +Boolean active
+	    +evaluer()
+    }
+
+    class Notification {
+	    +Long id
+	    +Utilisateur destinataire
+	    +String message
+	    +TypeNotifEnum type
+	    +Boolean lue
+	    +LocalDateTime envoyeLe
+	    +envoyer()
+    }
+
+    class TransfertMobileMoney {
+	    +Long id
+	    +Transfert transfert
+	    +String operateur
+	    +String numeroCible
+	    +StatutMobileEnum statut
+	    +String referencOperateur
+	    +envoyer()
+	    +reconcilier()
+    }
+
+	<<enumeration>> StatutEnum
+	<<enumeration>> RoleEnum
+
+    Utilisateur <|-- Administrateur
+    Utilisateur <|-- ResponsableAgence
+    Utilisateur <|-- Agent
+    Utilisateur <|-- Client
+    Agence "1" --> "1" ResponsableAgence : gérée par
+    Agence "1" --> "*" Agent : emploie
+    Transfert "*" --> "1" Expediteur : envoyé par
+    Transfert "*" --> "1" Beneficiaire : reçu par
+    Transfert "*" --> "1" Agent : saisi par
+    Transfert "*" --> "1" Agence : agence envoi
+    Transfert "*" --> "1" Agence : agence retrait
+    Transfert "*" --> "1" Corridor : via corridor
+    Transfert "*" --> "1" GrilleTarifaire : selon grille
+    Transfert --> StatutEnum
+    Corridor "*" --> "1" Devise : devise source
+    Corridor "*" --> "1" Devise : devise destination
+    HistoriqueTaux "*" --> "1" Devise : concerne
+    CaisseOperation "*" --> "1" Agent : effectuée par
+    ClotureCaisse "*" --> "1" Agent : clôturée par
+    JournalAudit "*" --> "1" Utilisateur : acteur
+    DeclarationSoupcon "*" --> "1" Transfert : concerne
+    DeclarationSoupcon "*" --> "1" Client : concerne
+    Notification "*" --> "1" Utilisateur : destinataire
+    Notification "*" --> "1" Transfert : concerne
+    TransfertMobileMoney "1" --> "1" Transfert : étend
+    Utilisateur --> RoleEnum
