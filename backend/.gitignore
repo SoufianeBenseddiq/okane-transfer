@@ -37,12 +37,12 @@ build/
 ### Mac OS ###
 .DS_Store
 
-# Secrets
-src/main/resources/application.properties
-
 # Build
 *.war
 *.class
 
 # IDE
 .idea/
+
+.env
+src/main/resources/application.properties
