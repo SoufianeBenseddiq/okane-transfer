@@ -20,5 +20,19 @@ public class Client extends Utilisateur {
             fetch = FetchType.LAZY)
     private List<PieceIdentite> piecesIdentites = new ArrayList<>();
 
-    // getters / setters
+    public Boolean getTwoFactorActive() {
+        return twoFactorActive;
+    }
+
+    public void setTwoFactorActive(Boolean twoFactorActive) {
+        this.twoFactorActive = twoFactorActive;
+    }
+
+    public List<PieceIdentite> getPiecesIdentites() {
+        return piecesIdentites;
+    }
+
+    public void setPiecesIdentites(List<PieceIdentite> piecesIdentites) {
+        this.piecesIdentites = piecesIdentites;
+    }
 }
