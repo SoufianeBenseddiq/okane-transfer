@@ -17,14 +17,14 @@ Si l'interface n'est pas encore codée → tu crées un mock temporaire dans ton
 
 ## Vue d'ensemble de la répartition
 
-| Membre | Domaine | Entités concernées |
-|--------|---------|-------------------|
-| Membre 1 | User + Auth + Security | `Utilisateur`, `Administrateur`, `Agent`, `Manager`, `Client`, `PieceIdentite` |
-| Membre 2 | Agence + Caisse | `Agence`, `CaisseOperation`, `ClotureCaisse` |
-| Membre 3 | Devise + Corridor + Frais | `Devise`, `Corridor`, `GrilleTarifaire`, `HistoriqueTaux` |
-| Membre 4 | Transfert | `Transfert`, `Expediteur`, `Beneficiaire` |
-| Membre 5 | AML + Audit | `DeclarationSoupcon`, `JournalAudit`, `ListeOFAC`, `RegleAML` |
-| Membre 6 | Notification + MobileMoney + Rapport | `Notification`, `TransfertMobileMoney` |
+| Membre     | Domaine | Entités concernées |
+|------------|---------|-------------------|
+| Soufiane   | User + Auth + Security | `Utilisateur`, `Administrateur`, `Agent`, `Manager`, `Client`, `PieceIdentite` |
+| Btissam    | Agence + Caisse | `Agence`, `CaisseOperation`, `ClotureCaisse` |
+| Siham      | Devise + Corridor + Frais | `Devise`, `Corridor`, `GrilleTarifaire`, `HistoriqueTaux` |
+| Ayman      | Transfert | `Transfert`, `Expediteur`, `Beneficiaire` |
+| Tabati     | AML + Audit | `DeclarationSoupcon`, `JournalAudit`, `ListeOFAC`, `RegleAML` |
+| Abdelghani | Notification + MobileMoney + Rapport | `Notification`, `TransfertMobileMoney` |
 
 ---
 
