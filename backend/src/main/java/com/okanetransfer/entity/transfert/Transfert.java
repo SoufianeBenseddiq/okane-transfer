@@ -37,7 +37,7 @@ public class Transfert {
     private StatutTransfert statut = StatutTransfert.EN_ATTENTE;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "expediteur_id", nullable = false)
+    @JoinColumn(name = "expediteur_id")
     private Expediteur expediteur;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -45,11 +45,11 @@ public class Transfert {
     private Beneficiaire beneficiaire;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "agent_saisie_id", nullable = false)
+    @JoinColumn(name = "agent_saisie_id")
     private Agent agentSaisie;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "agence_envoi_id", nullable = false)
+    @JoinColumn(name = "agence_envoi_id")
     private Agence agenceEnvoi;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -57,11 +57,11 @@ public class Transfert {
     private Agence agenceRetrait;       // null jusqu'au paiement
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "corridor_id", nullable = false)
+    @JoinColumn(name = "corridor_id")
     private Corridor corridor;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "grille_tarifaire_id", nullable = false)
+    @JoinColumn(name = "grille_tarifaire_id")
     private GrilleTarifaire grilleTarifaire;
 
     @Column(nullable = false, updatable = false)

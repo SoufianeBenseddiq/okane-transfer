@@ -14,13 +14,13 @@ public class Expediteur {
 
     // le client qui envoie — nom, prenom, tel viennent de Utilisateur
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false)
+    @JoinColumn(name = "client_id")//nullable=false
     private Client client;
 
     // la pièce qu'il a présentée physiquement au guichet
     // doit appartenir à ce client (vérification dans le service)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "piece_identite_id", nullable = false)
+    @JoinColumn(name = "piece_identite_id") //nullable=false
     private PieceIdentite pieceConfirmee;
 
     public Long getId() { return id; }
