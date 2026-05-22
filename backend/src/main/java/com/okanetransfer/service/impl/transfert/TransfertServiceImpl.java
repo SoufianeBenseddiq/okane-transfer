@@ -6,7 +6,7 @@ import com.okanetransfer.entity.transfert.Transfert;
 import com.okanetransfer.repository.transfert.BeneficiaireRepository;
 import com.okanetransfer.repository.transfert.ExpediteurRepository;
 import com.okanetransfer.repository.transfert.TransfertRepository;
-import com.okanetransfer.service.converter.TransfertConverter;
+import com.okanetransfer.service.converter.transfert.TransfertConverter;
 import com.okanetransfer.service.dto.transfert.request.CreateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.request.PaiementRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateTransfertRequest;
