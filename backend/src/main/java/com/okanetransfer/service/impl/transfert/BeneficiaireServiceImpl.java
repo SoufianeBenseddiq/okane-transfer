@@ -2,7 +2,7 @@ package com.okanetransfer.service.impl.transfert;
 
 import com.okanetransfer.entity.transfert.Beneficiaire;
 import com.okanetransfer.repository.transfert.BeneficiaireRepository;
-import com.okanetransfer.service.converter.BeneficiaireConverter;
+import com.okanetransfer.service.converter.transfert.BeneficiaireConverter;
 import com.okanetransfer.service.dto.transfert.request.CreateBeneficiaireRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateBeneficiaireRequest;
 import com.okanetransfer.service.dto.transfert.response.BeneficiaireResponse;

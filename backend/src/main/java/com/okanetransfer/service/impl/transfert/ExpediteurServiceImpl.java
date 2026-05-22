@@ -4,7 +4,7 @@ import com.okanetransfer.entity.transfert.Expediteur;
 import com.okanetransfer.entity.user.Client;
 import com.okanetransfer.entity.user.PieceIdentite;
 import com.okanetransfer.repository.transfert.ExpediteurRepository;
-import com.okanetransfer.service.converter.ExpediteurConverter;
+import com.okanetransfer.service.converter.transfert.ExpediteurConverter;
 import com.okanetransfer.service.dto.transfert.request.CreateExpediteurRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateExpediteurRequest;
 import com.okanetransfer.service.dto.transfert.response.ExpediteurResponse;

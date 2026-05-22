@@ -1,4 +1,4 @@
-package com.okanetransfer.service.converter;
+package com.okanetransfer.service.converter.transfert;
 
 import com.okanetransfer.entity.transfert.Beneficiaire;
 import com.okanetransfer.service.dto.transfert.response.BeneficiaireResponse;
