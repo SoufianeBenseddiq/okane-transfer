@@ -8,7 +8,9 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
         return new Class[]{AppConfig.class, JpaConfig.class};  // removed SecurityConfig
     }
     @Override
-    protected Class<?>[] getServletConfigClasses() { return null; }
+    protected Class<?>[] getServletConfigClasses() {
+        return new Class[]{AppConfig.class};
+    }
     @Override
     protected String[] getServletMappings() { return new String[]{"/"}; }
 }
