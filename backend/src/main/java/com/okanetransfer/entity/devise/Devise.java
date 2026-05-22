@@ -31,5 +31,69 @@ public class Devise {
 
     private String sourceTaux;     // "MANUEL" ou "API"
 
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
+    public String getSymbole() {
+        return symbole;
+    }
+
+    public void setSymbole(String symbole) {
+        this.symbole = symbole;
+    }
+
+    public BigDecimal getTauxVersEuro() {
+        return tauxVersEuro;
+    }
+
+    public void setTauxVersEuro(BigDecimal tauxVersEuro) {
+        this.tauxVersEuro = tauxVersEuro;
+    }
+
+    public LocalDateTime getDerniereMaj() {
+        return derniereMaj;
+    }
+
+    public void setDerniereMaj(LocalDateTime derniereMaj) {
+        this.derniereMaj = derniereMaj;
+    }
+
+    public String getSourceTaux() {
+        return sourceTaux;
+    }
+
+    public void setSourceTaux(String sourceTaux) {
+        this.sourceTaux = sourceTaux;
+    }
+
     // getters / setters
 }
