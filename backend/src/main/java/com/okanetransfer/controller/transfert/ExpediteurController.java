@@ -1,4 +1,4 @@
-package com.okanetransfer.Controller.transfert;
+package com.okanetransfer.controller.transfert;
 
 import com.okanetransfer.service.dto.transfert.request.CreateExpediteurRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateExpediteurRequest;
