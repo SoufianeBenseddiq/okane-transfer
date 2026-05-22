@@ -52,10 +52,11 @@ public class JournalAudit {
         this.dateHeure = LocalDateTime.now();
     }
 
-    long getId() {
+    public Long getId() {
         return id;
     }
-    void setId(long id) {
+
+    public void setId(Long id) {
         this.id = id;
     }
     public Utilisateur getActeur() {
