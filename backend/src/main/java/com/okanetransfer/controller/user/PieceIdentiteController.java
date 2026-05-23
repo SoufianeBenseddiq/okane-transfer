@@ -21,13 +21,13 @@ public class PieceIdentiteController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PieceIdentiteResponse>> findAll(@PathVariable Long clientId) {
+    public ResponseEntity<List<PieceIdentiteResponse>> findAll(@PathVariable("clientId") Long clientId) {
         return ResponseEntity.ok(pieceIdentiteService.getPieces(clientId));
     }
 
     @PostMapping
     public ResponseEntity<PieceIdentiteResponse> create(
-            @PathVariable Long clientId,
+            @PathVariable("clientId") Long clientId,
             @Valid @RequestBody PieceIdentiteRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(pieceIdentiteService.ajouterPiece(clientId, request));
@@ -35,15 +35,15 @@ public class PieceIdentiteController {
 
     @PutMapping("/{pieceId}/principale")
     public ResponseEntity<PieceIdentiteResponse> definirPrincipale(
-            @PathVariable Long clientId,
-            @PathVariable Long pieceId) {
+            @PathVariable("clientId") Long clientId,
+            @PathVariable("pieceId") Long pieceId) {
         return ResponseEntity.ok(pieceIdentiteService.definirPrincipale(clientId, pieceId));
     }
 
     @DeleteMapping("/{pieceId}")
     public ResponseEntity<Void> supprimer(
-            @PathVariable Long clientId,
-            @PathVariable Long pieceId) {
+            @PathVariable("clientId") Long clientId,
+            @PathVariable("pieceId") Long pieceId) {
         pieceIdentiteService.supprimerPiece(clientId, pieceId);
         return ResponseEntity.noContent().build();
     }
