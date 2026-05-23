@@ -57,5 +57,20 @@
     "cancel": "Cancel",
     "printSlip": "Print slip",
     "confirmPayment": "Confirm payment"
+  },
+  "caisse": {
+    "currentBalance": "Current balance",
+    "updatedAt": "Updated at",
+    "openingBalance": "day opening",
+    "totalEnvois": "Total sends collected",
+    "totalRetraits": "Total withdrawals paid",
+    "theoreticalBalance": "Calculated theoretical balance",
+    "operations": "operations",
+    "matchesReal": "Matches real balance",
+    "movements": "Movements",
+    "todayTimeline": "Today's operations timeline",
+    "movementsCount": "movements",
+    "send": "send",
+    "withdrawal": "withdrawal"
   }
 }

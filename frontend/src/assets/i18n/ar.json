@@ -57,5 +57,20 @@
     "cancel": "إلغاء",
     "printSlip": "طباعة الفيشة",
     "confirmPayment": "تأكيد الدفع"
+  },
+  "caisse": {
+    "currentBalance": "الرصيد الحالي",
+    "updatedAt": "محدّث في",
+    "openingBalance": "افتتاح اليوم",
+    "totalEnvois": "إجمالي التحويلات المحصّلة",
+    "totalRetraits": "إجمالي المسحوبات المدفوعة",
+    "theoreticalBalance": "الرصيد النظري المحسوب",
+    "operations": "عمليات",
+    "matchesReal": "يطابق الرصيد الفعلي",
+    "movements": "الحركات",
+    "todayTimeline": "جدول عمليات اليوم",
+    "movementsCount": "حركة",
+    "send": "إرسال",
+    "withdrawal": "سحب"
   }
 }

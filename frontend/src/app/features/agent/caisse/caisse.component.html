@@ -1,0 +1,119 @@
+<div class="space-y-4 max-w-7xl mx-auto mt-4 mb-4">
+
+  <!-- Balance Hero -->
+  <div class="bg-[#151c2c] rounded-2xl p-8 text-center">
+    <p class="text-xs text-amber-400 uppercase tracking-widest font-semibold mb-3">{{ 'caisse.currentBalance' | translate }}</p>
+    <div class="flex items-baseline justify-center gap-4">
+      <span class="text-7xl font-black text-white tracking-tight">84</span>
+      <span class="text-7xl font-black text-white tracking-tight">200</span>
+      <span class="text-3xl font-bold text-amber-400 mb-1">MAD</span>
+    </div>
+    <p class="text-sm text-gray-500 mt-3">
+      {{ 'caisse.updatedAt' | translate }} 15:42 · {{ 'caisse.openingBalance' | translate }} 50 000 MAD
+    </p>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-3 gap-4">
+
+    <!-- Envois -->
+    <div class="bg-[#151c2c] rounded-2xl p-5">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+          </svg>
+        </div>
+        <p class="text-xs text-gray-400 uppercase tracking-widest font-medium">{{ 'caisse.totalEnvois' | translate }}</p>
+      </div>
+      <p class="text-3xl font-black text-emerald-400 tracking-tight">+62 400 <span class="text-lg font-bold">MAD</span></p>
+      <p class="text-xs text-gray-500 mt-1.5">{{ cashStats.envoiOps }} {{ 'caisse.operations' | translate }}</p>
+    </div>
+
+    <!-- Retraits -->
+    <div class="bg-[#151c2c] rounded-2xl p-5">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-red-500/15 flex items-center justify-center">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#f87171" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+          </svg>
+        </div>
+        <p class="text-xs text-gray-400 uppercase tracking-widest font-medium">{{ 'caisse.totalRetraits' | translate }}</p>
+      </div>
+      <p class="text-3xl font-black text-red-400 tracking-tight">-28 200 <span class="text-lg font-bold">MAD</span></p>
+      <p class="text-xs text-gray-500 mt-1.5">{{ cashStats.retraitOps }} {{ 'caisse.operations' | translate }}</p>
+    </div>
+
+    <!-- Solde théorique -->
+    <div class="bg-[#151c2c] rounded-2xl p-5">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#60a5fa" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2"/>
+            <path stroke-linecap="round" d="M2 10h20"/>
+          </svg>
+        </div>
+        <p class="text-xs text-gray-400 uppercase tracking-widest font-medium">{{ 'caisse.theoreticalBalance' | translate }}</p>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <p class="text-3xl font-black text-white tracking-tight">84 200 <span class="text-lg font-bold">MAD</span></p>
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <p class="text-xs text-emerald-400 mt-1.5">{{ 'caisse.matchesReal' | translate }}</p>
+    </div>
+
+  </div>
+
+  <!-- Timeline -->
+  <div class="bg-[#151c2c] rounded-2xl overflow-hidden">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-white/5">
+      <div>
+        <p class="text-xs font-semibold text-amber-400 uppercase tracking-widest">{{ 'caisse.movements' | translate }}</p>
+        <p class="text-base font-bold text-white">{{ 'caisse.todayTimeline' | translate }}</p>
+      </div>
+      <p class="text-xs text-gray-500">{{ movements.length }} {{ 'caisse.movementsCount' | translate }}</p>
+    </div>
+
+    <!-- Rows -->
+    <div class="divide-y divide-white/[0.04]">
+      <div *ngFor="let m of movements"
+           class="flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition-colors">
+
+        <!-- Time -->
+        <span class="w-10 text-xs text-gray-500 font-mono shrink-0">{{ m.time }}</span>
+
+        <!-- Icon -->
+        <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+             [ngClass]="m.type === 'retrait' ? 'bg-red-500/15' : 'bg-emerald-500/15'">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+               [attr.stroke]="m.type === 'retrait' ? '#f87171' : '#34d399'">
+            <path *ngIf="m.type === 'retrait'" stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+            <path *ngIf="m.type === 'envoi'"   stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+          </svg>
+        </div>
+
+        <!-- Ref -->
+        <span class="w-28 text-xs text-gray-500 font-mono shrink-0">{{ m.ref }}</span>
+
+        <!-- Label -->
+        <span class="flex-1 text-sm text-white">
+          {{ m.client }}
+          <span class="text-gray-500"> — {{ m.type === 'retrait' ? ('caisse.withdrawal' | translate) : ('caisse.send' | translate) }}</span>
+        </span>
+
+        <!-- Amount -->
+        <span class="text-sm font-bold font-mono shrink-0 tracking-wide"
+              [ngClass]="m.type === 'retrait' ? 'text-red-400' : 'text-emerald-400'">
+          {{ m.type === 'retrait' ? '' : '+' }}{{ m.amount }} MAD
+        </span>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>

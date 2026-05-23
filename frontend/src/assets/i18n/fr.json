@@ -57,5 +57,20 @@
     "cancel": "Annuler",
     "printSlip": "Imprimer la fiche",
     "confirmPayment": "Confirmer le paiement"
+  },
+  "caisse": {
+    "currentBalance": "Solde actuel",
+    "updatedAt": "Mis à jour à",
+    "openingBalance": "ouverture du jour",
+    "totalEnvois": "Total envois encaissés",
+    "totalRetraits": "Total retraits décaissés",
+    "theoreticalBalance": "Solde théorique calculé",
+    "operations": "opérations",
+    "matchesReal": "Correspond au solde réel",
+    "movements": "Mouvements",
+    "todayTimeline": "Timeline des opérations du jour",
+    "movementsCount": "mouvements",
+    "send": "envoi",
+    "withdrawal": "retrait"
   }
 }
