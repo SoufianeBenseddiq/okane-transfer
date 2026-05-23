@@ -77,4 +77,22 @@ public class ClotureCaisseController {
     public ResponseEntity<List<ClotureCaisseResponse>> findAll() {
         return ResponseEntity.ok(clotureCaisseService.findAll());
     }
+
+    @GetMapping("/{email}/rapport")
+    @PreAuthorize("hasRole('ROLE_AGENT')")
+    public ResponseEntity<ClotureCaisseResponse> rapportCloture(@PathVariable String email, @RequestParam String date) {
+        return ResponseEntity.ok(
+                clotureCaisseService.rapportCloture(email, LocalDate.parse(date))
+        );
+    }
+
+    @PostMapping("/{email}/cloturer")
+    @PreAuthorize("hasRole('ROLE_AGENT')")
+    public ResponseEntity<ClotureCaisseResponse> cloturerCaisse(@PathVariable String email, @RequestBody ClotureCaisseRequest request) {
+        request.setAgentEmail(email);
+
+        return ResponseEntity.ok(
+                clotureCaisseService.cloturerCaisse(request)
+        );
+    }
 }

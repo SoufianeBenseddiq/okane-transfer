@@ -30,4 +30,10 @@ public interface CaisseOperationRepository extends JpaRepository<CaisseOperation
             @Param("debut") LocalDateTime debut,
             @Param("fin") LocalDateTime fin
     );
+
+    List<CaisseOperation> findByAgentEmailAndDateHeureBetweenOrderByDateHeureAsc(
+            String agentEmail,
+            LocalDateTime debut,
+            LocalDateTime fin
+    );
 }
