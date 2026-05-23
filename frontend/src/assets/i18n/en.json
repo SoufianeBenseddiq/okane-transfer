@@ -1,6 +1,37 @@
 {
-  "WELCOME": "Welcome to Okane Transfer",
-  "HOME": {
-    "DESCRIPTION": "Make your transfers securely."
+  "nav": {
+    "dashboard": "Dashboard",
+    "newTransfer": "New transfer",
+    "payTransfer": "Pay a transfer",
+    "cashier": "Cashier",
+    "history": "History",
+    "agent": "Agent",
+    "agency": "Agency",
+    "currentDay": "Current day",
+    "cashBalance": "Cash balance",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "mainAction": "Main action",
+    "registerTransfer": "Register a transfer",
+    "wizard4steps": "4-step wizard · ~2 min",
+    "withdrawalCode": "Withdrawal code",
+    "payTransfer": "Pay a transfer",
+    "searchByCode": "Search by code or phone",
+    "transfersToday": "Transfers processed today",
+    "sends": "sends",
+    "withdrawals": "withdrawals",
+    "totalProcessed": "Total amount processed",
+    "commissionsGenerated": "Commissions generated",
+    "activity": "Activity",
+    "todayOperations": "Today's operations",
+    "viewHistory": "View history",
+    "time": "Time",
+    "type": "Type",
+    "reference": "Reference",
+    "clientBenef": "Client / Beneficiary",
+    "amount": "Amount",
+    "send": "SEND",
+    "withdrawal": "WITHDRAWAL"
   }
 }

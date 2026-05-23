@@ -1,6 +1,37 @@
 {
-  "WELCOME": "Bienvenue sur Okane Transfer",
-  "HOME": {
-    "DESCRIPTION": "Effectuez vos transferts en toute sécurité."
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "newTransfer": "تحويل جديد",
+    "payTransfer": "دفع تحويل",
+    "cashier": "الصندوق",
+    "history": "السجل",
+    "agent": "وكيل",
+    "agency": "الوكالة",
+    "currentDay": "اليوم الحالي",
+    "cashBalance": "رصيد الصندوق",
+    "logout": "تسجيل الخروج"
+  },
+  "dashboard": {
+    "mainAction": "الإجراء الرئيسي",
+    "registerTransfer": "تسجيل إرسال",
+    "wizard4steps": "معالج 4 خطوات · ~٢ دقيقة",
+    "withdrawalCode": "رمز السحب",
+    "payTransfer": "دفع تحويل",
+    "searchByCode": "البحث بالرمز أو الهاتف",
+    "transfersToday": "التحويلات المعالجة اليوم",
+    "sends": "إرسال",
+    "withdrawals": "سحب",
+    "totalProcessed": "إجمالي المبلغ المعالج",
+    "commissionsGenerated": "العمولات المحققة",
+    "activity": "النشاط",
+    "todayOperations": "عمليات اليوم",
+    "viewHistory": "عرض السجل",
+    "time": "الوقت",
+    "type": "النوع",
+    "reference": "المرجع",
+    "clientBenef": "العميل / المستفيد",
+    "amount": "المبلغ",
+    "send": "إرسال",
+    "withdrawal": "سحب"
   }
 }
