@@ -1,19 +1,23 @@
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { routes } from './app.routes';
-import { HttpClient, provideHttpClient } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
-import {provideTranslateHttpLoader, TranslateHttpLoader} from '@ngx-translate/http-loader';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
-// Nouvelle signature simplifiée pour la v17+ de ngx-translate
+import { routes } from './app.routes';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
+
 export function HttpLoaderFactory(http: HttpClient) {
-  return new TranslateHttpLoader();
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(),
+    provideHttpClient(
+      withInterceptors([authInterceptor, errorInterceptor])
+    ),
     importProvidersFrom(
       TranslateModule.forRoot({
         loader: {
@@ -23,11 +27,6 @@ export const appConfig: ApplicationConfig = {
         },
         defaultLanguage: 'fr'
       })
-    ),
-    // C'est ici que l'on passe proprement le chemin et l'extension du fichier
-    provideTranslateHttpLoader({
-      prefix: './assets/i18n/',
-      suffix: '.json'
-    })
+    )
   ]
 };
