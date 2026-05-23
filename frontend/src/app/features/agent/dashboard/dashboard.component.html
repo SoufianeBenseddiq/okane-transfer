@@ -101,39 +101,40 @@
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead>
-        <tr class="text-xs text-gray-500 uppercase tracking-widest border-b border-white/5">
-          <th class="text-left px-6 py-3 font-medium">{{ 'dashboard.time' | translate }}</th>
-          <th class="text-left px-6 py-3 font-medium">{{ 'dashboard.type' | translate }}</th>
-          <th class="text-left px-6 py-3 font-medium">{{ 'dashboard.reference' | translate }}</th>
-          <th class="text-left px-6 py-3 font-medium">{{ 'dashboard.clientBenef' | translate }}</th>
-          <th class="text-right px-6 py-3 font-medium">{{ 'dashboard.amount' | translate }}</th>
-          <th class="px-4 py-3"></th>
-        </tr>
+          <tr class="text-xs text-gray-500 uppercase tracking-widest border-b border-white/5">
+            <th class="text-left px-6 py-3 font-medium">{{ 'dashboard.time' | translate }}</th>
+            <th class="text-left px-6 py-3 font-medium">{{ 'dashboard.type' | translate }}</th>
+            <th class="text-left px-6 py-3 font-medium">{{ 'dashboard.reference' | translate }}</th>
+            <th class="text-left px-6 py-3 font-medium">{{ 'dashboard.clientBenef' | translate }}</th>
+            <th class="text-right px-6 py-3 font-medium">{{ 'dashboard.amount' | translate }}</th>
+            <th class="px-4 py-3"></th>
+          </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let op of operations"
-            class="border-b border-white/5 hover:bg-white/[0.03] transition-colors cursor-pointer">
-          <td class="px-6 py-3.5 text-gray-400 font-mono text-xs">{{ op.time }}</td>
-          <td class="px-6 py-3.5">
-              <span [ngClass]="{
-                'bg-blue-500/15 text-blue-400': op.type === 'ENVOI',
-                'bg-purple-500/15 text-purple-400': op.type === 'RETRAIT'
-              }" class="text-[10px] font-bold px-2.5 py-1 rounded-full tracking-widest">
-                {{ op.type === 'ENVOI' ? ('dashboard.send' | translate) : ('dashboard.withdrawal' | translate) }}
-              </span>
-          </td>
-          <td class="px-6 py-3.5 text-gray-300 font-mono text-xs">{{ op.ref }}</td>
-          <td class="px-6 py-3.5 text-white font-medium">{{ op.client }}</td>
-          <td class="px-6 py-3.5 text-right font-semibold font-mono text-sm"
-              [ngClass]="op.amount.startsWith('-') ? 'text-red-400' : 'text-emerald-400'">
-            {{ op.amount }}
-          </td>
-          <td class="px-4 py-3.5 text-gray-600">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-            </svg>
-          </td>
-        </tr>
+          @for (op of operations; track op.ref) {
+            <tr class="border-b border-white/5 hover:bg-white/[0.03] transition-colors cursor-pointer">
+              <td class="px-6 py-3.5 text-gray-400 font-mono text-xs">{{ op.time }}</td>
+              <td class="px-6 py-3.5">
+                <span [ngClass]="{
+                  'bg-blue-500/15 text-blue-400': op.type === 'ENVOI',
+                  'bg-purple-500/15 text-purple-400': op.type === 'RETRAIT'
+                }" class="text-[10px] font-bold px-2.5 py-1 rounded-full tracking-widest">
+                  {{ op.type === 'ENVOI' ? ('dashboard.send' | translate) : ('dashboard.withdrawal' | translate) }}
+                </span>
+              </td>
+              <td class="px-6 py-3.5 text-gray-300 font-mono text-xs">{{ op.ref }}</td>
+              <td class="px-6 py-3.5 text-white font-medium">{{ op.client }}</td>
+              <td class="px-6 py-3.5 text-right font-semibold font-mono text-sm"
+                  [ngClass]="op.amount.startsWith('-') ? 'text-red-400' : 'text-emerald-400'">
+                {{ op.amount }}
+              </td>
+              <td class="px-4 py-3.5 text-gray-600">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+              </td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>
