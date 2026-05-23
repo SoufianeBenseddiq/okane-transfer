@@ -9,6 +9,7 @@ export const routes: Routes = [
       { path: 'envoi', loadComponent: () => import('./features/agent/envoi/envoi.component').then(m => m.EnvoiComponent) },
       { path: 'paiement', loadComponent: () => import('./features/agent/paiement/paiement.component').then(m => m.PaiementComponent) },
       { path: 'caisse', loadComponent: () => import('./features/agent/caisse/caisse.component').then(m => m.CaisseComponent) },
+      { path: 'historique', loadComponent: () => import('./features/agent/historique/historique.component').then(m => m.HistoriqueComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
