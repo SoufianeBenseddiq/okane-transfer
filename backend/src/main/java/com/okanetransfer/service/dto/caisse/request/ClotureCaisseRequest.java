@@ -19,7 +19,7 @@ public class ClotureCaisseRequest {
 
     // Getters & Setters
     public String getAgentEmail() { return agentEmail; }
-    public void setAgentId(String agentEmail) { this.agentEmail = agentEmail; }
+    public void setAgentEmail(String agentEmail) { this.agentEmail = agentEmail; }
 
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }

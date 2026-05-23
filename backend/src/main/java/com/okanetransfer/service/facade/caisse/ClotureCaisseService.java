@@ -15,4 +15,7 @@ public interface ClotureCaisseService {
     ClotureCaisseResponse save(ClotureCaisseRequest caisse);
     ClotureCaisseResponse update(ClotureCaisseRequest caisse);
     List<ClotureCaisseResponse> findAll();
+    ClotureCaisseResponse rapportCloture(String agentEmail, LocalDate date);
+    ClotureCaisseResponse cloturerCaisse(ClotureCaisseRequest request);
+
 }
