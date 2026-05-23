@@ -1,11 +1,23 @@
 package com.okanetransfer.service.impl.transfert;
 
 
+import com.okanetransfer.entity.agence.Agence;
+import com.okanetransfer.entity.devise.Corridor;
+import com.okanetransfer.entity.devise.GrilleTarifaire;
 import com.okanetransfer.entity.transfert.Beneficiaire;
+import com.okanetransfer.entity.transfert.Expediteur;
 import com.okanetransfer.entity.transfert.Transfert;
+import com.okanetransfer.entity.user.Agent;
+import com.okanetransfer.entity.user.Client;
+import com.okanetransfer.entity.user.PieceIdentite;
+import com.okanetransfer.repository.agence.AgenceRepository;
+import com.okanetransfer.repository.devise.CorridorRepository;
+import com.okanetransfer.repository.devise.GrilleTarifaireRepository;
 import com.okanetransfer.repository.transfert.BeneficiaireRepository;
 import com.okanetransfer.repository.transfert.ExpediteurRepository;
 import com.okanetransfer.repository.transfert.TransfertRepository;
+import com.okanetransfer.repository.user.PieceIdentiteRepository;
+import com.okanetransfer.repository.user.UtilisateurRepository;
 import com.okanetransfer.service.converter.transfert.TransfertConverter;
 import com.okanetransfer.service.dto.transfert.request.CreateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.request.PaiementRequest;
@@ -18,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -32,14 +45,34 @@ public class TransfertServiceImpl implements ITransfertService {
 
     private final ExpediteurRepository expediteurRepository;
 
+    private final UtilisateurRepository utilisateurRepository;
+
+    private final PieceIdentiteRepository pieceIdentiteRepository;
+
+    private final AgenceRepository agenceRepository;
+
+    private final CorridorRepository corridorRepository;
+
+    private final GrilleTarifaireRepository grilleTarifaireRepository;
+
     public TransfertServiceImpl(
             TransfertRepository transfertRepository,
             BeneficiaireRepository beneficiaireRepository,
-            ExpediteurRepository expediteurRepository) {
+            ExpediteurRepository expediteurRepository,
+            UtilisateurRepository utilisateurRepository,
+            PieceIdentiteRepository pieceIdentiteRepository,
+            AgenceRepository agenceRepository,
+            CorridorRepository corridorRepository,
+            GrilleTarifaireRepository grilleTarifaireRepository) {
 
         this.transfertRepository = transfertRepository;
         this.beneficiaireRepository = beneficiaireRepository;
         this.expediteurRepository = expediteurRepository;
+        this.utilisateurRepository = utilisateurRepository;
+        this.pieceIdentiteRepository = pieceIdentiteRepository;
+        this.agenceRepository = agenceRepository;
+        this.corridorRepository = corridorRepository;
+        this.grilleTarifaireRepository = grilleTarifaireRepository;
     }
 
     @Override
@@ -62,6 +95,42 @@ public class TransfertServiceImpl implements ITransfertService {
     @Override
     public TransfertResponse creerTransfert(CreateTransfertRequest request) {
 
+        if (request.getMontant() == null || request.getMontant().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Montant invalide");
+        }
+
+        Client client = request.getClientId() == null
+                ? null
+                : utilisateurRepository.findClientById(request.getClientId()).orElse(null);
+
+        PieceIdentite pieceIdentite = null;
+        if (request.getPieceIdentiteId() != null) {
+            pieceIdentite = client == null
+                    ? pieceIdentiteRepository.findById(request.getPieceIdentiteId()).orElse(null)
+                    : pieceIdentiteRepository.findByIdAndClientId(request.getPieceIdentiteId(), client.getId()).orElse(null);
+        }
+
+        Agent agent = request.getAgentId() == null
+                ? null
+                : utilisateurRepository.findAgentById(request.getAgentId()).orElse(null);
+
+        Agence agenceEnvoi = request.getAgenceEnvoiId() == null
+                ? null
+                : agenceRepository.findById(request.getAgenceEnvoiId()).orElse(null);
+
+        Corridor corridor = request.getCorridorId() == null
+                ? null
+                : corridorRepository.findById(request.getCorridorId()).orElse(null);
+
+        GrilleTarifaire grilleTarifaire = request.getGrilleTarifaireId() == null
+                ? null
+                : grilleTarifaireRepository.findById(request.getGrilleTarifaireId()).orElse(null);
+
+        Expediteur expediteur = new Expediteur();
+        expediteur.setClient(client);
+        expediteur.setPieceConfirmee(pieceIdentite);
+        expediteur = expediteurRepository.save(expediteur);
+
         Beneficiaire beneficiaire = new Beneficiaire();
         beneficiaire.setNom(request.getNomBeneficiaire());
         beneficiaire.setPrenom(request.getPrenomBeneficiaire());
@@ -70,16 +139,21 @@ public class TransfertServiceImpl implements ITransfertService {
         beneficiaire.setSurListeSurveillance(false);
         beneficiaire = beneficiaireRepository.save(beneficiaire);
 
-        // prendre en consideration que les frais = 5% en attd le module Frais
-        BigDecimal frais = request.getMontant()
-                .multiply(BigDecimal.valueOf(0.05));//INTEGRATION
+        BigDecimal frais;
+        if (grilleTarifaire != null) {
+            BigDecimal fraisVariables = request.getMontant()
+                    .multiply(grilleTarifaire.getFraisPourcentage())
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+            frais = grilleTarifaire.getFraisFixe()
+                    .add(fraisVariables);
+        } else {
+            frais = request.getMontant()
+                    .multiply(BigDecimal.valueOf(0.05));
+        }
 
         BigDecimal montantRecu = request.getMontant()
                 .subtract(frais);
-
-        if (request.getMontant().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Montant invalide");
-        }
 
         String codeRetrait = UUID.randomUUID()
                 .toString()
@@ -96,13 +170,11 @@ public class TransfertServiceImpl implements ITransfertService {
         transfert.setFrais(frais);
         transfert.setStatut(StatutTransfert.EN_ATTENTE);
         transfert.setBeneficiaire(beneficiaire);
-
-        // relations non geres encore (considerer null jusqu a integration )
-        transfert.setExpediteur(null);
-        transfert.setAgentSaisie(null);
-        transfert.setAgenceEnvoi(null);
-        transfert.setCorridor(null);
-        transfert.setGrilleTarifaire(null);
+        transfert.setExpediteur(expediteur);
+        transfert.setAgentSaisie(agent);
+        transfert.setAgenceEnvoi(agenceEnvoi);
+        transfert.setCorridor(corridor);
+        transfert.setGrilleTarifaire(grilleTarifaire);
 
         transfert = transfertRepository.save(transfert);
 
@@ -214,6 +286,6 @@ public class TransfertServiceImpl implements ITransfertService {
 
         return TransfertConverter.toResponse(transfert);
     }
-// Je n’ai pas implémenté DELETE /api/transferts/{id} car les transactions doivent rester toujours traçables.
-// À la place, j’ai créé un endpoint d’annulation de transaction.}
+// Je n’ai pas implémenté Delete /api/transferts/{id} car les transactions doivent rester toujours traçables.
+// A la place, j’ai créé un endpoint d’annulation de transaction
 }
