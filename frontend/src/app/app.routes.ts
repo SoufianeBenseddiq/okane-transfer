@@ -6,6 +6,7 @@ export const routes: Routes = [
     loadComponent: () => import('./layouts/agent-layout/agent-layout.component').then(m => m.AgentLayoutComponent),
     children: [
       { path: 'dashboard', loadComponent: () => import('./features/agent/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+      { path: 'paiement', loadComponent: () => import('./features/agent/paiement/paiement.component').then(m => m.PaiementComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

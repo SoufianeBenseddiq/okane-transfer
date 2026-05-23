@@ -33,5 +33,29 @@
     "amount": "المبلغ",
     "send": "إرسال",
     "withdrawal": "سحب"
+  },
+  "payment": {
+    "searchTitle": "البحث عن تحويل",
+    "searchSubtitle": "اطلب من المستفيد رمزه المكون من 8 أحرف أو رقم هاتفه",
+    "withdrawalCode": "رمز السحب",
+    "beneficiaryPhone": "هاتف المستفيد",
+    "validFormat": "صيغة صحيحة",
+    "search": "بحث",
+    "transferFound": "تم العثور على التحويل",
+    "pending": "قيد الانتظار",
+    "sender": "المرسِل",
+    "beneficiary": "المستفيد",
+    "sentOn": "أُرسل في",
+    "expiresOn": "ينتهي في",
+    "in30days": "خلال 30 يومًا",
+    "amountToGive": "المبلغ المراد تسليمه",
+    "rate": "السعر",
+    "idCheck": "التحقق من الهوية",
+    "passport": "جواز السفر",
+    "residencePermit": "بطاقة الإقامة",
+    "verifyIdWarning": "تحقق من تطابق الاسم على الوثيقة تمامًا",
+    "cancel": "إلغاء",
+    "printSlip": "طباعة الفيشة",
+    "confirmPayment": "تأكيد الدفع"
   }
 }
