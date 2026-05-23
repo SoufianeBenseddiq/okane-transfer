@@ -6,11 +6,8 @@ import com.okanetransfer.entity.user.Agent;
 import com.okanetransfer.repository.caisse.CaisseOperationRepository;
 //import com.okanetransfer.repository.user.AgentRepository;
 import com.okanetransfer.service.converter.caisse.CaisseOperationConverter;
-import com.okanetransfer.service.dto.caisse.request.ClotureCaisseRequest;
 import com.okanetransfer.service.dto.caisse.response.CaisseOperationResponse;
-import com.okanetransfer.service.dto.caisse.response.ClotureCaisseResponse;
 import com.okanetransfer.service.facade.caisse.CaisseOperationService;
-import com.okanetransfer.service.facade.caisse.ClotureCaisseService;
 import com.okanetransfer.shared.enums.TypeOperation;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -142,15 +139,10 @@ public class CaisseOperationServiceImpl implements CaisseOperationService {
 
     private final CaisseOperationRepository repository;
     private final CaisseOperationConverter converter;
-//    private final AgentService agentService;
-    private final ClotureCaisseService clotureCaisseService;
 
     public CaisseOperationServiceImpl(CaisseOperationRepository repository,
-                                      CaisseOperationConverter converter,
-                                      ClotureCaisseService clotureCaisseService) {
+                                      CaisseOperationConverter converter) {
         this.repository = repository;
         this.converter = converter;
-//        this.agentRepository = agentRepository;
-        this.clotureCaisseService = clotureCaisseService;
     }
 }
