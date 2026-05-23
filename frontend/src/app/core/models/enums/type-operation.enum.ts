@@ -1,0 +1,7 @@
+export enum TypeOperation {
+  ENVOI = 'ENVOI',
+  RETRAIT = 'RETRAIT',
+  OUVERTURE = 'OUVERTURE',
+  AJUSTEMENT = 'AJUSTEMENT',
+  CLOTURE = 'CLOTURE'
+}
