@@ -9,6 +9,7 @@ import com.okanetransfer.service.converter.caisse.ClotureCaisseConverter;
 import com.okanetransfer.service.dto.caisse.request.ClotureCaisseRequest;
 import com.okanetransfer.service.dto.caisse.response.CaisseOperationResponse;
 import com.okanetransfer.service.dto.caisse.response.ClotureCaisseResponse;
+import com.okanetransfer.service.facade.caisse.CaisseOperationService;
 import com.okanetransfer.service.facade.caisse.ClotureCaisseService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -66,8 +67,8 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
         // calcul solde théorique sur la journée
         LocalDateTime debut = request.getDate().atStartOfDay();
         LocalDateTime fin = request.getDate().atTime(23, 59, 59);
-        BigDecimal soldeTheorique = caisseOperationRepository
-                .calculerSoldeTheorique(agent.getId(), debut, fin);
+        BigDecimal soldeTheorique = caisseOperationService
+                .calculerSoldeTheorique(agent.getEmail(), debut, fin);
 
         cloture.setSoldeTheorique(soldeTheorique);
         cloture.setEcart(request.getSoldeSaisi().subtract(soldeTheorique));
@@ -113,17 +114,69 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
         return converter.toResponses(repository.findAll());
     }
 
+    @Override
+    public ClotureCaisseResponse rapportCloture(String agentEmail, LocalDate date) {
+
+        ClotureCaisse cloture = repository.findByAgentEmailAndDate(agentEmail, date);
+
+        if (cloture == null) {
+            throw new EntityNotFoundException(
+                    "Aucune clôture trouvée"
+            );
+        }
+
+        return converter.toResponse(cloture);
+    }
+
+    @Override
+    public ClotureCaisseResponse cloturerCaisse(ClotureCaisseRequest request) {
+
+//        Agent agent = agentService.findByEmail(request.getAgentEmail())
+//                .orElseThrow(() ->
+//                        new EntityNotFoundException(
+//                                "Agent introuvable : "
+//                                        + request.getAgentEmail()
+//                        ));
+        Agent agent= new Agent();
+
+        if (repository.findByAgentEmailAndDate(request.getAgentEmail(), request.getDate()) != null) {
+            throw new IllegalArgumentException(
+                    "Une clôture existe déjà pour cette date"
+            );
+        }
+
+        BigDecimal soldeTheorique = caisseOperationService.consulterSolde(request.getAgentEmail());
+
+        ClotureCaisse cloture = new ClotureCaisse();
+
+        cloture.setAgent(agent);
+        cloture.setDate(request.getDate());
+        cloture.setSoldeTheorique(soldeTheorique);
+        cloture.setSoldeSaisi(request.getSoldeSaisi());
+
+        BigDecimal ecart = request.getSoldeSaisi()
+                .subtract(soldeTheorique);
+
+        cloture.setEcart(ecart);
+
+        cloture.setEcartSignale(
+                ecart.compareTo(BigDecimal.ZERO) != 0
+        );
+
+        return converter.toResponse(repository.save(cloture));
+    }
+
     private final ClotureCaisseRepository repository;
     private final ClotureCaisseConverter converter;
-//    private final AgentRepository agentRepository;
-    private final CaisseOperationRepository caisseOperationRepository;
+//    private final AgentService agentService;
+    private final CaisseOperationService caisseOperationService;
 
     public ClotureCaisseServiceImpl(ClotureCaisseRepository repository,
                                     ClotureCaisseConverter converter,
-                                    CaisseOperationRepository caisseOperationRepository) {
+                                    CaisseOperationService caisseOperationService) {
         this.repository = repository;
         this.converter = converter;
 //        this.agentRepository = agentRepository;
-        this.caisseOperationRepository = caisseOperationRepository;
+        this.caisseOperationService = caisseOperationService;
     }
 }
