@@ -98,18 +98,21 @@ export class PaiementComponent {
     window.print();
   }
 
+
   // confirmPayment(): void {
   //   if (!this.idNumber || !this.transfer) return;
   //
   //   this.isLoading = true;
   //
   //   this.transfertService.payer({
-  //     codeRetrait:     this.transfer.codeRetrait,
-  //     agenceRetraitId: this.agenceRetraitId,
+  //     codeRetrait:             this.transfer.codeRetrait,
+  //     agenceRetraitId:         this.agenceRetraitId,
+  //     typePieceBeneficiaire:   this.idType as TypePiece,
+  //     numeroPieceBeneficiaire: this.idNumber,
   //   }).subscribe({
   //     next: (transfertPaye) => {
   //       this.isLoading = false;
-  //       this.transfer = transfertPaye; // ← met à jour avec la réponse du backend (statut PAYE)
+  //       this.transfer  = transfertPaye;
   //       alert(`Paiement confirmé — ${transfertPaye.numeroReference}`);
   //     },
   //     error: (err) => {
@@ -120,6 +123,9 @@ export class PaiementComponent {
   //     },
   //   });
   // }
+  // Dans paiement.component.ts
+// Remplace confirmPayment() par cette version
+
   confirmPayment(): void {
     if (!this.idNumber || !this.transfer) return;
 
@@ -134,7 +140,9 @@ export class PaiementComponent {
       next: (transfertPaye) => {
         this.isLoading = false;
         this.transfer  = transfertPaye;
-        alert(`Paiement confirmé — ${transfertPaye.numeroReference}`);
+
+        // Ouvrir le reçu dans une nouvelle fenêtre
+        this.ouvrirRecu(transfertPaye);
       },
       error: (err) => {
         this.isLoading    = false;
@@ -145,6 +153,16 @@ export class PaiementComponent {
     });
   }
 
+// Ajoute cette méthode dans la classe
+  public ouvrirRecu(transfer: TransfertResponse): void {
+    // Sérialise le transfert en query params via sessionStorage
+    sessionStorage.setItem('recu_transfer',   JSON.stringify(transfer));
+    sessionStorage.setItem('recu_typePiece',  this.idType);
+    sessionStorage.setItem('recu_numeroPiece', this.idNumber);
+
+    // Ouvre une nouvelle fenêtre sur la route du reçu
+    window.open('/recu-paiement', '_blank', 'width=800,height=900');
+  }
 
   get statutStyle(): { label: string; classes: string } {
     const styles: Record<string, { label: string; classes: string }> = {
@@ -171,29 +189,7 @@ export class PaiementComponent {
     };
     return styles[this.transfer?.statut ?? ''] ?? styles['EN_ATTENTE'];
   }
-  // confirmPayment(): void {
-  //   if (!this.idNumber || !this.transfer) return;
-  //
-  //   this.isLoading = true;
-  //
-  //   this.transfertService.payer({
-  //     codeRetrait:     this.transfer.codeRetrait,
-  //     agenceRetraitId: this.agenceRetraitId,
-  //   }).subscribe({
-  //     next: () => {
-  //       this.isLoading = false;
-  //       // TODO: afficher une toast/snackbar de succès à la place de l'alert
-  //       alert(`Paiement confirmé — ${this.transfer!.numeroReference}`);
-  //       this.cancel();
-  //     },
-  //     error: (err) => {
-  //       this.isLoading    = false;
-  //       this.errorMessage = err.status === 409
-  //         ? 'payment.alreadyPaid'
-  //         : 'payment.errorGeneric';
-  //     },
-  //   });
-  // }
+
 
   // ── Helpers template ───────────────────────────────────────────────────────
 

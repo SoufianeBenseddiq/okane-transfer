@@ -1,3 +1,4 @@
+
 <div class="space-y-4 max-w-4xl mx-auto mt-4 mb-4">
 
   <!-- Search Card -->
@@ -177,48 +178,77 @@
       <div class="bg-[#141b2d] rounded-xl p-5 min-w-0">
         <p class="text-xs text-gray-500 uppercase tracking-widest font-medium mb-3">{{ 'payment.idCheck' | translate }}</p>
 
-        <div class="flex gap-2 mb-3 w-full min-w-0">
-
-          <!-- Select type pièce -->
-          <div class="relative shrink-0">
-<!--            <select [(ngModel)]="idType"-->
-<!--                    class="appearance-none bg-[#0b1120] text-white text-sm font-medium rounded-lg pl-3 pr-8 py-3 border border-white/10 outline-none cursor-pointer">-->
-<!--              <option value="CIN">CIN</option>-->
-<!--              <option value="PASSEPORT">{{ 'payment.passport' | translate }}</option>-->
-<!--              <option value="SEJOUR">{{ 'payment.residencePermit' | translate }}</option>-->
-<!--            </select>-->
-            <select [(ngModel)]="idType"
-                    class="appearance-none bg-[#0b1120] text-white text-sm font-medium rounded-lg pl-3 pr-8 py-3 border border-white/10 outline-none cursor-pointer">
-              <option *ngFor="let type of typesPiece" [value]="type">
-                {{  type  }}
-              </option>
-            </select>
-            <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                 width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#6b7280" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-            </svg>
+        <!-- EN_ATTENTE : saisie de la pièce -->
+        <ng-container *ngIf="transfer.statut === 'EN_ATTENTE'">
+          <div class="flex gap-2 mb-3 w-full min-w-0">
+            <div class="relative shrink-0">
+              <select [(ngModel)]="idType"
+                      class="appearance-none bg-[#0b1120] text-white text-sm font-medium rounded-lg pl-3 pr-8 py-3 border border-white/10 outline-none cursor-pointer">
+                <option *ngFor="let type of typesPiece" [value]="type">{{ type }}</option>
+              </select>
+              <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                   width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#6b7280" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </div>
+            <input [(ngModel)]="idNumber" placeholder="AB 4521098"
+                   class="min-w-0 w-full bg-[#0b1120] text-white text-sm rounded-lg px-3 py-3
+                          border border-white/10 outline-none placeholder:text-gray-600 font-mono
+                          tracking-wider focus:border-white/25 transition-colors"/>
           </div>
+          <p class="text-xs text-amber-400 flex items-start gap-1.5 leading-snug">
+            <svg class="shrink-0 mt-0.5" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            {{ 'payment.verifyIdWarning' | translate }}
+          </p>
+        </ng-container>
 
-          <!-- Numéro de pièce -->
-          <input [(ngModel)]="idNumber"
-                 placeholder="AB 4521098"
-                 class="min-w-0 w-full bg-[#0b1120] text-white text-sm rounded-lg px-3 py-3
-                        border border-white/10 outline-none
-                        placeholder:text-gray-600 font-mono tracking-wider
-                        focus:border-white/25 transition-colors"/>
-        </div>
+        <!-- PAYE : badge pièce vérifiée -->
+        <ng-container *ngIf="transfer.statut === 'PAYE'">
+          <div class="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+            <p class="text-sm text-emerald-400 font-semibold">Pièce d'identité vérifiée lors du paiement</p>
+          </div>
+        </ng-container>
 
-        <p class="text-xs text-amber-400 flex items-start gap-1.5 leading-snug">
-          <svg class="shrink-0 mt-0.5" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-          </svg>
-          {{ 'payment.verifyIdWarning' | translate }}
-        </p>
+        <!-- ANNULE -->
+        <ng-container *ngIf="transfer.statut === 'ANNULE'">
+          <div class="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f87171" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            <p class="text-sm text-red-400 font-semibold">Ce transfert a été annulé</p>
+          </div>
+        </ng-container>
+
+        <!-- EXPIRE -->
+        <ng-container *ngIf="transfer.statut === 'EXPIRE'">
+          <div class="flex items-center gap-3 bg-gray-500/10 border border-gray-500/20 rounded-xl px-4 py-3">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-sm text-gray-400 font-semibold">Ce transfert a expiré</p>
+          </div>
+        </ng-container>
+
+        <!-- BLOQUE -->
+        <ng-container *ngIf="transfer.statut === 'BLOQUE'">
+          <div class="flex items-center gap-3 bg-purple-500/10 border border-purple-500/20 rounded-xl px-4 py-3">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <p class="text-sm text-purple-400 font-semibold">Ce transfert est bloqué — contactez votre agence</p>
+          </div>
+        </ng-container>
+
       </div>
 
     </div>
 
-    <!-- Erreur paiement (409 already paid, etc.) -->
+    <!-- Erreur paiement -->
     <div *ngIf="errorMessage" class="flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
       <svg class="shrink-0" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f87171" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
@@ -236,32 +266,45 @@
         {{ 'payment.cancel' | translate }}
       </button>
       <div class="flex gap-3">
-        <button (click)="printSlip()"
+
+        <!-- "Voir le reçu" si PAYE -->
+        <button *ngIf="transfer.statut === 'PAYE'"
+                (click)="ouvrirRecu(transfer)"
                 class="flex items-center gap-2 text-sm text-white bg-[#252f42] hover:bg-[#2d3a52] transition-colors px-5 py-2.5 rounded-xl font-medium">
           <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
           </svg>
-          {{ 'payment.printSlip' | translate }}
+          Voir le reçu
         </button>
-        <button (click)="confirmPayment()"
-                [disabled]="!idNumber || isLoading"
-                class="flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-xl transition-colors"
-                [ngClass]="(idNumber && !isLoading)
-                  ? 'bg-emerald-500 hover:bg-emerald-400 text-white'
-                  : 'bg-emerald-800/40 text-emerald-700 cursor-not-allowed'">
-          <svg *ngIf="!isLoading" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-          </svg>
-          <svg *ngIf="isLoading" class="animate-spin" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" d="M12 3a9 9 0 110 18A9 9 0 0112 3z" opacity=".3"/>
-            <path stroke-linecap="round" d="M12 3a9 9 0 019 9"/>
-          </svg>
-          {{ 'payment.confirmPayment' | translate }}
-        </button>
-      </div>
-    </div>
 
-  </div>
+        <!-- "Imprimer le bordereau" + "Confirmer" uniquement si EN_ATTENTE -->
+        <ng-container *ngIf="transfer.statut === 'EN_ATTENTE'">
+          <button (click)="ouvrirRecu(transfer)"
+                  class="flex items-center gap-2 text-sm text-white bg-[#252f42] hover:bg-[#2d3a52] transition-colors px-5 py-2.5 rounded-xl font-medium">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            {{ 'payment.printSlip' | translate }}
+          </button>
+          <button (click)="confirmPayment()"
+                  [disabled]="!idNumber || isLoading"
+                  class="flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-xl transition-colors"
+                  [ngClass]="(idNumber && !isLoading)
+                    ? 'bg-emerald-500 hover:bg-emerald-400 text-white'
+                    : 'bg-emerald-800/40 text-emerald-700 cursor-not-allowed'">
+            <svg *ngIf="!isLoading" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+            <svg *ngIf="isLoading" class="animate-spin" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" d="M12 3a9 9 0 110 18A9 9 0 0112 3z" opacity=".3"/>
+              <path stroke-linecap="round" d="M12 3a9 9 0 019 9"/>
+            </svg>
+            {{ 'payment.confirmPayment' | translate }}
+          </button>
+        </ng-container>
+
+      </div>
+    </div>  </div>
 
 </div>
 <!--<div class="space-y-4 max-w-4xl mx-auto mt-4 mb-4">-->

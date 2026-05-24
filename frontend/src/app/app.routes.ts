@@ -33,7 +33,11 @@ export const routes: Routes = [
     data: { roles: [RoleUtilisateur.ROLE_AGENT] },
     loadChildren: () => import('./features/agent/agent.routes').then(m => m.agentRoutes)
   },
-
+  {
+    path: 'recu-paiement',  // ← accessible via localhost:4200/recu-paiement
+    loadComponent: () => import('./features/agent/recu-paiement/recu-paiement.component')
+      .then(m => m.RecuPaiementComponent)
+  },
   // ─── Client ────────────────────────────────────────────────────────────────
   {
     path: 'client',

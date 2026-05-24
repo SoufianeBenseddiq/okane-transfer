@@ -26,6 +26,11 @@ export const agentRoutes: Routes = [
         path: 'historique',
         loadComponent: () => import('./historique/historique.component').then(m => m.HistoriqueComponent)
       },
+      // {
+      //   path: 'recu-paiement',
+      //   loadComponent: () => import('./recu-paiement/recu-paiement.component').then(m => m.RecuPaiementComponent)
+      // },
+
       {
         path: '',
         redirectTo: 'dashboard',

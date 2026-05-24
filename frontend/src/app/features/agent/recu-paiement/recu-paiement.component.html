@@ -1,0 +1,145 @@
+<!-- Boutons visibles à l'écran uniquement (masqués à l'impression) -->
+<div class="no-print action-bar">
+  <button (click)="downloadPdf()" class="btn-print">
+    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+    </svg>
+    Imprimer / Enregistrer PDF
+  </button>
+  <button (click)="close()" class="btn-close">Fermer</button>
+</div>
+
+<!-- Reçu -->
+<div class="recu">
+
+  <!-- En-tête -->
+  <div class="recu-header">
+    <div class="logo-block">
+      <div class="logo-icon">
+        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="logo-name">OkaneTransfer</h1>
+        <p class="logo-sub">Réseau de transfert d'argent</p>
+      </div>
+    </div>
+    <div class="recu-title-block">
+      <div class="badge-paye">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+        PAIEMENT EFFECTUÉ
+      </div>
+      <p class="recu-date">{{ printDate | date:'dd/MM/yyyy à HH:mm' }}</p>
+    </div>
+  </div>
+
+  <div class="divider-gold"></div>
+
+  <!-- Référence -->
+  <div class="ref-block">
+    <div class="ref-item">
+      <span class="ref-label">N° DE RÉFÉRENCE</span>
+      <span class="ref-value">{{ transfer.numeroReference }}</span>
+    </div>
+    <div class="ref-item">
+      <span class="ref-label">CODE RETRAIT</span>
+      <span class="ref-value mono">{{ transfer.codeRetrait }}</span>
+    </div>
+    <div class="ref-item">
+      <span class="ref-label">DATE D'ENVOI</span>
+      <span class="ref-value">{{ transfer.creeLe | date:'dd/MM/yyyy HH:mm' }}</span>
+    </div>
+    <div class="ref-item">
+      <span class="ref-label">DATE DE PAIEMENT</span>
+      <span class="ref-value">{{ printDate | date:'dd/MM/yyyy HH:mm' }}</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Expéditeur / Bénéficiaire -->
+  <div class="parties">
+    <div class="partie">
+      <p class="partie-label">EXPÉDITEUR</p>
+      <p class="partie-nom">{{ transfer.nomExpediteur || '—' }}</p>
+      <p class="partie-detail">
+        <span class="pays-badge">{{ transfer.paysExpediteur || 'MA' }}</span>
+        {{ transfer.villeExpediteur || '' }}
+      </p>
+      <p class="partie-detail">{{ transfer.agenceEnvoi || '—' }}</p>
+    </div>
+
+    <div class="arrow-block">
+      <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+      </svg>
+    </div>
+
+    <div class="partie">
+      <p class="partie-label">BÉNÉFICIAIRE</p>
+      <p class="partie-nom">{{ transfer.nomBeneficiaire || '—' }}</p>
+      <p class="partie-detail">
+        <span class="pays-badge benef">{{ transfer.paysBeneficiaire || '—' }}</span>
+        {{ transfer.villeBeneficiaire || '' }}
+      </p>
+      <p class="partie-detail">{{ transfer.telephoneBeneficiaire || '—' }}</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Montants -->
+  <div class="montants">
+    <div class="montant-row">
+      <span class="montant-label">Montant envoyé</span>
+      <span class="montant-value">{{ transfer.montantEnvoye | number:'1.2-2' }} MAD</span>
+    </div>
+    <div class="montant-row">
+      <span class="montant-label">Frais de service</span>
+      <span class="montant-value frais">- {{ transfer.frais | number:'1.2-2' }} MAD</span>
+    </div>
+    <div class="montant-row" *ngIf="transfer.tauxChange">
+      <span class="montant-label">Taux appliqué</span>
+      <span class="montant-value">1 MAD = {{ transfer.tauxChange | number:'1.2-4' }} {{ transfer.deviseReception }}</span>
+    </div>
+    <div class="divider-thin"></div>
+    <div class="montant-row total">
+      <span class="montant-label">Montant remis au bénéficiaire</span>
+      <span class="montant-total">
+        {{ transfer.montantRecu | number:'1.0-0' }}
+        <span class="devise">{{ transfer.deviseReception || 'MAD' }}</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Pièce d'identité vérifiée -->
+  <div class="identite-block">
+    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+    </svg>
+    <div>
+      <p class="identite-label">PIÈCE D'IDENTITÉ VÉRIFIÉE</p>
+      <p class="identite-value">{{ typePiece }} — {{ numeroPiece }}</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Pied de page -->
+  <div class="recu-footer">
+    <p class="footer-mention">
+      Ce document constitue la preuve de paiement du transfert référencé ci-dessus.
+      Conservez-le précieusement. En cas de litige, contactez votre agence OkaneTransfer.
+    </p>
+    <div class="footer-bottom">
+      <p>OkaneTransfer © {{ printDate | date:'yyyy' }} — Tous droits réservés</p>
+      <p>Imprimé le {{ printDate | date:'dd/MM/yyyy à HH:mm:ss' }}</p>
+    </div>
+  </div>
+
+</div>
