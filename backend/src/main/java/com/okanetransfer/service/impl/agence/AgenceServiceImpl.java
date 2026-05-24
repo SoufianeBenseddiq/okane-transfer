@@ -1,12 +1,12 @@
 package com.okanetransfer.service.impl.agence;
 
 import com.okanetransfer.entity.agence.Agence;
-import com.okanetransfer.entity.user.Manager;
 import com.okanetransfer.repository.agence.AgenceRepository;
 import com.okanetransfer.service.converter.agence.AgenceConverter;
 import com.okanetransfer.service.dto.agence.request.AgenceRequest;
 import com.okanetransfer.service.dto.agence.response.AgenceResponse;
 import com.okanetransfer.service.facade.agence.AgenceService;
+import com.okanetransfer.service.facade.user.UtilisateurService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -60,13 +60,14 @@ public class AgenceServiceImpl implements AgenceService {
 
     @Override
     public AgenceResponse save(AgenceRequest agenceRequest) {
-        Agence saved = converter.toEntity(agenceRequest);
-        if (repository.findByNom(saved.getNom()) != null) {
+        Agence entity = converter.toEntity(agenceRequest);
+        if (repository.findByNom(entity.getNom()) != null) {
             throw new IllegalArgumentException(
-                    "Une agence avec le nom '" + saved.getNom() + "' existe déjà");
+                    "Une agence avec le nom '" + entity.getNom() + "' existe déjà");
         }
-
-        return converter.toResponse(repository.save(saved));
+        Agence saved = repository.save(entity);
+        utilisateurService.updateAgenceManager(saved.getId(), agenceRequest.getResponsableId());
+        return converter.toResponse(repository.findById(saved.getId()).orElse(saved));
     }
 
     @Override
@@ -76,7 +77,9 @@ public class AgenceServiceImpl implements AgenceService {
                         "Agence introuvable avec l'id : " + id));
 
         converter.updateEntity(existing, agenceRequest);
-        return converter.toResponse(repository.save(existing));
+        repository.save(existing);
+        utilisateurService.updateAgenceManager(id, agenceRequest.getResponsableId());
+        return converter.toResponse(repository.findById(id).orElse(existing));
     }
 
     @Override
@@ -86,10 +89,12 @@ public class AgenceServiceImpl implements AgenceService {
 
     private final AgenceRepository repository;
     private final AgenceConverter converter;
+    private final UtilisateurService utilisateurService;
 
-
-    public AgenceServiceImpl(AgenceRepository repository, AgenceConverter converter) {
-        this.repository = repository;
-        this.converter = converter;
+    public AgenceServiceImpl(AgenceRepository repository, AgenceConverter converter,
+                             UtilisateurService utilisateurService) {
+        this.repository         = repository;
+        this.converter          = converter;
+        this.utilisateurService = utilisateurService;
     }
 }

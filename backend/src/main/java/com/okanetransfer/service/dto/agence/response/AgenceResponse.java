@@ -13,6 +13,7 @@ public class AgenceResponse {
     private BigDecimal montantTraiteAujourdhui;
     private Boolean active;
     private String responsableNom;
+    private Long responsableId;
 
 
     public Long getId() { return id; }
@@ -38,4 +39,7 @@ public class AgenceResponse {
 
     public String getResponsableNom() { return responsableNom; }
     public void setResponsableNom(String responsableNom) { this.responsableNom = responsableNom; }
+
+    public Long getResponsableId() { return responsableId; }
+    public void setResponsableId(Long responsableId) { this.responsableId = responsableId; }
 }

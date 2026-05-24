@@ -1,0 +1,131 @@
+<aside class="flex flex-col flex-shrink-0 overflow-hidden h-full"
+       style="background:#1A1F36;border-right:1px solid rgba(255,255,255,0.08);transition:width 0.25s ease;"
+       [style.width]="collapsed ? '64px' : '240px'">
+
+  <!-- Logo row -->
+  <div class="flex items-center flex-shrink-0"
+       style="min-height:65px;border-bottom:1px solid rgba(255,255,255,0.08);"
+       [style.padding]="collapsed ? '0 10px' : '0 14px 0 18px'"
+       [style.justify-content]="collapsed ? 'center' : 'space-between'">
+
+    <!-- Logo icon + text -->
+    <div class="flex items-center gap-2.5 min-w-0">
+      <div class="flex items-center justify-center rounded-[9px] flex-shrink-0"
+           style="width:28px;height:28px;background:#252B45;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+          <path d="M5 10h11"  stroke="#F5A623" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M10 4c0 6-3 10-5 12" stroke="#F5A623" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M14 7c2 2 4 5 4 9 0 2-1 4-3 4" stroke="#F5A623" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="18.5" cy="6" r="1.4" fill="#F5A623"/>
+        </svg>
+      </div>
+      @if (!collapsed) {
+        <span class="text-[16px] font-bold tracking-tight text-white whitespace-nowrap">
+          Okane<span style="color:#F5A623;">Transfer</span>
+        </span>
+      }
+    </div>
+
+    <!-- Collapse toggle (only when expanded) -->
+    @if (!collapsed) {
+      <button (click)="toggleCollapse()" title="Réduire"
+              class="flex items-center justify-center rounded-[8px] cursor-pointer border-none outline-none flex-shrink-0"
+              style="width:28px;height:28px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.45);"
+              onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+              onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+        <app-icon name="chevronLeft" [size]="14" />
+      </button>
+    }
+  </div>
+
+  <!-- Expand toggle (only when collapsed) -->
+  @if (collapsed) {
+    <div class="flex justify-center pt-3 flex-shrink-0">
+      <button (click)="toggleCollapse()" title="Développer"
+              class="flex items-center justify-center rounded-[8px] cursor-pointer border-none outline-none"
+              style="width:32px;height:32px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.45);"
+              onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+              onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+        <app-icon name="chevronRight" [size]="14" />
+      </button>
+    </div>
+  }
+
+  <!-- Nav -->
+  <nav class="flex-1 overflow-y-auto flex flex-col gap-0.5 py-[12px]"
+       [style.padding-left]="collapsed ? '8px' : '10px'"
+       [style.padding-right]="collapsed ? '8px' : '10px'">
+    @for (item of navItems; track item.id) {
+      <a [routerLink]="item.route"
+         routerLinkActive
+         #rla="routerLinkActive"
+         [title]="collapsed ? ts.t(item.label) : ''"
+         class="relative flex items-center rounded-[9px] text-[13.5px] no-underline cursor-pointer outline-none"
+         style="transition:background 0.15s,color 0.15s;"
+         [style.gap]="collapsed ? '0' : '11px'"
+         [style.padding]="collapsed ? '10px 0' : '9px 12px'"
+         [style.justify-content]="collapsed ? 'center' : 'flex-start'"
+         [style.background]="rla.isActive ? 'rgba(245,166,35,0.12)' : 'transparent'"
+         [style.color]="rla.isActive ? '#fff' : 'rgba(255,255,255,0.55)'"
+         [style.font-weight]="rla.isActive ? '600' : '500'">
+
+        <!-- Active indicator bar -->
+        @if (rla.isActive) {
+          <span class="absolute rounded-r-[3px]"
+                style="top:8px;bottom:8px;width:3px;background:#F5A623;"
+                [style.left]="collapsed ? '-8px' : '-10px'"></span>
+        }
+
+        <app-icon [name]="item.icon" [size]="17"
+                  [color]="rla.isActive ? '#F5A623' : 'currentColor'"
+                  [stroke]="rla.isActive ? 2.2 : 1.8" />
+
+        @if (!collapsed) {
+          <span class="flex-1 whitespace-nowrap">{{ item.label | translate }}</span>
+          @if (item.badge) {
+            <span class="text-white text-[10.5px] font-bold px-1.5 py-px rounded-full min-w-[18px] text-center"
+                  style="background:#FF4D4F;">{{ item.badge }}</span>
+          }
+        }
+      </a>
+    }
+  </nav>
+
+  <!-- User profile — always at bottom -->
+  <div class="flex flex-shrink-0"
+       style="border-top:1px solid rgba(255,255,255,0.08);padding:12px 0;"
+       [style.flex-direction]="collapsed ? 'column' : 'row'"
+       [style.align-items]="'center'"
+       [style.gap]="collapsed ? '6px' : '10px'"
+       [style.padding-left]="collapsed ? '0' : '16px'"
+       [style.padding-right]="collapsed ? '0' : '16px'">
+
+    <!-- Avatar -->
+    <div class="flex items-center justify-center rounded-[10px] text-[13px] font-bold flex-shrink-0"
+         style="width:34px;height:34px;"
+         [style.background]="roleColor + '24'"
+         [style.color]="roleColor"
+         [title]="collapsed ? (userName + ' · ' + roleName) : ''">
+      {{ initials }}
+    </div>
+
+    <!-- Name + role (only when expanded) -->
+    @if (!collapsed) {
+      <div class="flex-1 min-w-0">
+        <div class="text-[13px] font-semibold text-white truncate">{{ userName }}</div>
+        <div class="text-[10.5px] font-semibold tracking-[0.06em] uppercase"
+             [style.color]="roleColor">{{ roleName }}</div>
+      </div>
+    }
+
+    <!-- Logout -->
+    <button (click)="logout()" title="Déconnexion"
+            class="flex items-center justify-center rounded-[8px] cursor-pointer border-none outline-none"
+            style="width:30px;height:30px;background:transparent;color:rgba(255,255,255,0.55);"
+            onmouseover="this.style.background='rgba(255,255,255,0.06)'"
+            onmouseout="this.style.background='transparent'">
+      <app-icon name="logout" [size]="16" />
+    </button>
+  </div>
+
+</aside>

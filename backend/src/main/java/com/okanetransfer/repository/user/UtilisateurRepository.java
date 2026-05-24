@@ -6,6 +6,7 @@ import com.okanetransfer.entity.user.Manager;
 import com.okanetransfer.entity.user.Utilisateur;
 import com.okanetransfer.shared.enums.RoleUtilisateur;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -64,5 +65,12 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
     @Query("SELECT m FROM Manager m WHERE m.agence.id = :agenceId")
     Optional<Manager> findManagerByAgenceId(@Param("agenceId") Long agenceId);
 
+    @Modifying
+    @Query(value = "UPDATE managers SET agence_id = NULL WHERE agence_id = :agenceId", nativeQuery = true)
+    void clearManagerForAgence(@Param("agenceId") Long agenceId);
+
+    @Modifying
+    @Query(value = "UPDATE managers SET agence_id = :agenceId WHERE id = :managerId", nativeQuery = true)
+    void assignManagerToAgence(@Param("managerId") Long managerId, @Param("agenceId") Long agenceId);
 
 }

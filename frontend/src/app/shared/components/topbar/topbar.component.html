@@ -1,0 +1,48 @@
+<header class="flex items-center gap-[14px] flex-shrink-0 px-5 py-[14px] sm:px-7 sm:py-[18px]"
+        style="background:#1A1F36;color:#F3F4F8;border-bottom:1px solid rgba(255,255,255,0.08);">
+
+  <!-- Sidebar toggle (visible on all screens) -->
+  <button (click)="toggleSidebar()" title="Menu"
+          class="flex items-center justify-center rounded-[10px] cursor-pointer outline-none flex-shrink-0"
+          style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:none;color:rgba(255,255,255,0.7);"
+          onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+    <app-icon name="menu" [size]="16" />
+  </button>
+
+  <!-- Title block -->
+  <div class="flex-1 min-w-0">
+    @if (breadcrumb) {
+      <div class="hidden sm:block text-[11.5px] font-medium tracking-[0.04em] uppercase mb-1"
+           style="color:rgba(255,255,255,0.55);">{{ breadcrumb }}</div>
+    }
+    <div class="text-[18px] sm:text-[22px] font-bold tracking-tight truncate">{{ title }}</div>
+    @if (subtitle) {
+      <div class="hidden sm:block text-[13px] mt-0.5 truncate" style="color:rgba(255,255,255,0.55);">{{ subtitle }}</div>
+    }
+  </div>
+
+  <!-- Right slot (action buttons injected by page) -->
+  <ng-content />
+
+  <!-- Bell -->
+  <button class="relative flex items-center justify-center rounded-[10px] cursor-pointer outline-none flex-shrink-0"
+          style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:none;color:#F3F4F8;">
+    <app-icon name="bell" [size]="16" />
+    <span class="absolute rounded-full"
+          style="top:8px;right:8px;width:7px;height:7px;background:#F5A623;border:2px solid #1A1F36;"></span>
+  </button>
+
+  <!-- Language toggle (hidden on mobile) -->
+  <div class="hidden sm:flex rounded-[10px] p-0.5" style="background:rgba(255,255,255,0.05);">
+    @for (l of langs; track l) {
+      <button (click)="setLang(l)"
+              class="px-[10px] py-[5px] rounded-[7px] text-[11.5px] font-semibold tracking-[0.04em] cursor-pointer outline-none border-none transition-colors"
+              [style.background]="lang === l ? '#F5A623' : 'transparent'"
+              [style.color]="lang === l ? '#1A1F36' : 'rgba(255,255,255,0.55)'">
+        {{ l }}
+      </button>
+    }
+  </div>
+
+</header>

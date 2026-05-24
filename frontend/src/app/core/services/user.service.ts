@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { UserResponse, CreateUserRequest, UpdateProfilRequest } from '../models/user';
+import { UserResponse, CreateUserRequest, UpdateProfilRequest, AdminUpdateUserRequest } from '../models/user';
 import { PieceIdentiteResponse, PieceIdentiteRequest } from '../models/piece-identite';
 import { RoleUtilisateur } from '../models/enums';
 
@@ -26,6 +26,14 @@ export class UserService {
 
   findById(id: number): Observable<UserResponse> {
     return this.http.get<UserResponse>(`${this.base}/${id}`);
+  }
+
+  updateById(id: number, request: AdminUpdateUserRequest): Observable<UserResponse> {
+    return this.http.put<UserResponse>(`${this.base}/${id}`, request);
+  }
+
+  deleteById(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
   }
 
   desactiver(id: number): Observable<void> {

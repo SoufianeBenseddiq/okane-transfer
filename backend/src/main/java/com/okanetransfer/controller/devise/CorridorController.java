@@ -6,6 +6,7 @@ import com.okanetransfer.service.dto.devise.request.CorridorRequest;
 import com.okanetransfer.service.dto.devise.request.GrilleTarifaireRequest;
 import com.okanetransfer.service.dto.devise.response.CorridorResponse;
 import com.okanetransfer.service.dto.devise.response.FraisResult;
+import com.okanetransfer.service.dto.devise.response.GrilleTarifaireResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -63,5 +64,23 @@ public class CorridorController {
     public ResponseEntity<Void> creerGrille(@RequestBody GrilleTarifaireRequest request) {
         fraisService.creerGrille(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/{id}/grilles")
+    public ResponseEntity<List<GrilleTarifaireResponse>> getGrillesByCorridor(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(fraisService.getGrillesByCorridor(id));
+    }
+
+    @PutMapping("/grilles/{id}")
+    public ResponseEntity<GrilleTarifaireResponse> updateGrille(
+            @PathVariable("id") Long id,
+            @RequestBody GrilleTarifaireRequest request) {
+        return ResponseEntity.ok(fraisService.updateGrille(id, request));
+    }
+
+    @DeleteMapping("/grilles/{id}")
+    public ResponseEntity<Void> deleteGrille(@PathVariable("id") Long id) {
+        fraisService.deleteGrille(id);
+        return ResponseEntity.noContent().build();
     }
 }

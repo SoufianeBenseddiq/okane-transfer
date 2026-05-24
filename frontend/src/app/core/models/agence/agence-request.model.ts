@@ -3,4 +3,5 @@ export interface AgenceRequest {
   adresse: string;
   pays: string;
   plafondJournalier: number;
+  responsableId?: number | null;
 }

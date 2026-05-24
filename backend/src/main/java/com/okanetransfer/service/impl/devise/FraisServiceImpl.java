@@ -13,6 +13,7 @@ import com.okanetransfer.service.facade.devise.IFraisService;
 import com.okanetransfer.service.dto.devise.request.CorridorRequest;
 import com.okanetransfer.service.dto.devise.response.CorridorResponse;
 import com.okanetransfer.service.dto.devise.response.FraisResult;
+import com.okanetransfer.service.dto.devise.response.GrilleTarifaireResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -140,5 +142,50 @@ public class FraisServiceImpl implements IFraisService, ICorridorService {
         grille.setPartAgence(request.getPartAgence());
         grille.setPartCentrale(request.getPartCentrale());
         grilleTarifaireRepository.save(grille);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GrilleTarifaireResponse> getGrillesByCorridor(Long corridorId) {
+        corridorRepository.findById(corridorId)
+                .orElseThrow(() -> new IllegalArgumentException("Corridor introuvable avec l'id : " + corridorId));
+        return grilleTarifaireRepository.findByCorridor_IdOrderByMontantMinAsc(corridorId)
+                .stream()
+                .map(this::toGrilleResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public GrilleTarifaireResponse updateGrille(Long id, GrilleTarifaireRequest request) {
+        GrilleTarifaire grille = grilleTarifaireRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Grille tarifaire introuvable avec l'id : " + id));
+        grille.setMontantMin(request.getMontantMin());
+        grille.setMontantMax(request.getMontantMax());
+        grille.setFraisFixe(request.getFraisFixe());
+        grille.setFraisPourcentage(request.getFraisPourcentage());
+        grille.setPartAgence(request.getPartAgence());
+        grille.setPartCentrale(request.getPartCentrale());
+        return toGrilleResponse(grilleTarifaireRepository.save(grille));
+    }
+
+    @Override
+    public void deleteGrille(Long id) {
+        if (!grilleTarifaireRepository.existsById(id)) {
+            throw new IllegalArgumentException("Grille tarifaire introuvable avec l'id : " + id);
+        }
+        grilleTarifaireRepository.deleteById(id);
+    }
+
+    private GrilleTarifaireResponse toGrilleResponse(GrilleTarifaire g) {
+        GrilleTarifaireResponse r = new GrilleTarifaireResponse();
+        r.setId(g.getId());
+        r.setCorridorId(g.getCorridor().getId());
+        r.setMontantMin(g.getMontantMin());
+        r.setMontantMax(g.getMontantMax());
+        r.setFraisFixe(g.getFraisFixe());
+        r.setFraisPourcentage(g.getFraisPourcentage());
+        r.setPartAgence(g.getPartAgence());
+        r.setPartCentrale(g.getPartCentrale());
+        return r;
     }
 }

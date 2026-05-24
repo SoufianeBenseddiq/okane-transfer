@@ -3,6 +3,7 @@ package com.okanetransfer.service.impl.user;
 import com.okanetransfer.entity.user.*;
 import com.okanetransfer.repository.user.UtilisateurRepository;
 import com.okanetransfer.service.converter.user.UtilisateurConverter;
+import com.okanetransfer.service.dto.user.request.AdminUpdateUserRequest;
 import com.okanetransfer.service.dto.user.request.CreateUserRequest;
 import com.okanetransfer.service.dto.user.request.PieceIdentiteRequest;
 import com.okanetransfer.service.dto.user.request.UpdateProfilRequest;
@@ -202,6 +203,43 @@ public class UtilisateurServiceImpl implements UtilisateurService {
                                 "Utilisateur introuvable (id=" + userId + ")"
                         ))
         );
+    }
+
+    @Override
+    public UserResponse adminUpdate(Long userId, AdminUpdateUserRequest request) {
+        Utilisateur user = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new TransfertNotFoundException(
+                        "Utilisateur introuvable (id=" + userId + ")"
+                ));
+
+        if (request.getNom()       != null) user.setNom(request.getNom());
+        if (request.getPrenom()    != null) user.setPrenom(request.getPrenom());
+        if (request.getTelephone() != null) user.setTelephone(request.getTelephone());
+        if (request.getPays()      != null) user.setPays(request.getPays());
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            if (utilisateurRepository.existsByEmail(request.getEmail())) {
+                throw new IllegalArgumentException("Cet email est déjà utilisé : " + request.getEmail());
+            }
+            user.setEmail(request.getEmail());
+        }
+
+        return utilisateurConverter.toResponse(utilisateurRepository.save(user));
+    }
+
+    @Override
+    public void deleteById(Long userId) {
+        if (!utilisateurRepository.existsById(userId)) {
+            throw new TransfertNotFoundException("Utilisateur introuvable (id=" + userId + ")");
+        }
+        utilisateurRepository.deleteById(userId);
+    }
+
+    @Override
+    public void updateAgenceManager(Long agenceId, Long newManagerId) {
+        utilisateurRepository.clearManagerForAgence(agenceId);
+        if (newManagerId != null) {
+            utilisateurRepository.assignManagerToAgence(newManagerId, agenceId);
+        }
     }
 
     // =========================================================================

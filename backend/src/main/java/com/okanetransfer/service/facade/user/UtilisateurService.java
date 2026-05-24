@@ -3,6 +3,7 @@ package com.okanetransfer.service.facade.user;
 import com.okanetransfer.entity.user.Agent;
 import com.okanetransfer.entity.user.Client;
 import com.okanetransfer.entity.user.Utilisateur;
+import com.okanetransfer.service.dto.user.request.AdminUpdateUserRequest;
 import com.okanetransfer.service.dto.user.request.CreateUserRequest;
 import com.okanetransfer.service.dto.user.request.PieceIdentiteRequest;
 import com.okanetransfer.service.dto.user.request.UpdateProfilRequest;
@@ -116,6 +117,21 @@ public interface UtilisateurService {
      * @return UserResponse
      */
     UserResponse getById(Long userId);
+
+    UserResponse adminUpdate(Long userId, AdminUpdateUserRequest request);
+
+    void deleteById(Long userId);
+
+    /**
+     * Affecte ou désaffecte un manager à une agence.
+     * Désaffecte d'abord l'éventuel manager précédent de cette agence,
+     * puis affecte le nouveau si newManagerId est non-null.
+     * Appelé par AgenceServiceImpl — jamais par un controller.
+     *
+     * @param agenceId     id de l'agence concernée
+     * @param newManagerId id du manager à affecter, null pour juste désaffecter
+     */
+    void updateAgenceManager(Long agenceId, Long newManagerId);
 
     // =========================================================================
     // CLIENT — gestion du profil

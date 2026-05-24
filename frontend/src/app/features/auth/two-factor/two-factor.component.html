@@ -1,0 +1,144 @@
+<div class="relative flex h-screen w-full items-center justify-center bg-cream font-sans">
+
+  <!-- Ambient blobs -->
+  <div class="pointer-events-none absolute -right-48 -top-48 h-[500px] w-[500px] rounded-full"
+       style="background: radial-gradient(circle, rgba(245,166,35,0.12), transparent 70%);"></div>
+  <div class="pointer-events-none absolute -bottom-48 -left-48 h-[500px] w-[500px] rounded-full"
+       style="background: radial-gradient(circle, rgba(26,31,54,0.06), transparent 70%);"></div>
+
+  <!-- Logo top-left -->
+  <div class="absolute left-9 top-8 flex items-center gap-2.5">
+    <div class="flex h-8 w-8 items-center justify-center rounded-[10px] bg-navy">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M5 10h11" stroke="#F5A623" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M10 4c0 6-3 10-5 12" stroke="#F5A623" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M14 7c2 2 4 5 4 9 0 2-1 4-3 4" stroke="#F5A623" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="18.5" cy="6" r="1.4" fill="#F5A623"/>
+      </svg>
+    </div>
+    <span class="text-[17px] font-bold tracking-tight text-navy">
+      Okane<span class="text-gold">Transfer</span>
+    </span>
+  </div>
+
+  <!-- Card -->
+  <div class="relative z-10 w-[460px] rounded-2xl bg-white p-10 shadow-[0_24px_64px_rgba(26,31,54,0.08)]">
+
+    <!-- Icon -->
+    <div class="mb-[18px] flex h-[52px] w-[52px] items-center justify-center rounded-[14px] bg-gold-soft">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F5A623"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.2 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.6 2.8a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.8.6a2 2 0 0 1 1.7 2z"/>
+      </svg>
+    </div>
+
+    <!-- Title -->
+    <h2 class="mb-2 text-2xl font-bold tracking-tight text-navy">
+      Vérification en deux étapes
+    </h2>
+    <p class="mb-7 text-[13.5px] leading-[1.55] text-ink-dim">
+      Un code de sécurité à 6 chiffres a été envoyé au
+      <strong class="text-navy">+212 6 •• •• •• ••</strong>.
+      Saisissez-le ci-dessous pour continuer.
+    </p>
+
+    <!-- OTP boxes -->
+    <div class="mb-[22px] flex gap-2.5" (paste)="onPaste($event)">
+      <input #digitInput type="text" inputmode="numeric" maxlength="1" [value]="digits[0]"
+             (input)="onDigitInput($event, 0)" (keydown)="onDigitKeydown($event, 0)"
+             class="h-[58px] flex-1 rounded-[12px] border text-center text-2xl font-bold font-mono outline-none transition-all"
+             [style.background]="digits[0] ? '#1A1F36' : '#fff'"
+             [style.color]="digits[0] ? '#fff' : '#1A1F36'"
+             [style.border-color]="digits[0] ? '#1A1F36' : (isActiveBox(0) ? '#F5A623' : '#E8E2D4')"
+             [style.box-shadow]="isActiveBox(0) ? '0 0 0 4px rgba(245,166,35,0.15)' : 'none'">
+      <input #digitInput type="text" inputmode="numeric" maxlength="1" [value]="digits[1]"
+             (input)="onDigitInput($event, 1)" (keydown)="onDigitKeydown($event, 1)"
+             class="h-[58px] flex-1 rounded-[12px] border text-center text-2xl font-bold font-mono outline-none transition-all"
+             [style.background]="digits[1] ? '#1A1F36' : '#fff'"
+             [style.color]="digits[1] ? '#fff' : '#1A1F36'"
+             [style.border-color]="digits[1] ? '#1A1F36' : (isActiveBox(1) ? '#F5A623' : '#E8E2D4')"
+             [style.box-shadow]="isActiveBox(1) ? '0 0 0 4px rgba(245,166,35,0.15)' : 'none'">
+      <input #digitInput type="text" inputmode="numeric" maxlength="1" [value]="digits[2]"
+             (input)="onDigitInput($event, 2)" (keydown)="onDigitKeydown($event, 2)"
+             class="h-[58px] flex-1 rounded-[12px] border text-center text-2xl font-bold font-mono outline-none transition-all"
+             [style.background]="digits[2] ? '#1A1F36' : '#fff'"
+             [style.color]="digits[2] ? '#fff' : '#1A1F36'"
+             [style.border-color]="digits[2] ? '#1A1F36' : (isActiveBox(2) ? '#F5A623' : '#E8E2D4')"
+             [style.box-shadow]="isActiveBox(2) ? '0 0 0 4px rgba(245,166,35,0.15)' : 'none'">
+      <input #digitInput type="text" inputmode="numeric" maxlength="1" [value]="digits[3]"
+             (input)="onDigitInput($event, 3)" (keydown)="onDigitKeydown($event, 3)"
+             class="h-[58px] flex-1 rounded-[12px] border text-center text-2xl font-bold font-mono outline-none transition-all"
+             [style.background]="digits[3] ? '#1A1F36' : '#fff'"
+             [style.color]="digits[3] ? '#fff' : '#1A1F36'"
+             [style.border-color]="digits[3] ? '#1A1F36' : (isActiveBox(3) ? '#F5A623' : '#E8E2D4')"
+             [style.box-shadow]="isActiveBox(3) ? '0 0 0 4px rgba(245,166,35,0.15)' : 'none'">
+      <input #digitInput type="text" inputmode="numeric" maxlength="1" [value]="digits[4]"
+             (input)="onDigitInput($event, 4)" (keydown)="onDigitKeydown($event, 4)"
+             class="h-[58px] flex-1 rounded-[12px] border text-center text-2xl font-bold font-mono outline-none transition-all"
+             [style.background]="digits[4] ? '#1A1F36' : '#fff'"
+             [style.color]="digits[4] ? '#fff' : '#1A1F36'"
+             [style.border-color]="digits[4] ? '#1A1F36' : (isActiveBox(4) ? '#F5A623' : '#E8E2D4')"
+             [style.box-shadow]="isActiveBox(4) ? '0 0 0 4px rgba(245,166,35,0.15)' : 'none'">
+      <input #digitInput type="text" inputmode="numeric" maxlength="1" [value]="digits[5]"
+             (input)="onDigitInput($event, 5)" (keydown)="onDigitKeydown($event, 5)"
+             class="h-[58px] flex-1 rounded-[12px] border text-center text-2xl font-bold font-mono outline-none transition-all"
+             [style.background]="digits[5] ? '#1A1F36' : '#fff'"
+             [style.color]="digits[5] ? '#fff' : '#1A1F36'"
+             [style.border-color]="digits[5] ? '#1A1F36' : (isActiveBox(5) ? '#F5A623' : '#E8E2D4')"
+             [style.box-shadow]="isActiveBox(5) ? '0 0 0 4px rgba(245,166,35,0.15)' : 'none'">
+    </div>
+
+    <!-- Timer + resend -->
+    <div class="mb-[26px] flex items-center justify-between text-[12.5px] text-ink-dim">
+      @if (!canResend) {
+        <span>
+          Renvoyer le code dans
+          <strong class="tabular-nums text-navy">{{ timerDisplay }}</strong>
+        </span>
+      } @else {
+        <span>Le code a expiré.</span>
+      }
+      <button (click)="resend()"
+              [disabled]="!canResend"
+              class="font-semibold transition-colors"
+              [class.text-gold]="canResend"
+              [class.hover:text-gold-deep]="canResend"
+              [class.text-ink-mute]="!canResend"
+              [class.cursor-not-allowed]="!canResend">
+        Renvoyer
+      </button>
+    </div>
+
+    <!-- Verify button -->
+    <button (click)="onSubmit()" [disabled]="!isComplete || loading"
+            class="flex w-full items-center justify-center gap-2 rounded-[10px] bg-gold px-4 py-3
+                   text-sm font-semibold text-white transition-colors hover:bg-gold-deep disabled:opacity-50">
+      @if (loading) {
+        <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
+        Vérification...
+      } @else {
+        Vérifier
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M13 5l7 7-7 7"/>
+        </svg>
+      }
+    </button>
+
+    <!-- Security note -->
+    <div class="mt-[22px] flex items-start gap-2.5 border-t border-dashed border-cream-line pt-[18px]
+                text-[12px] text-ink-dim">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#00C48C"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="mt-px shrink-0">
+        <path d="M12 3l8 3v6c0 5-3.5 8.5-8 9.5-4.5-1-8-4.5-8-9.5V6z"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+      <span>
+        Ce code protège votre compte. Ne le partagez jamais avec qui que ce soit,
+        même un agent OkaneTransfer.
+      </span>
+    </div>
+
+  </div>
+
+</div>

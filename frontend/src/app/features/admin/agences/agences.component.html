@@ -1,0 +1,322 @@
+<app-topbar [breadcrumb]="'agences.breadcrumb' | translate"
+            [title]="'agences.title' | translate"
+            [subtitle]="pageSubtitle">
+  <button (click)="openCreate()"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-[12.5px] font-semibold cursor-pointer border-none outline-none"
+          style="background:#F5A623;color:#1A1F36;">
+    <app-icon name="plus" [size]="13" color="#1A1F36" /> {{ 'agences.createBtn' | translate }}
+  </button>
+</app-topbar>
+
+<div class="flex-1 overflow-y-auto p-4 sm:p-7 flex flex-col gap-5">
+
+  <!-- Filters bar -->
+  <div class="flex flex-wrap items-center gap-3">
+    <div class="relative" style="max-width:340px;flex:1;">
+      <div class="absolute left-3 top-1/2 -translate-y-1/2" style="color:rgba(255,255,255,0.55);">
+        <app-icon name="search" [size]="15" />
+      </div>
+      <input [(ngModel)]="search" [placeholder]="'agences.search' | translate"
+             class="w-full pl-9 pr-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+             style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+    </div>
+    <div class="flex rounded-[10px] p-0.5" style="background:rgba(255,255,255,0.05);">
+      @for (tab of filterTabs; track tab.id) {
+        <button (click)="activeTab = tab.id"
+                class="px-[14px] py-[7px] rounded-[7px] text-[12.5px] font-semibold cursor-pointer border-none outline-none"
+                [style.background]="activeTab === tab.id ? '#F5A623' : 'transparent'"
+                [style.color]="activeTab === tab.id ? '#1A1F36' : 'rgba(255,255,255,0.55)'">
+          {{ tab.key | translate }} ({{ tab.id === 'all' ? agences.length : tab.id === 'active' ? countActive : countInactive }})
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Main layout: cards + optional panel -->
+  <div class="grid gap-5 items-start"
+       [style.grid-template-columns]="(!isMobile && showPanel) ? '1.5fr 1fr' : '1fr'">
+
+    <!-- Cards area -->
+    <div class="flex flex-col gap-4">
+      @if (loading) {
+        <div class="flex justify-center items-center py-20">
+          <div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color:rgba(255,255,255,0.12);border-top-color:#F5A623;"></div>
+        </div>
+      } @else {
+        <div class="grid gap-4"
+             [style.grid-template-columns]="isMobile ? '1fr' : (showPanel ? '1fr 1fr' : 'repeat(3,1fr)')">
+          @for (a of filtered; track a.id) {
+            <div class="rounded-[12px] p-5 flex flex-col gap-0"
+                 style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+
+              <!-- Header -->
+              <div class="flex items-start justify-between mb-4">
+                <div class="flex-1 min-w-0 pr-2">
+                  <div class="text-[15px] font-bold tracking-tight truncate" style="color:#fff;">{{ a.nom }}</div>
+                  <div class="text-[12px] mt-0.5 truncate" style="color:rgba(255,255,255,0.55);">{{ a.adresse }}</div>
+                </div>
+                <span class="text-[10.5px] font-bold tracking-[0.06em] uppercase px-2 py-0.5 rounded-[5px] flex-shrink-0"
+                      [style.background]="a.active ? 'rgba(0,196,140,0.18)' : 'rgba(255,77,79,0.18)'"
+                      [style.color]="a.active ? '#00C48C' : '#FF4D4F'">
+                  {{ a.active ? ('agences.status.active' | translate) : ('agences.status.inactive' | translate) }}
+                </span>
+              </div>
+
+              <!-- Manager row -->
+              <div class="flex items-center gap-2.5 mb-4 pb-4" style="border-bottom:1px dashed rgba(255,255,255,0.08);">
+                <div class="flex items-center justify-center rounded-[9px] text-[12px] font-bold flex-shrink-0"
+                     style="width:32px;height:32px;background:rgba(245,166,35,0.18);color:#F5A623;">
+                  {{ initials(a.responsableNom) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-[12.5px] font-semibold truncate" style="color:#fff;">{{ a.responsableNom ?? '—' }}</div>
+                  <div class="text-[10.5px] font-semibold tracking-[0.06em]" style="color:#7BB0FF;">{{ 'agences.managerLabel' | translate }}</div>
+                </div>
+              </div>
+
+              <!-- Capacity -->
+              <div class="mb-4">
+                <div class="flex justify-between items-baseline mb-1.5 text-[11.5px]">
+                  <span class="font-semibold" style="color:rgba(255,255,255,0.55);">{{ 'agences.plafond' | translate }}</span>
+                  <span class="font-semibold" style="color:#fff;font-variant-numeric:tabular-nums;">
+                    {{ a.montantTraiteAujourdhui.toLocaleString('fr-FR') }} / {{ a.plafondJournalier.toLocaleString('fr-FR') }} MAD
+                  </span>
+                </div>
+                <div class="w-full rounded-full overflow-hidden" style="height:6px;background:rgba(255,255,255,0.06);">
+                  <div class="h-full rounded-full transition-all"
+                       [style.width.%]="capacityPct(a)"
+                       [style.background]="capacityColor(capacityPct(a))"></div>
+                </div>
+                <div class="text-[11px] font-semibold mt-1.5"
+                     [style.color]="a.active ? capacityColor(capacityPct(a)) : 'rgba(255,255,255,0.55)'">
+                  @if (a.active) {
+                    {{ (a.plafondJournalier - a.montantTraiteAujourdhui).toLocaleString('fr-FR') }} {{ 'agences.available' | translate }} · {{ capacityPct(a) }}%
+                  } @else {
+                    {{ 'agences.outOfService' | translate }}
+                  }
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex gap-2 mt-auto">
+                <button (click)="goDetail(a.id)"
+                        class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[8px] text-[12.5px] font-semibold cursor-pointer border-none outline-none"
+                        [style.background]="detailAgence?.id === a.id ? 'rgba(123,176,255,0.15)' : 'rgba(255,255,255,0.06)'"
+                        [style.color]="detailAgence?.id === a.id ? '#7BB0FF' : '#F3F4F8'">
+                  {{ 'common.view' | translate }} <app-icon name="chevronRight" [size]="13" />
+                </button>
+                <button (click)="openEdit(a)"
+                        class="flex items-center justify-center rounded-[8px] cursor-pointer border border-solid outline-none"
+                        style="width:34px;height:34px;background:transparent;border-color:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);"
+                        [title]="'common.edit' | translate">
+                  <app-icon name="edit" [size]="14" />
+                </button>
+                <button (click)="deleteAgence(a)" [disabled]="deleting === a.id"
+                        class="flex items-center justify-center rounded-[8px] cursor-pointer border border-solid outline-none disabled:opacity-40"
+                        style="width:34px;height:34px;background:transparent;border-color:rgba(255,77,79,0.25);color:rgba(255,77,79,0.7);"
+                        [title]="'common.delete' | translate">
+                  <app-icon name="trash" [size]="14" color="rgba(255,77,79,0.8)" />
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (filtered.length === 0) {
+          <div class="text-center py-16" style="color:rgba(255,255,255,0.55);">{{ 'agences.none' | translate }}</div>
+        }
+      }
+    </div>
+
+    <!-- Create / Edit modal -->
+    @if (showModal) {
+      <div class="rounded-[12px] p-5 sm:p-6 flex flex-col gap-4"
+           style="background:#252B45;border:1px solid rgba(255,255,255,0.08);box-shadow:0 24px 64px rgba(0,0,0,0.5);"
+           [formGroup]="form">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase"
+                 [style.color]="modalMode === 'edit' ? '#7BB0FF' : '#F5A623'">
+              {{ (modalMode === 'edit' ? 'agences.modal.modification' : 'agences.modal.creation') | translate }}
+            </div>
+            <div class="text-[16px] font-bold mt-1">
+              {{ (modalMode === 'edit' ? 'agences.modal.editTitle' : 'agences.modal.createTitle') | translate }}
+            </div>
+          </div>
+          <button (click)="closeModal()" class="cursor-pointer border-none bg-transparent p-1 outline-none" style="color:rgba(255,255,255,0.55);">
+            <app-icon name="x" [size]="16" />
+          </button>
+        </div>
+
+        @if (error) {
+          <div class="flex items-center gap-2 px-3 py-2 rounded-[8px] text-[12.5px]"
+               style="background:rgba(255,77,79,0.12);color:#FF4D4F;border:1px solid rgba(255,77,79,0.24);">
+            <app-icon name="alert" [size]="14" color="#FF4D4F" /> {{ error }}
+          </div>
+        }
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[12px] font-semibold">{{ 'agences.fields.nom' | translate }} <span style="color:#FF4D4F;">*</span></label>
+          <input formControlName="nom" placeholder="ex: Casablanca Maârif"
+                 class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[12px] font-semibold">{{ 'agences.fields.adresse' | translate }} <span style="color:#FF4D4F;">*</span></label>
+          <input formControlName="adresse" placeholder="ex: Boulevard Zerktouni"
+                 class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[12px] font-semibold">{{ 'agences.fields.pays' | translate }} <span style="color:#FF4D4F;">*</span></label>
+            <input formControlName="pays" placeholder="MA"
+                   class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[12px] font-semibold">{{ 'agences.fields.plafond' | translate }} <span style="color:#FF4D4F;">*</span></label>
+            <input formControlName="plafondJournalier" type="number" min="1" placeholder="200000"
+                   class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[12px] font-semibold">{{ 'agences.fields.manager' | translate }}</label>
+          <select formControlName="responsableId"
+                  class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                  style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;">
+            <option [value]="null" style="background:#252B45;">{{ 'agences.fields.noManager' | translate }}</option>
+            @for (m of managers; track m.id) {
+              <option [value]="m.id" style="background:#252B45;">{{ m.prenom }} {{ m.nom }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="flex items-center gap-3 mt-2">
+          <button (click)="closeModal()" class="px-4 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border outline-none"
+                  style="background:transparent;color:rgba(255,255,255,0.55);border-color:rgba(255,255,255,0.08);">{{ 'common.cancel' | translate }}</button>
+          <span class="flex-1"></span>
+          <button (click)="submit()" [disabled]="saving"
+                  class="flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border-none outline-none disabled:opacity-50"
+                  style="background:#F5A623;color:#1A1F36;">
+            @if (saving) {
+              <span class="w-4 h-4 rounded-full border-2 animate-spin" style="border-color:rgba(26,31,54,0.3);border-top-color:#1A1F36;"></span>
+              {{ (modalMode === 'edit' ? 'common.updating' : 'common.creating') | translate }}
+            } @else {
+              <app-icon name="check" [size]="14" color="#1A1F36" />
+              {{ (modalMode === 'edit' ? 'common.save' : 'agences.createBtn') | translate }}
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Detail popup -->
+    @if (detailAgence) {
+      <div class="rounded-[12px] p-6 flex flex-col gap-5"
+           style="background:#252B45;border:1px solid rgba(255,255,255,0.08);box-shadow:0 24px 64px rgba(0,0,0,0.5);">
+
+        <!-- Header -->
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:#7BB0FF;">{{ 'agences.detail.title' | translate }}</div>
+            <div class="text-[17px] font-bold mt-1 leading-tight">{{ detailAgence.nom }}</div>
+            <div class="text-[12px] mt-0.5" style="color:rgba(255,255,255,0.55);">{{ detailAgence.adresse }}</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10.5px] font-bold tracking-[0.06em] uppercase px-2 py-0.5 rounded-[5px]"
+                  [style.background]="detailAgence.active ? 'rgba(0,196,140,0.18)' : 'rgba(255,77,79,0.18)'"
+                  [style.color]="detailAgence.active ? '#00C48C' : '#FF4D4F'">
+              {{ detailAgence.active ? ('agences.status.active' | translate) : ('agences.status.inactive' | translate) }}
+            </span>
+            <button (click)="closeDetail()" class="cursor-pointer border-none bg-transparent p-1 outline-none" style="color:rgba(255,255,255,0.55);">
+              <app-icon name="x" [size]="16" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Info grid -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="rounded-[10px] p-3" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+            <div class="text-[10.5px] font-semibold tracking-[0.06em] uppercase mb-1" style="color:rgba(255,255,255,0.4);">{{ 'agences.detail.country' | translate }}</div>
+            <div class="text-[14px] font-bold" style="color:#fff;">{{ detailAgence.pays }}</div>
+          </div>
+          <div class="rounded-[10px] p-3" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+            <div class="text-[10.5px] font-semibold tracking-[0.06em] uppercase mb-1" style="color:rgba(255,255,255,0.4);">{{ 'agences.detail.status' | translate }}</div>
+            <div class="text-[13px] font-bold" [style.color]="detailAgence.active ? '#00C48C' : '#FF4D4F'">
+              {{ detailAgence.active ? ('agences.detail.operational' | translate) : ('agences.detail.outOfService' | translate) }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Manager -->
+        <div class="rounded-[10px] p-4 flex items-center gap-3"
+             style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+          <div class="flex items-center justify-center rounded-[10px] text-[13px] font-bold flex-shrink-0"
+               style="width:38px;height:38px;background:rgba(245,166,35,0.18);color:#F5A623;">
+            {{ initials(detailAgence.responsableNom) }}
+          </div>
+          <div>
+            <div class="text-[10.5px] font-semibold tracking-[0.06em] uppercase mb-0.5" style="color:rgba(255,255,255,0.4);">{{ 'agences.detail.managerSection' | translate }}</div>
+            <div class="text-[13.5px] font-semibold" style="color:#fff;">
+              {{ detailAgence.responsableNom ? detailAgence.responsableNom : ('agences.detail.noManager' | translate) }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Capacity -->
+        <div class="rounded-[10px] p-4 flex flex-col gap-3"
+             style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+          <div class="text-[10.5px] font-semibold tracking-[0.06em] uppercase" style="color:rgba(255,255,255,0.4);">{{ 'agences.detail.plafond' | translate }}</div>
+          <div class="flex justify-between items-baseline text-[13px]">
+            <span style="color:rgba(255,255,255,0.7);">{{ 'agences.detail.todayAmount' | translate }}</span>
+            <span class="font-bold" style="color:#fff;font-variant-numeric:tabular-nums;">
+              {{ detailAgence.montantTraiteAujourdhui.toLocaleString('fr-FR') }} MAD
+            </span>
+          </div>
+          <div class="w-full rounded-full overflow-hidden" style="height:8px;background:rgba(255,255,255,0.06);">
+            <div class="h-full rounded-full transition-all"
+                 [style.width.%]="capacityPct(detailAgence)"
+                 [style.background]="capacityColor(capacityPct(detailAgence))"></div>
+          </div>
+          <div class="flex justify-between items-baseline text-[12px]">
+            <span [style.color]="capacityColor(capacityPct(detailAgence))">
+              {{ capacityPct(detailAgence) }}{{ 'agences.detail.used' | translate }}
+            </span>
+            <span style="color:rgba(255,255,255,0.55);">
+              {{ 'agences.detail.limit' | translate }} : {{ detailAgence.plafondJournalier.toLocaleString('fr-FR') }} MAD
+            </span>
+          </div>
+          <div class="pt-1" style="border-top:1px solid rgba(255,255,255,0.06);">
+            <div class="flex justify-between items-baseline text-[12px]">
+              <span style="color:rgba(255,255,255,0.55);">{{ 'agences.detail.available' | translate }}</span>
+              <span class="font-semibold" [style.color]="capacityColor(capacityPct(detailAgence))">
+                {{ (detailAgence.plafondJournalier - detailAgence.montantTraiteAujourdhui).toLocaleString('fr-FR') }} MAD
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-2">
+          <button (click)="openEdit(detailAgence)"
+                  class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[8px] text-[12.5px] font-semibold cursor-pointer border-none outline-none"
+                  style="background:rgba(255,255,255,0.06);color:#F3F4F8;">
+            <app-icon name="edit" [size]="13" /> {{ 'common.edit' | translate }}
+          </button>
+          <button (click)="deleteAgence(detailAgence)" [disabled]="deleting === detailAgence.id"
+                  class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-[8px] text-[12.5px] font-semibold cursor-pointer border border-solid outline-none disabled:opacity-40"
+                  style="background:transparent;border-color:rgba(255,77,79,0.25);color:rgba(255,77,79,0.8);">
+            <app-icon name="trash" [size]="13" color="rgba(255,77,79,0.8)" /> {{ 'common.delete' | translate }}
+          </button>
+        </div>
+
+      </div>
+    }
+
+  </div>
+</div>

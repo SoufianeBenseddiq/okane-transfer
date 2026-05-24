@@ -7,4 +7,5 @@ export interface AgenceResponse {
   montantTraiteAujourdhui: number;
   active: boolean;
   responsableNom: string | null;
+  responsableId: number | null;
 }

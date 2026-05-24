@@ -1,6 +1,7 @@
 package com.okanetransfer.controller.user;
 
 import com.okanetransfer.entity.user.Utilisateur;
+import com.okanetransfer.service.dto.user.request.AdminUpdateUserRequest;
 import com.okanetransfer.service.dto.user.request.CreateUserRequest;
 import com.okanetransfer.service.dto.user.request.UpdateProfilRequest;
 import com.okanetransfer.service.dto.user.response.UserResponse;
@@ -33,23 +34,36 @@ public class UtilisateurController {
 
     @GetMapping
     public ResponseEntity<List<UserResponse>> findAll(
-            @RequestParam(required = false) String role) {
+            @RequestParam(name = "role", required = false) String role) {
         return ResponseEntity.ok(utilisateurService.getAll(role));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> findById(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> findById(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(utilisateurService.getById(id));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> adminUpdate(
+            @PathVariable(name = "id") Long id,
+            @Valid @RequestBody AdminUpdateUserRequest request) {
+        return ResponseEntity.ok(utilisateurService.adminUpdate(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable(name = "id") Long id) {
+        utilisateurService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/{id}/desactiver")
-    public ResponseEntity<Void> desactiver(@PathVariable Long id) {
+    public ResponseEntity<Void> desactiver(@PathVariable(name = "id") Long id) {
         utilisateurService.desactiver(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/reactiver")
-    public ResponseEntity<Void> reactiver(@PathVariable Long id) {
+    public ResponseEntity<Void> reactiver(@PathVariable(name = "id") Long id) {
         utilisateurService.reactiver(id);
         return ResponseEntity.noContent().build();
     }

@@ -18,6 +18,7 @@ public class AgenceRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "Le plafond doit être positif")
     private BigDecimal plafondJournalier;
 
+    private Long responsableId;
 
     public String getNom() { return nom; }
     public void setNom(String nom) { this.nom = nom; }
@@ -30,4 +31,7 @@ public class AgenceRequest {
 
     public BigDecimal getPlafondJournalier() { return plafondJournalier; }
     public void setPlafondJournalier(BigDecimal plafondJournalier) { this.plafondJournalier = plafondJournalier; }
+
+    public Long getResponsableId() { return responsableId; }
+    public void setResponsableId(Long responsableId) { this.responsableId = responsableId; }
 }

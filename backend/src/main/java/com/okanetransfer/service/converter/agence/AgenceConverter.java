@@ -34,6 +34,7 @@ public class AgenceConverter {
             response.setResponsableNom(
                     agence.getResponsable().getPrenom() + " " + agence.getResponsable().getNom()
             );
+            response.setResponsableId(agence.getResponsable().getId());
         }
 
         return response;
