@@ -24,6 +24,7 @@ export const appConfig: ApplicationConfig = {
           provide: TranslateLoader,
           useClass: TranslateHttpLoader
         },
+        defaultLanguage: 'fr',
         fallbackLang: 'fr'
       })
     )

@@ -5,6 +5,8 @@ import com.okanetransfer.entity.devise.Corridor;
 import com.okanetransfer.entity.devise.GrilleTarifaire;
 import com.okanetransfer.entity.user.Agent;
 import com.okanetransfer.shared.enums.StatutTransfert;
+import com.okanetransfer.shared.enums.TypePiece;
+import com.okanetransfer.shared.util.CryptoConverter;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -68,6 +70,14 @@ public class Transfert {
     private LocalDateTime creeLe;
 
     private LocalDateTime payeLe;       // null jusqu'au paiement
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private TypePiece typePieceBeneficiaire;
+
+    @Convert(converter = CryptoConverter.class)
+    @Column
+    private String numeroPieceBeneficiaire;
 
     @PrePersist
     public void prePersist() {
@@ -200,5 +210,21 @@ public class Transfert {
 
     public void setPayeLe(LocalDateTime payeLe) {
         this.payeLe = payeLe;
+    }
+
+    public TypePiece getTypePieceBeneficiaire() {
+        return typePieceBeneficiaire;
+    }
+
+    public void setTypePieceBeneficiaire(TypePiece typePieceBeneficiaire) {
+        this.typePieceBeneficiaire = typePieceBeneficiaire;
+    }
+
+    public String getNumeroPieceBeneficiaire() {
+        return numeroPieceBeneficiaire;
+    }
+
+    public void setNumeroPieceBeneficiaire(String numeroPieceBeneficiaire) {
+        this.numeroPieceBeneficiaire = numeroPieceBeneficiaire;
     }
 }
