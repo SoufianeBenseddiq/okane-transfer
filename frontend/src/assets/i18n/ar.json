@@ -152,5 +152,30 @@
     "movementsCount": "حركة",
     "send": "إرسال",
     "withdrawal": "سحب"
+  },
+  "historique": {
+    "searchPlaceholder": "بحث بالاسم أو المرجع...",
+    "allTypes": "جميع الأنواع",
+    "send": "إرسال",
+    "withdrawal": "سحب",
+    "today": "اليوم",
+    "thisWeek": "هذا الأسبوع",
+    "thisMonth": "هذا الشهر",
+    "export": "تصدير",
+    "totalOps": "إجمالي العمليات",
+    "sends": "الإرساليات",
+    "withdrawals": "السحوبات",
+    "commissions": "العمولات",
+    "history": "السجل",
+    "allOperations": "جميع العمليات",
+    "results": "نتيجة",
+    "time": "الوقت",
+    "type": "النوع",
+    "reference": "المرجع",
+    "client": "العميل",
+    "amount": "المبلغ",
+    "noResults": "لا توجد عمليات",
+    "showing": "عرض",
+    "of": "من"
   }
 }

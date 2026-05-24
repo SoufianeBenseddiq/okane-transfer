@@ -13,6 +13,7 @@ import com.okanetransfer.service.dto.transfert.request.UpdateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.response.TransfertResponse;
 import com.okanetransfer.service.facade.transfert.ITransfertService;
 import com.okanetransfer.shared.enums.StatutTransfert;
+import com.okanetransfer.shared.exception.TransfertNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,7 +55,7 @@ public class TransfertServiceImpl implements ITransfertService {
     @Transactional(readOnly = true)
     public TransfertResponse getTransfertById(Long id) {
         Transfert transfert = transfertRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transfert introuvable"));
+                .orElseThrow(() -> new TransfertNotFoundException("Transfert introuvable"));
 
         return TransfertConverter.toResponse(transfert);
     }
@@ -112,7 +113,7 @@ public class TransfertServiceImpl implements ITransfertService {
     @Override
     public TransfertResponse updateTransfert(Long id, UpdateTransfertRequest request) {
         Transfert transfert = transfertRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transfert introuvable"));
+                .orElseThrow(() -> new TransfertNotFoundException("Transfert introuvable"));
 
         if (transfert.getStatut() == StatutTransfert.PAYE) {
             throw new RuntimeException("Impossible de modifier un transfert deja paye");
@@ -166,7 +167,7 @@ public class TransfertServiceImpl implements ITransfertService {
         Transfert transfert = transfertRepository
                 .findByCodeRetrait(request.getCodeRetrait())
                 .orElseThrow(() ->
-                        new RuntimeException("Transfert introuvable")
+                        new TransfertNotFoundException("Transfert introuvable")
                 );
 
         if (transfert.getStatut() == StatutTransfert.PAYE) {
@@ -179,6 +180,10 @@ public class TransfertServiceImpl implements ITransfertService {
 
         transfert.setAgenceRetrait(null);
 
+        transfert.setTypePieceBeneficiaire(request.getTypePieceBeneficiaire());
+
+        transfert.setNumeroPieceBeneficiaire(request.getNumeroPieceBeneficiaire());
+
         transfert = transfertRepository.save(transfert);
 
         return TransfertConverter.toResponse(transfert);
@@ -190,7 +195,7 @@ public class TransfertServiceImpl implements ITransfertService {
         Transfert transfert = transfertRepository
                 .findByCodeRetrait(codeRetrait)
                 .orElseThrow(() ->
-                        new RuntimeException("Transfert introuvable")
+                        new TransfertNotFoundException("Transfert introuvable")
                 );
 
         return TransfertConverter.toResponse(transfert);
@@ -207,7 +212,7 @@ public class TransfertServiceImpl implements ITransfertService {
     @Override
     public TransfertResponse annulerTransfert(Long id) {
         Transfert transfert = transfertRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transfert introuvable"));
+                .orElseThrow(() -> new TransfertNotFoundException("Transfert introuvable"));
 
         transfert.setStatut(StatutTransfert.ANNULE);
         transfert = transfertRepository.save(transfert);
@@ -216,4 +221,18 @@ public class TransfertServiceImpl implements ITransfertService {
     }
 // Je n’ai pas implémenté DELETE /api/transferts/{id} car les transactions doivent rester toujours traçables.
 // À la place, j’ai créé un endpoint d’annulation de transaction.}
+
+    @Override
+    @Transactional(readOnly = true)
+    public TransfertResponse getByTelephoneBeneficiaire(String telephone) {
+        List<Transfert> resultats = transfertRepository
+                .findByBeneficiairePhone(telephone);
+
+        if (resultats.isEmpty()) {
+            throw new RuntimeException("Aucun transfert en attente pour ce numéro");
+        }
+
+        // Le premier = le plus récent (ORDER BY creeLe DESC dans le repository)
+        return TransfertConverter.toResponse(resultats.get(0));
+    }
 }

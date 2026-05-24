@@ -25,4 +25,6 @@ public interface ITransfertService {
     List<TransfertResponse> getMesTransferts(Long clientId);
 
     TransfertResponse annulerTransfert(Long id);
+
+    TransfertResponse getByTelephoneBeneficiaire(String telephone);
 }

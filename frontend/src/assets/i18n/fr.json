@@ -114,12 +114,13 @@
     "send": "ENVOI",
     "withdrawal": "RETRAIT"
   },
+
   "payment": {
     "searchTitle": "Rechercher un transfert",
     "searchSubtitle": "Demandez au bénéficiaire son code à 8 caractères, ou son numéro de téléphone",
     "withdrawalCode": "Code de retrait",
     "beneficiaryPhone": "Téléphone bénéficiaire",
-    "validFormat": "FORMAT VALIDE",
+    "validFormat": "Format valide",
     "search": "Rechercher",
     "transferFound": "Transfert trouvé",
     "pending": "En attente",
@@ -129,14 +130,17 @@
     "expiresOn": "Expire le",
     "in30days": "Dans 30 jours",
     "amountToGive": "Montant à remettre",
-    "rate": "taux",
-    "idCheck": "Contrôle identité",
+    "rate": "Taux :",
+    "idCheck": "Vérification identité",
     "passport": "Passeport",
     "residencePermit": "Titre de séjour",
-    "verifyIdWarning": "Vérifiez que le nom sur la pièce correspond exactement",
+    "verifyIdWarning": "Vérifiez la pièce d'identité du bénéficiaire avant de confirmer",
     "cancel": "Annuler",
-    "printSlip": "Imprimer la fiche",
-    "confirmPayment": "Confirmer le paiement"
+    "printSlip": "Imprimer le bordereau",
+    "confirmPayment": "Confirmer le paiement",
+    "notFound": "Aucun transfert trouvé pour cette recherche",
+    "alreadyPaid": "Ce transfert a déjà été payé",
+    "errorGeneric": "Une erreur est survenue, veuillez réessayer"
   },
   "caisse": {
     "currentBalance": "Solde actuel",
@@ -152,5 +156,30 @@
     "movementsCount": "mouvements",
     "send": "envoi",
     "withdrawal": "retrait"
+  },
+  "historique": {
+    "searchPlaceholder": "Rechercher par nom, référence...",
+    "allTypes": "Tous les types",
+    "send": "ENVOI",
+    "withdrawal": "RETRAIT",
+    "today": "Aujourd'hui",
+    "thisWeek": "Cette semaine",
+    "thisMonth": "Ce mois",
+    "export": "Exporter",
+    "totalOps": "Total opérations",
+    "sends": "Envois",
+    "withdrawals": "Retraits",
+    "commissions": "Commissions",
+    "history": "Historique",
+    "allOperations": "Toutes les opérations",
+    "results": "résultats",
+    "time": "Heure",
+    "type": "Type",
+    "reference": "Référence",
+    "client": "Client",
+    "amount": "Montant",
+    "noResults": "Aucune opération trouvée",
+    "showing": "Affichage de",
+    "of": "sur"
   }
 }

@@ -152,5 +152,30 @@
     "movementsCount": "movements",
     "send": "send",
     "withdrawal": "withdrawal"
+  },
+  "historique": {
+    "searchPlaceholder": "Search by name, reference...",
+    "allTypes": "All types",
+    "send": "SEND",
+    "withdrawal": "WITHDRAWAL",
+    "today": "Today",
+    "thisWeek": "This week",
+    "thisMonth": "This month",
+    "export": "Export",
+    "totalOps": "Total operations",
+    "sends": "Sends",
+    "withdrawals": "Withdrawals",
+    "commissions": "Commissions",
+    "history": "History",
+    "allOperations": "All operations",
+    "results": "results",
+    "time": "Time",
+    "type": "Type",
+    "reference": "Reference",
+    "client": "Client",
+    "amount": "Amount",
+    "noResults": "No operations found",
+    "showing": "Showing",
+    "of": "of"
   }
 }

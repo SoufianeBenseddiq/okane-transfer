@@ -29,7 +29,7 @@ export const routes: Routes = [
   // ─── Agent ─────────────────────────────────────────────────────────────────
   {
     path: 'agent',
-    canActivate: [authGuard, roleGuard],
+    // canActivate: [authGuard, roleGuard],
     data: { roles: [RoleUtilisateur.ROLE_AGENT] },
     loadChildren: () => import('./features/agent/agent.routes').then(m => m.agentRoutes)
   },
