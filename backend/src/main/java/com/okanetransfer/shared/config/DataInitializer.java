@@ -1,6 +1,7 @@
 package com.okanetransfer.shared.config;
 
 import com.okanetransfer.entity.user.Administrateur;
+import com.okanetransfer.entity.user.Client;
 import com.okanetransfer.repository.user.UtilisateurRepository;
 import com.okanetransfer.shared.enums.RoleUtilisateur;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -40,4 +41,5 @@ public class DataInitializer {
 
         utilisateurRepository.save(admin);
     }
+
 }

@@ -169,4 +169,5 @@ public interface UtilisateurService {
      * @param clientId id du client demandant l'effacement
      */
     void demanderEffacement(Long clientId);
+    List<UserResponse> searchClients(String query);
 }
