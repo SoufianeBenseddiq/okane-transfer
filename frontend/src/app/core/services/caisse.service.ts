@@ -43,6 +43,23 @@ export class CaisseService {
     return this.http.delete<void>(`${this.baseOps}/id/${id}`);
   }
 
+  operationsDuJour(email: string): Observable<CaisseOperationResponse[]> {
+    return this.http.get<CaisseOperationResponse[]>(`${this.baseOps}/agent/${email}/today`);
+  }
+
+  consulterSoldeDuJour(email: string): Observable<number> {
+    return this.http.get<number>(`${this.baseOps}/agent/${email}/solde-jour`);
+  }
+
+  historiqueFiltre(email: string, dateDebut: string, dateFin: string): Observable<CaisseOperationResponse[]> {
+    const params = new HttpParams()
+      .set('dateDebut', dateDebut)
+      .set('dateFin', dateFin);
+    return this.http.get<CaisseOperationResponse[]>(
+      `${this.baseOps}/agent/${email}/historique`, { params }
+    );
+  }
+
   // ─── Clôtures ──────────────────────────────────────────────────────────────
 
   findAllClotures(): Observable<ClotureCaisseResponse[]> {

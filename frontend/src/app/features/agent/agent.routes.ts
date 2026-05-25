@@ -30,6 +30,10 @@ export const agentRoutes: Routes = [
       //   path: 'recu-paiement',
       //   loadComponent: () => import('./recu-paiement/recu-paiement.component').then(m => m.RecuPaiementComponent)
       // },
+      {
+        path: 'cloture-caisse',
+        loadComponent: () => import('./cloture-caisse/cloture-caisse.component').then(m => m.ClotureCaisseComponent)
+      },
 
       {
         path: '',
