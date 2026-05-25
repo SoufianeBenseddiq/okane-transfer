@@ -1,0 +1,175 @@
+<app-topbar
+  [breadcrumb]="'notifications.breadcrumb' | translate"
+  [title]="'notifications.title' | translate"
+  [subtitle]="subtitle">
+</app-topbar>
+
+<div class="flex flex-col sm:flex-row flex-1 min-h-0 overflow-hidden gap-5 p-4 sm:p-7">
+
+  <!-- Send form panel -->
+  <aside class="w-full sm:w-[300px] flex-shrink-0 flex flex-col gap-4">
+    <div class="rounded-[12px] p-5 sm:p-6 flex flex-col gap-4"
+         style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="text-[10.5px] font-semibold uppercase tracking-[0.06em]" style="color:rgba(255,255,255,0.45);">
+        {{ 'notifications.send.title' | translate }}
+      </div>
+
+      @if (sendSuccess) {
+        <div class="flex items-center gap-2 px-3 py-2 rounded-[8px] text-[12.5px]"
+             style="background:rgba(0,196,140,0.12);color:#00C48C;border:1px solid rgba(0,196,140,0.24);">
+          <app-icon name="check" [size]="14" color="#00C48C" />
+          {{ 'notifications.send.success' | translate }}
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="send()" class="flex flex-col gap-4">
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[12px] font-semibold" style="color:rgba(255,255,255,0.55);">
+            {{ 'notifications.send.destinataire' | translate }} <span style="color:#FF4D4F;">*</span>
+          </label>
+          <input formControlName="destinataireId" type="number" min="1"
+                 class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[12px] font-semibold" style="color:rgba(255,255,255,0.55);">
+            {{ 'notifications.send.message' | translate }} <span style="color:#FF4D4F;">*</span>
+          </label>
+          <textarea formControlName="message" rows="4"
+                    class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none resize-none"
+                    style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[12px] font-semibold" style="color:rgba(255,255,255,0.55);">
+            {{ 'notifications.send.type' | translate }}
+          </label>
+          <div class="flex gap-2">
+            @for (t of typeOptions; track t) {
+              <button type="button" (click)="form.get('type')!.setValue(t)"
+                      class="flex-1 py-2 rounded-[8px] text-[11.5px] font-bold cursor-pointer border outline-none transition-all"
+                      [style.background]="form.get('type')!.value === t ? typeBg(t) : 'transparent'"
+                      [style.color]="form.get('type')!.value === t ? typeColor(t) : 'rgba(255,255,255,0.4)'"
+                      [style.border-color]="form.get('type')!.value === t ? typeColor(t) : 'rgba(255,255,255,0.08)'">
+                {{ t }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <button type="submit" [disabled]="sending"
+                class="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[13px] font-semibold cursor-pointer border-none outline-none disabled:opacity-50"
+                style="background:#F5A623;color:#1A1F36;">
+          @if (sending) {
+            <span class="w-4 h-4 rounded-full border-2 animate-spin" style="border-color:rgba(26,31,54,0.3);border-top-color:#1A1F36;"></span>
+          }
+          {{ sending ? ('notifications.send.sending' | translate) : ('notifications.send.btn' | translate) }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Unread count badge -->
+    @if (unreadCount > 0) {
+      <div class="rounded-[12px] px-4 py-3 flex items-center gap-3"
+           style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);">
+        <span class="flex items-center justify-center rounded-full text-[12px] font-bold"
+              style="width:28px;height:28px;background:#F5A623;color:#1A1F36;">
+          {{ unreadCount }}
+        </span>
+        <span class="text-[13px] font-medium" style="color:#F5A623;">
+          {{ unreadCount }} {{ 'notifications.unreadBadge' | translate }}
+        </span>
+      </div>
+    }
+  </aside>
+
+  <!-- Notifications list -->
+  <div class="flex flex-col flex-1 min-w-0 min-h-0">
+    <!-- Toolbar -->
+    <div class="flex items-center gap-3 mb-4 flex-wrap">
+      <div class="relative flex-1 min-w-[160px] max-w-sm">
+        <div class="absolute left-3 top-1/2 -translate-y-1/2" style="color:rgba(255,255,255,0.55);">
+          <app-icon name="search" [size]="14" />
+        </div>
+        <input [(ngModel)]="search" type="text"
+               [placeholder]="'notifications.list.search' | translate"
+               class="w-full pl-9 pr-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+               style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+      </div>
+      <div class="flex gap-1 p-0.5 rounded-[8px]" style="background:rgba(255,255,255,0.05);">
+        <button (click)="listFilter = 'all'"
+                class="px-3 py-1 rounded-[6px] text-[12px] font-semibold cursor-pointer border-none outline-none"
+                [style.background]="listFilter === 'all' ? '#F5A623' : 'transparent'"
+                [style.color]="listFilter === 'all' ? '#1A1F36' : 'rgba(255,255,255,0.55)'">
+          {{ 'notifications.list.filter.all' | translate }}
+        </button>
+        <button (click)="listFilter = 'unread'"
+                class="px-3 py-1 rounded-[6px] text-[12px] font-semibold cursor-pointer border-none outline-none"
+                [style.background]="listFilter === 'unread' ? '#F5A623' : 'transparent'"
+                [style.color]="listFilter === 'unread' ? '#1A1F36' : 'rgba(255,255,255,0.55)'">
+          {{ 'notifications.list.filter.unread' | translate }}
+        </button>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color:rgba(255,255,255,0.12);border-top-color:#F5A623;"></div>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-2 overflow-auto flex-1 min-h-0 pr-1">
+        @for (n of filtered; track n.id) {
+          <div class="rounded-[12px] px-4 py-3 flex items-start gap-3 transition-all"
+               [style.background]="n.lue ? '#252B45' : 'rgba(245,166,35,0.08)'"
+               [style.border]="n.lue ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(245,166,35,0.25)'">
+
+            <!-- Type badge -->
+            <span class="flex-shrink-0 px-2 py-0.5 rounded-[5px] text-[10px] font-bold mt-0.5"
+                  [style.background]="typeBg(n.type)"
+                  [style.color]="typeColor(n.type)">
+              {{ n.type }}
+            </span>
+
+            <!-- Content -->
+            <div class="flex-1 min-w-0">
+              <div class="text-[13px] font-medium mb-1" style="color:#F3F4F8;">{{ n.message }}</div>
+              <div class="flex items-center gap-3 text-[11px]" style="color:rgba(255,255,255,0.4);">
+                <span>ID {{ n.destinataireId }}</span>
+                <span>·</span>
+                <span>{{ n.envoyeLe | date:'dd/MM/yy HH:mm' }}</span>
+                <span>·</span>
+                <span [style.color]="n.lue ? '#00C48C' : '#F5A623'">
+                  {{ n.lue ? ('notifications.list.read' | translate) : ('notifications.list.unread' | translate) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              @if (!n.lue) {
+                <button (click)="markRead(n)" [disabled]="markingRead === n.id"
+                        class="flex items-center justify-center rounded-[8px] cursor-pointer border-none disabled:opacity-50"
+                        style="width:30px;height:30px;background:rgba(0,196,140,0.18);color:#00C48C;"
+                        [title]="'notifications.list.markRead' | translate">
+                  <app-icon name="check" [size]="13" color="#00C48C" />
+                </button>
+              }
+              <button (click)="deleteNotif(n)" [disabled]="deleting === n.id"
+                      class="flex items-center justify-center rounded-[8px] cursor-pointer border-none disabled:opacity-50"
+                      style="width:30px;height:30px;background:rgba(255,77,79,0.12);color:#FF4D4F;"
+                      [title]="'notifications.list.delete' | translate">
+                <app-icon name="trash" [size]="13" color="#FF4D4F" />
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="flex items-center justify-center flex-1 py-14 text-[13px]" style="color:rgba(255,255,255,0.35);">
+            {{ 'notifications.list.none' | translate }}
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

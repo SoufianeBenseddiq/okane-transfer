@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { SidebarStateService } from '../../../core/services/sidebar-state.service';
-import { TranslationService } from '../../../core/services/translation.service';
 import { RoleUtilisateur } from '../../../core/models/enums';
 import { IconComponent } from '../icon/icon.component';
-import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface NavItem {
   id: string;
@@ -24,21 +23,22 @@ const NAV_CONFIG: Record<string, NavItem[]> = {
     { id: 'utilisateurs', label: 'nav.utilisateurs', icon: 'users',     route: '/admin/utilisateurs' },
     { id: 'conformite',   label: 'nav.conformite',   icon: 'shield',    route: '/admin/conformite', badge: 7 },
     { id: 'audit',        label: 'nav.audit',        icon: 'list',      route: '/admin/audit' },
-    { id: 'rapports',     label: 'nav.rapports',     icon: 'report',    route: '/admin/rapports' },
+    { id: 'rapports',       label: 'nav.rapports',       icon: 'report',    route: '/admin/rapports' },
+    { id: 'notifications',  label: 'nav.notifications',  icon: 'bell',      route: '/admin/notifications' },
   ],
   [RoleUtilisateur.ROLE_MANAGER]: [
-    { id: 'dashboard',    label: 'nav.dashboard',   icon: 'dashboard', route: '/manager/dashboard' },
-    { id: 'validations',  label: 'nav.validations', icon: 'check',     route: '/manager/validations' },
-    { id: 'equipe',       label: 'nav.equipe',      icon: 'users',     route: '/manager/equipe' },
-    { id: 'plafonds',     label: 'nav.plafonds',    icon: 'wallet',    route: '/manager/plafonds' },
-    { id: 'rapports',     label: 'nav.rapports',    icon: 'report',    route: '/manager/rapports' },
+    { id: 'dashboard',   label: 'nav.dashboard',   icon: 'dashboard', route: '/manager/dashboard' },
+    { id: 'validations', label: 'nav.validations', icon: 'check',     route: '/manager/validations' },
+    { id: 'equipe',      label: 'nav.equipe',      icon: 'users',     route: '/manager/equipe' },
+    { id: 'plafonds',    label: 'nav.plafonds',    icon: 'wallet',    route: '/manager/plafonds' },
+    { id: 'rapports',    label: 'nav.rapports',    icon: 'report',    route: '/manager/rapports' },
   ],
   [RoleUtilisateur.ROLE_AGENT]: [
-    { id: 'dashboard', label: 'nav.tableau',   icon: 'dashboard',     route: '/agent/dashboard' },
-    { id: 'transfert', label: 'nav.transfert', icon: 'send',          route: '/agent/transfert' },
-    { id: 'paiement',  label: 'nav.paiement',  icon: 'arrowDownLeft', route: '/agent/paiement' },
-    { id: 'caisse',    label: 'nav.caisse',    icon: 'wallet',        route: '/agent/caisse' },
-    { id: 'cloture',   label: 'nav.cloture',   icon: 'lock',          route: '/agent/cloture' },
+    { id: 'dashboard',  label: 'nav.tableau',    icon: 'dashboard',     route: '/agent/dashboard' },
+    { id: 'envoi',      label: 'nav.transfert',  icon: 'send',          route: '/agent/envoi' },
+    { id: 'paiement',   label: 'nav.paiement',   icon: 'arrowDownLeft', route: '/agent/paiement' },
+    { id: 'caisse',     label: 'nav.caisse',     icon: 'wallet',        route: '/agent/caisse' },
+    { id: 'historique', label: 'nav.historique', icon: 'history',       route: '/agent/historique' },
   ],
 };
 
@@ -60,11 +60,13 @@ export class SidebarComponent {
     public auth: AuthService,
     private router: Router,
     public sidebarState: SidebarStateService,
-    public ts: TranslationService,
+    private translate: TranslateService,
   ) {}
 
   get collapsed(): boolean { return this.sidebarState.collapsed; }
   toggleCollapse(): void { this.sidebarState.toggle(); }
+
+  t(key: string): string { return this.translate.instant(key); }
 
   get navItems(): NavItem[] {
     return NAV_CONFIG[this.auth.currentUser?.role ?? ''] ?? [];

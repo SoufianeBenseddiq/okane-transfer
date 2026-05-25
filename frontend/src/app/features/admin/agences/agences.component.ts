@@ -8,8 +8,7 @@ import { UserResponse } from '../../../core/models/user';
 import { RoleUtilisateur } from '../../../core/models/enums';
 import { TopbarComponent } from '../../../shared/components/topbar/topbar.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
-import { TranslationService } from '../../../core/services/translation.service';
-import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 
 type FilterTab  = 'all' | 'active' | 'inactive';
 type ModalMode  = 'create' | 'edit';
@@ -59,7 +58,7 @@ export class AgencesComponent implements OnInit {
     private agenceService: AgenceService,
     private userService: UserService,
     private fb: FormBuilder,
-    public ts: TranslationService,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void { this.load(); }
@@ -97,7 +96,7 @@ export class AgencesComponent implements OnInit {
   get showPanel():     boolean { return this.showModal || this.detailAgence !== null; }
 
   get pageSubtitle(): string {
-    return `${this.agences.length} ${this.ts.t('agences.subtitle')} · ${this.countActive} ${this.ts.t('agences.activeCount')} · ${this.countInactive} ${this.ts.t('agences.inactiveCount')}`;
+    return `${this.agences.length} ${this.translate.instant('agences.subtitle')} · ${this.countActive} ${this.translate.instant('agences.activeCount')} · ${this.countInactive} ${this.translate.instant('agences.inactiveCount')}`;
   }
 
   capacityPct(a: AgenceResponse): number {
@@ -158,7 +157,7 @@ export class AgencesComponent implements OnInit {
           this.showModal = false;
         },
         error: () => {
-          this.error  = this.ts.t('agences.error.create');
+          this.error  = this.translate.instant('agences.error.create');
           this.saving = false;
         },
       });
@@ -171,7 +170,7 @@ export class AgencesComponent implements OnInit {
           this.showModal = false;
         },
         error: () => {
-          this.error  = this.ts.t('agences.error.update');
+          this.error  = this.translate.instant('agences.error.update');
           this.saving = false;
         },
       });
@@ -179,7 +178,7 @@ export class AgencesComponent implements OnInit {
   }
 
   deleteAgence(a: AgenceResponse): void {
-    if (!confirm(`${this.ts.t('agences.deleteConfirm')} "${a.nom}" ?`)) return;
+    if (!confirm(`${this.translate.instant('agences.deleteConfirm')} "${a.nom}" ?`)) return;
     this.deleting = a.id;
     this.agenceService.delete(a.id).subscribe({
       next: () => {

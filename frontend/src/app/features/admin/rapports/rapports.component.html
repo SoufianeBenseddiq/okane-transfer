@@ -1,0 +1,151 @@
+<app-topbar
+  [breadcrumb]="'rapports.breadcrumb' | translate"
+  [title]="'rapports.title' | translate"
+  [subtitle]="subtitle">
+</app-topbar>
+
+<div class="flex-1 overflow-y-auto p-4 sm:p-7 flex flex-col gap-5">
+
+  <!-- ⚠️ Warning banner -->
+  <div class="flex items-center gap-2 px-4 py-2 rounded-[10px] text-[12.5px]"
+       style="background:rgba(245,166,35,0.1);color:#F5A623;border:1px solid rgba(245,166,35,0.2);">
+    <app-icon name="alert" [size]="14" color="#F5A623" />
+    {{ 'rapports.warning' | translate }}
+  </div>
+
+  <!-- Period filter -->
+  <div class="flex items-center gap-2 flex-wrap">
+    @for (p of ['all', 'today', 'week', 'month']; track p) {
+      <button (click)="period = $any(p)"
+              class="px-3 py-1.5 rounded-[8px] text-[12.5px] font-semibold cursor-pointer border-none outline-none transition-all"
+              [style.background]="period === p ? '#F5A623' : 'rgba(255,255,255,0.05)'"
+              [style.color]="period === p ? '#1A1F36' : 'rgba(255,255,255,0.55)'">
+        {{ ('rapports.period.' + p) | translate }}
+      </button>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="flex justify-center py-16">
+      <div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color:rgba(255,255,255,0.12);border-top-color:#F5A623;"></div>
+    </div>
+  } @else {
+    <!-- KPI cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="rounded-[12px] p-4" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+        <div class="text-[10.5px] font-semibold uppercase tracking-[0.06em] mb-2" style="color:rgba(255,255,255,0.45);">
+          {{ 'rapports.kpi.total' | translate }}
+        </div>
+        <div class="text-[28px] font-bold" style="color:#fff;">{{ totalCount }}</div>
+      </div>
+      <div class="rounded-[12px] p-4" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+        <div class="text-[10.5px] font-semibold uppercase tracking-[0.06em] mb-2" style="color:rgba(255,255,255,0.45);">
+          {{ 'rapports.kpi.volume' | translate }}
+        </div>
+        <div class="text-[22px] font-bold" style="color:#F5A623;">{{ totalVolume | number:'1.0-0' }}</div>
+      </div>
+      <div class="rounded-[12px] p-4" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+        <div class="text-[10.5px] font-semibold uppercase tracking-[0.06em] mb-2" style="color:rgba(255,255,255,0.45);">
+          {{ 'rapports.kpi.avg' | translate }}
+        </div>
+        <div class="text-[22px] font-bold" style="color:#fff;">{{ avgAmount | number:'1.0-0' }}</div>
+      </div>
+      <div class="rounded-[12px] p-4" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+        <div class="text-[10.5px] font-semibold uppercase tracking-[0.06em] mb-2" style="color:rgba(255,255,255,0.45);">
+          {{ 'rapports.kpi.pending' | translate }}
+        </div>
+        <div class="text-[28px] font-bold" style="color:#F5A623;">{{ pendingCount }}</div>
+      </div>
+    </div>
+
+    <!-- Status distribution -->
+    <div class="rounded-[12px] p-5" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="text-[12px] font-semibold uppercase tracking-[0.06em] mb-4" style="color:rgba(255,255,255,0.45);">
+        {{ 'rapports.status.label' | translate }}
+      </div>
+      <div class="flex flex-col gap-3">
+        @for (s of statuts; track s) {
+          <div class="flex items-center gap-3">
+            <div class="w-[110px] text-[11px] font-semibold flex-shrink-0" [style.color]="statutColor(s)">
+              {{ ('rapports.status.' + s) | translate }}
+            </div>
+            <div class="flex-1 rounded-full h-2" style="background:rgba(255,255,255,0.06);">
+              <div class="h-2 rounded-full transition-all"
+                   [style.width.%]="barWidth(s)"
+                   [style.background]="statutColor(s)"></div>
+            </div>
+            <div class="w-8 text-right text-[11px] font-mono" style="color:rgba(255,255,255,0.4);">{{ countByStatut(s) }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Transfers table -->
+    <div class="rounded-[12px] overflow-hidden" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div class="text-[12px] font-semibold uppercase tracking-[0.06em]" style="color:rgba(255,255,255,0.45);">
+          {{ 'rapports.table.title' | translate }}
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <div class="absolute left-3 top-1/2 -translate-y-1/2" style="color:rgba(255,255,255,0.55);">
+              <app-icon name="search" [size]="13" />
+            </div>
+            <input [(ngModel)]="search" type="text"
+                   [placeholder]="'rapports.table.search' | translate"
+                   class="pl-8 pr-3 py-1.5 rounded-[8px] text-[12.5px] outline-none"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;width:180px;" />
+          </div>
+          <button title="{{ 'rapports.export' | translate }}"
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold cursor-pointer border outline-none"
+                  style="background:transparent;border-color:rgba(255,255,255,0.08);color:rgba(255,255,255,0.55);">
+            <app-icon name="arrowDown" [size]="13" />
+            CSV ⚠️
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full" style="border-collapse:collapse;font-size:13px;min-width:720px;">
+          <thead>
+            <tr style="color:rgba(255,255,255,0.45);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);">
+              <th class="px-5 py-3 font-semibold text-left">{{ 'rapports.table.col.ref' | translate }}</th>
+              <th class="px-5 py-3 font-semibold text-left">{{ 'rapports.table.col.expediteur' | translate }}</th>
+              <th class="px-5 py-3 font-semibold text-left">{{ 'rapports.table.col.beneficiaire' | translate }}</th>
+              <th class="px-5 py-3 font-semibold text-right">{{ 'rapports.table.col.montant' | translate }}</th>
+              <th class="px-5 py-3 font-semibold text-left">{{ 'rapports.table.col.devise' | translate }}</th>
+              <th class="px-5 py-3 font-semibold text-center">{{ 'rapports.table.col.statut' | translate }}</th>
+              <th class="px-5 py-3 font-semibold text-left">{{ 'rapports.table.col.date' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of filtered; track t.numeroReference; let i = $index; let last = $last) {
+              <tr [style.background]="i % 2 === 1 ? 'rgba(255,255,255,0.02)' : 'transparent'"
+                  [style.border-bottom]="!last ? '1px solid rgba(255,255,255,0.06)' : 'none'">
+                <td class="px-5 py-[10px] font-mono text-[12px]" style="color:rgba(255,255,255,0.4);">{{ t.numeroReference }}</td>
+                <td class="px-5 py-[10px] font-semibold" style="color:#fff;">{{ t.nomExpediteur }}</td>
+                <td class="px-5 py-[10px]" style="color:rgba(255,255,255,0.55);">{{ t.nomBeneficiaire }}</td>
+                <td class="px-5 py-[10px] text-right font-semibold" style="color:#fff;">{{ t.montantEnvoye | number:'1.2-2' }}</td>
+                <td class="px-5 py-[10px] font-mono text-[12px]" style="color:rgba(255,255,255,0.55);">{{ t.deviseReception }}</td>
+                <td class="px-5 py-[10px] text-center">
+                  <span class="px-2 py-0.5 rounded-[5px] text-[10.5px] font-bold tracking-[0.05em] uppercase"
+                        [style.background]="statutBg(t.statut)"
+                        [style.color]="statutColor(t.statut)">
+                    {{ ('rapports.status.' + t.statut) | translate }}
+                  </span>
+                </td>
+                <td class="px-5 py-[10px] text-[12px]" style="color:rgba(255,255,255,0.4);">{{ t.creeLe | date:'dd/MM/yy HH:mm' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="text-center py-14" style="color:rgba(255,255,255,0.35);">
+                  {{ 'rapports.none' | translate }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

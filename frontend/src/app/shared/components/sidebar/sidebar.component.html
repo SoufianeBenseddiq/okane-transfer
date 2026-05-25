@@ -59,7 +59,7 @@
       <a [routerLink]="item.route"
          routerLinkActive
          #rla="routerLinkActive"
-         [title]="collapsed ? ts.t(item.label) : ''"
+         [title]="collapsed ? t(item.label) : ''"
          class="relative flex items-center rounded-[9px] text-[13.5px] no-underline cursor-pointer outline-none"
          style="transition:background 0.15s,color 0.15s;"
          [style.gap]="collapsed ? '0' : '11px'"

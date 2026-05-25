@@ -94,4 +94,13 @@ public class TransfertController {
         );
     }
 
+    @GetMapping("/telephone/{telephone}")
+    public ResponseEntity<TransfertResponse> getByTelephoneBeneficiaire(
+            @PathVariable("telephone") String telephone) {
+
+        return ResponseEntity.ok(
+                transfertService.getByTelephoneBeneficiaire(telephone)
+        );
+    }
+
 }

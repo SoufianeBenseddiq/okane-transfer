@@ -1,0 +1,530 @@
+
+<div class="space-y-4 max-w-4xl mx-auto mt-4 mb-4">
+
+  <!-- Search Card -->
+  <div class="bg-[#151c2c] rounded-2xl p-8">
+
+    <!-- Header -->
+    <div class="flex flex-col items-center text-center mb-6">
+      <div class="w-12 h-12 rounded-xl bg-[#1e2a3a] flex items-center justify-center mb-4">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/>
+        </svg>
+      </div>
+      <h2 class="text-xl font-bold text-white">{{ 'payment.searchTitle' | translate }}</h2>
+      <p class="text-sm text-gray-400 mt-1 max-w-sm">{{ 'payment.searchSubtitle' | translate }}</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex rounded-xl bg-[#0e1420] p-1 mb-4">
+      <button
+        (click)="setSearchMode('code')"
+        [ngClass]="searchMode === 'code' ? 'bg-amber-400 text-gray-900' : 'text-gray-400 hover:text-white'"
+        class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" d="M7 11V7a5 5 0 0110 0v4"/>
+        </svg>
+        {{ 'payment.withdrawalCode' | translate }}
+      </button>
+      <button
+        (click)="setSearchMode('phone')"
+        [ngClass]="searchMode === 'phone' ? 'bg-amber-400 text-gray-900' : 'text-gray-400 hover:text-white'"
+        class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+        </svg>
+        {{ 'payment.beneficiaryPhone' | translate }}
+      </button>
+    </div>
+
+    <!-- Input Row -->
+    <div class="flex gap-2">
+      <div class="flex-1 min-w-0 flex items-center gap-3 bg-white rounded-xl px-4 py-3 border-2"
+           [ngClass]="isValidFormat ? 'border-emerald-400' : 'border-transparent'">
+        <svg class="shrink-0" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" d="M7 11V7a5 5 0 0110 0v4"/>
+        </svg>
+        <input
+          [(ngModel)]="searchValue"
+          (input)="onInputChange()"
+          [placeholder]="searchMode === 'code' ? 'XXXX-XXXX' : '+212 6XX XXX XXX'"
+          class="min-w-0 w-full bg-transparent text-gray-900 font-mono font-bold text-lg tracking-widest outline-none placeholder:text-gray-300 placeholder:font-normal placeholder:text-sm placeholder:tracking-normal"
+        />
+        <span *ngIf="isValidFormat" class="shrink-0 text-xs text-emerald-500 font-semibold whitespace-nowrap flex items-center gap-1">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+          {{ 'payment.validFormat' | translate }}
+        </span>
+      </div>
+      <button
+        (click)="search()"
+        [disabled]="!isValidFormat || isLoading"
+        class="shrink-0 px-6 rounded-xl bg-amber-400 hover:bg-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-gray-900 font-bold text-sm transition-colors whitespace-nowrap">
+        <span *ngIf="!isLoading">{{ 'payment.search' | translate }}</span>
+        <span *ngIf="isLoading" class="flex items-center gap-2">
+          <svg class="animate-spin" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" d="M12 3a9 9 0 110 18A9 9 0 0112 3z" opacity=".3"/>
+            <path stroke-linecap="round" d="M12 3a9 9 0 019 9"/>
+          </svg>
+          ...
+        </span>
+      </button>
+    </div>
+
+    <!-- Message d'erreur (404 / erreur générique) -->
+    <div *ngIf="errorMessage" class="mt-4 flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
+      <svg class="shrink-0" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f87171" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+      </svg>
+      <p class="text-sm text-red-400 font-medium">{{ errorMessage | translate }}</p>
+    </div>
+
+  </div>
+
+  <!-- Result Card -->
+  <div *ngIf="transfer" class="bg-[#1a2235] rounded-2xl p-6 space-y-6">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-9 h-9 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs text-gray-400 uppercase tracking-widest font-medium">{{ 'payment.transferFound' | translate }}</p>
+          <!-- numeroReference comme référence affichée -->
+          <p class="text-lg font-bold text-white font-mono tracking-wide truncate">{{ transfer.numeroReference }}</p>
+        </div>
+      </div>
+
+      <span class="shrink-0 flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-full border"
+            [ngClass]="statutStyle.classes">
+            <span class="w-2 h-2 rounded-full" [ngClass]="{
+              'bg-amber-400':  transfer.statut === 'EN_ATTENTE',
+              'bg-emerald-400': transfer.statut === 'PAYE',
+              'bg-red-400':    transfer.statut === 'ANNULE',
+              'bg-gray-400':   transfer.statut === 'EXPIRE',
+              'bg-purple-400': transfer.statut === 'BLOQUE'
+            }"></span>
+        {{ statutStyle.label }}
+      </span>
+    </div>
+
+    <div class="border-t border-white/[0.07]"></div>
+
+    <!-- Sender / Beneficiary -->
+    <div class="grid grid-cols-2 gap-8">
+      <div class="space-y-1 min-w-0">
+        <p class="text-xs text-gray-500 uppercase tracking-widest font-medium">{{ 'payment.sender' | translate }}</p>
+        <p class="text-white font-bold text-base">{{ transfer.nomExpediteur }}</p>
+        <div class="flex items-center gap-2 mt-1 min-w-0">
+          <span class="shrink-0 text-[10px] font-black text-white bg-blue-600 px-1.5 py-0.5 rounded">
+            {{ transfer.paysExpediteur }}
+          </span>
+          <span class="text-sm text-gray-400 truncate">{{ transfer.villeExpediteur }}</span>
+        </div>
+      </div>
+      <div class="space-y-1 min-w-0">
+        <p class="text-xs text-gray-500 uppercase tracking-widest font-medium">{{ 'payment.beneficiary' | translate }}</p>
+        <p class="text-white font-bold text-base">{{ transfer.nomBeneficiaire }}</p>
+        <div class="flex items-center gap-2 mt-1 min-w-0">
+          <span class="shrink-0 text-[10px] font-black text-white bg-green-600 px-1.5 py-0.5 rounded">
+            {{ transfer.paysBeneficiaire }}
+          </span>
+          <span class="text-sm text-gray-400 truncate">
+            {{ transfer.villeBeneficiaire }} · {{ transfer.telephoneBeneficiaire }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dates -->
+    <div class="grid grid-cols-2 gap-8">
+      <div class="space-y-1">
+        <p class="text-xs text-gray-500 uppercase tracking-widest font-medium">{{ 'payment.sentOn' | translate }}</p>
+        <p class="text-white font-bold text-base">{{ transfer.creeLe | date:'dd / MM / yyyy · HH:mm' }}</p>
+        <p class="text-sm text-gray-400">{{ transfer.agenceEnvoi }}</p>
+      </div>
+      <div class="space-y-1">
+        <p class="text-xs text-gray-500 uppercase tracking-widest font-medium">{{ 'payment.expiresOn' | translate }}</p>
+        <p class="text-white font-bold text-base">{{ transfer.expireLe | date:'dd / MM / yyyy' }}</p>
+        <p class="text-sm text-gray-400">{{ 'payment.in30days' | translate }}</p>
+      </div>
+    </div>
+
+    <!-- Amount + ID -->
+    <div class="grid grid-cols-2 gap-4">
+
+      <!-- Montant -->
+      <div class="bg-[#141b2d] rounded-xl p-5 min-w-0">
+        <p class="text-xs text-gray-500 uppercase tracking-widest font-medium mb-3">{{ 'payment.amountToGive' | translate }}</p>
+        <div class="flex items-baseline gap-2 min-w-0">
+          <span class="text-5xl font-black text-amber-400 tracking-tight leading-none">
+            {{ transfer.montantRecu | number:'1.0-0' }}
+          </span>
+          <span class="text-xl font-bold text-gray-400 shrink-0">{{ transfer.deviseReception }}</span>
+        </div>
+        <!-- "2 000 MAD envoyés · Taux : 107.7" -->
+        <p class="text-xs text-gray-500 mt-2">
+          ≈ {{ transfer.montantEnvoye | number:'1.0-0' }} MAD envoyés
+          · {{ 'payment.rate' | translate }} {{ transfer.tauxChange }}
+        </p>
+      </div>
+
+      <!-- Identité -->
+      <div class="bg-[#141b2d] rounded-xl p-5 min-w-0">
+        <p class="text-xs text-gray-500 uppercase tracking-widest font-medium mb-3">{{ 'payment.idCheck' | translate }}</p>
+
+        <!-- EN_ATTENTE : saisie de la pièce -->
+        <ng-container *ngIf="transfer.statut === 'EN_ATTENTE'">
+          <div class="flex gap-2 mb-3 w-full min-w-0">
+            <div class="relative shrink-0">
+              <select [(ngModel)]="idType"
+                      class="appearance-none bg-[#0b1120] text-white text-sm font-medium rounded-lg pl-3 pr-8 py-3 border border-white/10 outline-none cursor-pointer">
+                <option *ngFor="let type of typesPiece" [value]="type">{{ type }}</option>
+              </select>
+              <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                   width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#6b7280" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </div>
+            <input [(ngModel)]="idNumber" placeholder="AB 4521098"
+                   class="min-w-0 w-full bg-[#0b1120] text-white text-sm rounded-lg px-3 py-3
+                          border border-white/10 outline-none placeholder:text-gray-600 font-mono
+                          tracking-wider focus:border-white/25 transition-colors"/>
+          </div>
+          <p class="text-xs text-amber-400 flex items-start gap-1.5 leading-snug">
+            <svg class="shrink-0 mt-0.5" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            {{ 'payment.verifyIdWarning' | translate }}
+          </p>
+        </ng-container>
+
+        <!-- PAYE : badge pièce vérifiée -->
+        <ng-container *ngIf="transfer.statut === 'PAYE'">
+          <div class="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+            <p class="text-sm text-emerald-400 font-semibold">Pièce d'identité vérifiée lors du paiement</p>
+          </div>
+        </ng-container>
+
+        <!-- ANNULE -->
+        <ng-container *ngIf="transfer.statut === 'ANNULE'">
+          <div class="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f87171" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            <p class="text-sm text-red-400 font-semibold">Ce transfert a été annulé</p>
+          </div>
+        </ng-container>
+
+        <!-- EXPIRE -->
+        <ng-container *ngIf="transfer.statut === 'EXPIRE'">
+          <div class="flex items-center gap-3 bg-gray-500/10 border border-gray-500/20 rounded-xl px-4 py-3">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-sm text-gray-400 font-semibold">Ce transfert a expiré</p>
+          </div>
+        </ng-container>
+
+        <!-- BLOQUE -->
+        <ng-container *ngIf="transfer.statut === 'BLOQUE'">
+          <div class="flex items-center gap-3 bg-purple-500/10 border border-purple-500/20 rounded-xl px-4 py-3">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <p class="text-sm text-purple-400 font-semibold">Ce transfert est bloqué — contactez votre agence</p>
+          </div>
+        </ng-container>
+
+      </div>
+
+    </div>
+
+    <!-- Erreur paiement -->
+    <div *ngIf="errorMessage" class="flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
+      <svg class="shrink-0" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f87171" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+      </svg>
+      <p class="text-sm text-red-400 font-medium">{{ errorMessage | translate }}</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center justify-between pt-1">
+      <button (click)="cancel()"
+              class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors px-4 py-2.5 rounded-xl hover:bg-white/5">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+        {{ 'payment.cancel' | translate }}
+      </button>
+      <div class="flex gap-3">
+
+        <!-- "Voir le reçu" si PAYE -->
+        <button *ngIf="transfer.statut === 'PAYE'"
+                (click)="ouvrirRecu(transfer)"
+                class="flex items-center gap-2 text-sm text-white bg-[#252f42] hover:bg-[#2d3a52] transition-colors px-5 py-2.5 rounded-xl font-medium">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+          </svg>
+          Voir le reçu
+        </button>
+
+        <!-- "Imprimer le bordereau" + "Confirmer" uniquement si EN_ATTENTE -->
+        <ng-container *ngIf="transfer.statut === 'EN_ATTENTE'">
+          <button (click)="ouvrirRecu(transfer)"
+                  class="flex items-center gap-2 text-sm text-white bg-[#252f42] hover:bg-[#2d3a52] transition-colors px-5 py-2.5 rounded-xl font-medium">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            {{ 'payment.printSlip' | translate }}
+          </button>
+          <button (click)="confirmPayment()"
+                  [disabled]="!idNumber || isLoading"
+                  class="flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-xl transition-colors"
+                  [ngClass]="(idNumber && !isLoading)
+                    ? 'bg-emerald-500 hover:bg-emerald-400 text-white'
+                    : 'bg-emerald-800/40 text-emerald-700 cursor-not-allowed'">
+            <svg *ngIf="!isLoading" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+            <svg *ngIf="isLoading" class="animate-spin" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" d="M12 3a9 9 0 110 18A9 9 0 0112 3z" opacity=".3"/>
+              <path stroke-linecap="round" d="M12 3a9 9 0 019 9"/>
+            </svg>
+            {{ 'payment.confirmPayment' | translate }}
+          </button>
+        </ng-container>
+
+      </div>
+    </div>  </div>
+
+</div>
+<!--<div class="space-y-4 max-w-4xl mx-auto mt-4 mb-4">-->
+
+<!--  &lt;!&ndash; Search Card &ndash;&gt;-->
+<!--  <div class="bg-[#151c2c] rounded-2xl p-8">-->
+
+<!--    &lt;!&ndash; Header &ndash;&gt;-->
+<!--    <div class="flex flex-col items-center text-center mb-6">-->
+<!--      <div class="w-12 h-12 rounded-xl bg-[#1e2a3a] flex items-center justify-center mb-4">-->
+<!--        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2">-->
+<!--          <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/>-->
+<!--        </svg>-->
+<!--      </div>-->
+<!--      <h2 class="text-xl font-bold text-white">{{ 'payment.searchTitle' | translate }}</h2>-->
+<!--      <p class="text-sm text-gray-400 mt-1 max-w-sm">{{ 'payment.searchSubtitle' | translate }}</p>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Tabs &ndash;&gt;-->
+<!--    <div class="flex rounded-xl bg-[#0e1420] p-1 mb-4">-->
+<!--      <button-->
+<!--        (click)="setSearchMode('code')"-->
+<!--        [ngClass]="searchMode === 'code' ? 'bg-amber-400 text-gray-900' : 'text-gray-400 hover:text-white'"-->
+<!--        class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all">-->
+<!--        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">-->
+<!--          <rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" d="M7 11V7a5 5 0 0110 0v4"/>-->
+<!--        </svg>-->
+<!--        {{ 'payment.withdrawalCode' | translate }}-->
+<!--      </button>-->
+<!--      <button-->
+<!--        (click)="setSearchMode('phone')"-->
+<!--        [ngClass]="searchMode === 'phone' ? 'bg-amber-400 text-gray-900' : 'text-gray-400 hover:text-white'"-->
+<!--        class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all">-->
+<!--        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">-->
+<!--          <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>-->
+<!--        </svg>-->
+<!--        {{ 'payment.beneficiaryPhone' | translate }}-->
+<!--      </button>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Input Row &ndash;&gt;-->
+<!--    <div class="flex gap-2">-->
+<!--      <div class="flex-1 min-w-0 flex items-center gap-3 bg-white rounded-xl px-4 py-3 border-2"-->
+<!--           [ngClass]="isValidFormat ? 'border-emerald-400' : 'border-transparent'">-->
+<!--        <svg class="shrink-0" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2">-->
+<!--          <rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" d="M7 11V7a5 5 0 0110 0v4"/>-->
+<!--        </svg>-->
+<!--        <input-->
+<!--          [(ngModel)]="searchValue"-->
+<!--          (input)="onInputChange()"-->
+<!--          [placeholder]="searchMode === 'code' ? 'XXXX-XXXX' : '+212 6XX XXX XXX'"-->
+<!--          class="min-w-0 w-full bg-transparent text-gray-900 font-mono font-bold text-lg tracking-widest outline-none placeholder:text-gray-300 placeholder:font-normal placeholder:text-sm placeholder:tracking-normal"-->
+<!--        />-->
+<!--        <span *ngIf="isValidFormat" class="shrink-0 text-xs text-emerald-500 font-semibold whitespace-nowrap flex items-center gap-1">-->
+<!--          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">-->
+<!--            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>-->
+<!--          </svg>-->
+<!--          {{ 'payment.validFormat' | translate }}-->
+<!--        </span>-->
+<!--      </div>-->
+<!--      <button-->
+<!--        (click)="search()"-->
+<!--        [disabled]="!isValidFormat || isLoading"-->
+<!--        class="shrink-0 px-6 rounded-xl bg-amber-400 hover:bg-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-gray-900 font-bold text-sm transition-colors whitespace-nowrap">-->
+<!--        <span *ngIf="!isLoading">{{ 'payment.search' | translate }}</span>-->
+<!--        <span *ngIf="isLoading" class="flex items-center gap-2">-->
+<!--          <svg class="animate-spin" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">-->
+<!--            <path stroke-linecap="round" d="M12 3a9 9 0 110 18A9 9 0 0112 3z" opacity=".3"/>-->
+<!--            <path stroke-linecap="round" d="M12 3a9 9 0 019 9"/>-->
+<!--          </svg>-->
+<!--          ...-->
+<!--        </span>-->
+<!--      </button>-->
+<!--    </div>-->
+
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Result Card &ndash;&gt;-->
+<!--  <div *ngIf="transfer" class="bg-[#1a2235] rounded-2xl p-6 space-y-6">-->
+
+<!--    &lt;!&ndash; Header &ndash;&gt;-->
+<!--    <div class="flex items-center justify-between gap-4">-->
+<!--      <div class="flex items-center gap-3 min-w-0">-->
+<!--        <div class="w-9 h-9 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">-->
+<!--          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2.5">-->
+<!--            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>-->
+<!--          </svg>-->
+<!--        </div>-->
+<!--        <div class="min-w-0">-->
+<!--          <p class="text-xs text-gray-400 uppercase tracking-widest font-medium">{{ 'payment.transferFound' | translate }}</p>-->
+<!--          <p class="text-lg font-bold text-white font-mono tracking-wide truncate">{{ transfer.ref }}</p>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <span class="shrink-0 flex items-center gap-2 text-sm font-semibold text-amber-400 bg-[#2a2010] border border-amber-500/30 px-4 py-2 rounded-full">-->
+<!--        <span class="w-2 h-2 rounded-full bg-amber-400"></span>-->
+<!--        {{ 'payment.pending' | translate }}-->
+<!--      </span>-->
+<!--    </div>-->
+
+<!--    <div class="border-t border-white/[0.07]"></div>-->
+
+<!--    &lt;!&ndash; Sender / Beneficiary &ndash;&gt;-->
+<!--    <div class="grid grid-cols-2 gap-8">-->
+<!--      <div class="space-y-1 min-w-0">-->
+<!--        <p class="text-xs text-gray-500 uppercase tracking-widest font-medium">{{ 'payment.sender' | translate }}</p>-->
+<!--        <p class="text-white font-bold text-base">{{ transfer.senderName }}</p>-->
+<!--        <div class="flex items-center gap-2 mt-1 min-w-0">-->
+<!--          <span class="shrink-0 text-[10px] font-black text-white bg-blue-600 px-1.5 py-0.5 rounded">MA</span>-->
+<!--          <span class="text-sm text-gray-400 truncate">{{ transfer.senderLocation }}</span>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="space-y-1 min-w-0">-->
+<!--        <p class="text-xs text-gray-500 uppercase tracking-widest font-medium">{{ 'payment.beneficiary' | translate }}</p>-->
+<!--        <p class="text-white font-bold text-base">{{ transfer.benefName }}</p>-->
+<!--        <div class="flex items-center gap-2 mt-1 min-w-0">-->
+<!--          <span class="shrink-0 text-[10px] font-black text-white bg-green-600 px-1.5 py-0.5 rounded">SN</span>-->
+<!--          <span class="text-sm text-gray-400 truncate">{{ transfer.benefLocation }} · {{ transfer.benefPhone }}</span>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Dates &ndash;&gt;-->
+<!--    <div class="grid grid-cols-2 gap-8">-->
+<!--      <div class="space-y-1">-->
+<!--        <p class="text-xs text-gray-500 uppercase tracking-widest font-medium">{{ 'payment.sentOn' | translate }}</p>-->
+<!--        <p class="text-white font-bold text-base">{{ transfer.sentDate }}</p>-->
+<!--        <p class="text-sm text-gray-400">{{ transfer.agency }}</p>-->
+<!--      </div>-->
+<!--      <div class="space-y-1">-->
+<!--        <p class="text-xs text-gray-500 uppercase tracking-widest font-medium">{{ 'payment.expiresOn' | translate }}</p>-->
+<!--        <p class="text-white font-bold text-base">{{ transfer.expiryDate }}</p>-->
+<!--        <p class="text-sm text-gray-400">{{ 'payment.in30days' | translate }}</p>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Amount + ID &ndash;&gt;-->
+<!--    <div class="grid grid-cols-2 gap-4">-->
+
+<!--      &lt;!&ndash; Montant &ndash;&gt;-->
+<!--      <div class="bg-[#141b2d] rounded-xl p-5 min-w-0">-->
+<!--        <p class="text-xs text-gray-500 uppercase tracking-widest font-medium mb-3">{{ 'payment.amountToGive' | translate }}</p>-->
+<!--        <div class="flex items-baseline gap-2 min-w-0">-->
+<!--          <span class="text-5xl font-black text-amber-400 tracking-tight leading-none">-->
+<!--            {{ transfer.amount | number:'1.0-0' }}-->
+<!--          </span>-->
+<!--          <span class="text-xl font-bold text-gray-400 shrink-0">{{ transfer.currency }}</span>-->
+<!--        </div>-->
+<!--        <p class="text-xs text-gray-500 mt-2">≈ {{ transfer.madAmount }} · {{ 'payment.rate' | translate }} {{ transfer.rate }}</p>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Identité &ndash;&gt;-->
+<!--      <div class="bg-[#141b2d] rounded-xl p-5 min-w-0">-->
+<!--        <p class="text-xs text-gray-500 uppercase tracking-widest font-medium mb-3">{{ 'payment.idCheck' | translate }}</p>-->
+
+<!--        <div class="flex gap-2 mb-3 w-full min-w-0">-->
+
+<!--          &lt;!&ndash; Select &ndash;&gt;-->
+<!--          <div class="relative shrink-0">-->
+<!--            <select [(ngModel)]="idType"-->
+<!--                    class="appearance-none bg-[#0b1120] text-white text-sm font-medium rounded-lg pl-3 pr-8 py-3 border border-white/10 outline-none cursor-pointer">-->
+<!--              <option value="CIN">CIN</option>-->
+<!--              <option value="PASSEPORT">{{ 'payment.passport' | translate }}</option>-->
+<!--              <option value="SEJOUR">{{ 'payment.residencePermit' | translate }}</option>-->
+<!--            </select>-->
+<!--            <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"-->
+<!--                 width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#6b7280" stroke-width="2.5">-->
+<!--              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>-->
+<!--            </svg>-->
+<!--          </div>-->
+
+<!--          &lt;!&ndash; Input &ndash;&gt;-->
+<!--          <input [(ngModel)]="idNumber"-->
+<!--                 placeholder="AB 4521098"-->
+<!--                 class="min-w-0 w-full bg-[#0b1120] text-white text-sm rounded-lg px-3 py-3-->
+<!--                        border border-white/10 outline-none-->
+<!--                        placeholder:text-gray-600 font-mono tracking-wider-->
+<!--                        focus:border-white/25 transition-colors"/>-->
+<!--        </div>-->
+
+<!--        <p class="text-xs text-amber-400 flex items-start gap-1.5 leading-snug">-->
+<!--          <svg class="shrink-0 mt-0.5" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">-->
+<!--            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>-->
+<!--          </svg>-->
+<!--          {{ 'payment.verifyIdWarning' | translate }}-->
+<!--        </p>-->
+<!--      </div>-->
+
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Actions &ndash;&gt;-->
+<!--    <div class="flex items-center justify-between pt-1">-->
+<!--      <button (click)="cancel()"-->
+<!--              class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors px-4 py-2.5 rounded-xl hover:bg-white/5">-->
+<!--        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">-->
+<!--          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>-->
+<!--        </svg>-->
+<!--        {{ 'payment.cancel' | translate }}-->
+<!--      </button>-->
+<!--      <div class="flex gap-3">-->
+<!--        <button (click)="printSlip()"-->
+<!--                class="flex items-center gap-2 text-sm text-white bg-[#252f42] hover:bg-[#2d3a52] transition-colors px-5 py-2.5 rounded-xl font-medium">-->
+<!--          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">-->
+<!--            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>-->
+<!--          </svg>-->
+<!--          {{ 'payment.printSlip' | translate }}-->
+<!--        </button>-->
+<!--        <button (click)="confirmPayment()"-->
+<!--                [disabled]="!idNumber"-->
+<!--                class="flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-xl transition-colors"-->
+<!--                [ngClass]="idNumber-->
+<!--                  ? 'bg-emerald-500 hover:bg-emerald-400 text-white'-->
+<!--                  : 'bg-emerald-800/40 text-emerald-700 cursor-not-allowed'">-->
+<!--          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">-->
+<!--            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>-->
+<!--          </svg>-->
+<!--          {{ 'payment.confirmPayment' | translate }}-->
+<!--        </button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--  </div>-->
+
+<!--</div>-->

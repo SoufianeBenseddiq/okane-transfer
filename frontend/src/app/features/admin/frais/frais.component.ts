@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { DeviseService } from '../../../core/services/devise.service';
-import { TranslationService } from '../../../core/services/translation.service';
-import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { CorridorResponse } from '../../../core/models/devise/corridor-response.model';
 import { GrilleTarifaireRequest } from '../../../core/models/devise/grille-tarifaire-request.model';
 import { GrilleTarifaireResponse } from '../../../core/models/devise/grille-tarifaire-response.model';
@@ -43,7 +42,7 @@ export class FraisComponent implements OnInit {
   constructor(
     private deviseService: DeviseService,
     private fb: FormBuilder,
-    public ts: TranslationService,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -78,8 +77,8 @@ export class FraisComponent implements OnInit {
   }
 
   get pageSubtitle(): string {
-    if (this.loadingCorridors) return this.ts.t('frais.loading');
-    return `${this.grilles.length} ${this.ts.t('frais.subtitle')}`;
+    if (this.loadingCorridors) return this.translate.instant('frais.loading');
+    return `${this.grilles.length} ${this.translate.instant('frais.subtitle')}`;
   }
 
   selectCorridor(id: number): void {
@@ -166,7 +165,7 @@ export class FraisComponent implements OnInit {
           this.closeModal();
         },
         error: () => {
-          this.error = this.ts.t('frais.error.create');
+          this.error = this.translate.instant('frais.error.create');
           this.saving = false;
         },
       });
@@ -178,7 +177,7 @@ export class FraisComponent implements OnInit {
           this.closeModal();
         },
         error: () => {
-          this.error = this.ts.t('frais.error.update');
+          this.error = this.translate.instant('frais.error.update');
           this.saving = false;
         },
       });
@@ -187,7 +186,7 @@ export class FraisComponent implements OnInit {
 
   deleteGrille(g: GrilleTarifaireResponse): void {
     if (this.deleting !== null) return;
-    if (!confirm(this.ts.t('frais.deleteConfirm'))) return;
+    if (!confirm(this.translate.instant('frais.deleteConfirm'))) return;
     this.deleting = g.id;
     this.deviseService.deleteGrille(g.id).subscribe({
       next: () => {

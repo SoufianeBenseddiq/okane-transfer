@@ -31,6 +31,22 @@ export const adminRoutes: Routes = [
         path: 'utilisateurs',
         loadComponent: () => import('./utilisateurs/utilisateurs.component').then(m => m.UtilisateursComponent),
       },
+      {
+        path: 'conformite',
+        loadComponent: () => import('./conformite/conformite.component').then(m => m.ConformiteComponent),
+      },
+      {
+        path: 'audit',
+        loadComponent: () => import('./audit/audit.component').then(m => m.AuditComponent),
+      },
+      {
+        path: 'rapports',
+        loadComponent: () => import('./rapports/rapports.component').then(m => m.RapportsComponent),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./notifications/notifications.component').then(m => m.NotificationsComponent),
+      },
     ],
   },
 ];

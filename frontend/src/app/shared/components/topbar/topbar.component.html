@@ -26,21 +26,29 @@
   <ng-content />
 
   <!-- Bell -->
-  <button class="relative flex items-center justify-center rounded-[10px] cursor-pointer outline-none flex-shrink-0"
+  <button (click)="openNotifications()"
+          class="relative flex items-center justify-center rounded-[10px] cursor-pointer outline-none flex-shrink-0"
           style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:none;color:#F3F4F8;">
     <app-icon name="bell" [size]="16" />
-    <span class="absolute rounded-full"
-          style="top:8px;right:8px;width:7px;height:7px;background:#F5A623;border:2px solid #1A1F36;"></span>
+    @if (unreadCount > 0) {
+      <span class="absolute flex items-center justify-center rounded-full text-[9px] font-bold"
+            style="top:5px;right:5px;min-width:14px;height:14px;padding:0 3px;background:#F5A623;color:#1A1F36;border:2px solid #1A1F36;line-height:1;">
+        {{ unreadCount > 99 ? '99+' : unreadCount }}
+      </span>
+    } @else {
+      <span class="absolute rounded-full"
+            style="top:8px;right:8px;width:7px;height:7px;background:rgba(255,255,255,0.2);border:2px solid #1A1F36;"></span>
+    }
   </button>
 
   <!-- Language toggle (hidden on mobile) -->
   <div class="hidden sm:flex rounded-[10px] p-0.5" style="background:rgba(255,255,255,0.05);">
-    @for (l of langs; track l) {
-      <button (click)="setLang(l)"
+    @for (l of lang.langs; track l) {
+      <button (click)="lang.use(l)"
               class="px-[10px] py-[5px] rounded-[7px] text-[11.5px] font-semibold tracking-[0.04em] cursor-pointer outline-none border-none transition-colors"
-              [style.background]="lang === l ? '#F5A623' : 'transparent'"
-              [style.color]="lang === l ? '#1A1F36' : 'rgba(255,255,255,0.55)'">
-        {{ l }}
+              [style.background]="lang.current === l ? '#F5A623' : 'transparent'"
+              [style.color]="lang.current === l ? '#1A1F36' : 'rgba(255,255,255,0.55)'">
+        {{ l.toUpperCase() }}
       </button>
     }
   </div>

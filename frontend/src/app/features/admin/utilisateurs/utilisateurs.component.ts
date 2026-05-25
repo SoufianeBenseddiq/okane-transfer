@@ -7,8 +7,7 @@ import { UserResponse, CreateUserRequest } from '../../../core/models/user';
 import { RoleUtilisateur } from '../../../core/models/enums';
 import { TopbarComponent } from '../../../shared/components/topbar/topbar.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
-import { TranslationService } from '../../../core/services/translation.service';
-import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 
 type RoleFilter = 'all' | RoleUtilisateur;
 type ModalMode  = 'create' | 'edit';
@@ -66,7 +65,7 @@ export class UtilisateursComponent implements OnInit {
   constructor(
     private userService: UserService,
     private fb: FormBuilder,
-    public ts: TranslationService,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void { this.load(); }
@@ -80,7 +79,7 @@ export class UtilisateursComponent implements OnInit {
   }
 
   get pageSubtitle(): string {
-    return `${this.users.length} ${this.ts.t('users.subtitle')}`;
+    return `${this.users.length} ${this.translate.instant('users.subtitle')}`;
   }
 
   get filtered(): UserResponse[] {
@@ -141,7 +140,7 @@ export class UtilisateursComponent implements OnInit {
           this.showModal = false;
         },
         error: () => {
-          this.error  = this.ts.t('users.error.create');
+          this.error  = this.translate.instant('users.error.create');
           this.saving = false;
         },
       });
@@ -155,7 +154,7 @@ export class UtilisateursComponent implements OnInit {
           this.showModal = false;
         },
         error: () => {
-          this.error  = this.ts.t('users.error.update');
+          this.error  = this.translate.instant('users.error.update');
           this.saving = false;
         },
       });
@@ -163,7 +162,7 @@ export class UtilisateursComponent implements OnInit {
   }
 
   deleteUser(u: UserResponse): void {
-    if (!confirm(`${this.ts.t('users.deleteConfirm')} ${u.prenom} ${u.nom} ?`)) return;
+    if (!confirm(`${this.translate.instant('users.deleteConfirm')} ${u.prenom} ${u.nom} ?`)) return;
     this.deleting = u.id;
     this.userService.deleteById(u.id).subscribe({
       next: () => {

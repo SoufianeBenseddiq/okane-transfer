@@ -7,8 +7,7 @@ import { DeviseResponse } from '../../../core/models/devise/devise-response.mode
 import { CorridorResponse } from '../../../core/models/devise/corridor-response.model';
 import { TopbarComponent } from '../../../shared/components/topbar/topbar.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
-import { TranslationService } from '../../../core/services/translation.service';
-import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 
 // ⚠️ TODO (équipe Devise): ajouter DELETE /api/admin/devises/{id}
 // ⚠️ TODO (équipe Corridor): ajouter PUT /api/admin/corridors/{id} et DELETE /api/admin/corridors/{id}
@@ -65,7 +64,7 @@ export class DevisesComponent implements OnInit {
   constructor(
     private deviseService: DeviseService,
     private fb: FormBuilder,
-    public ts: TranslationService,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -92,8 +91,8 @@ export class DevisesComponent implements OnInit {
   get corridorCount(): number { return this.corridors.filter(c => c.actif).length; }
 
   get pageSubtitle(): string {
-    if (this.loading) return this.ts.t('devises.subtitle.loading');
-    return `${this.activeCount} ${this.ts.t('devises.subtitle.active')} · ${this.corridorCount} ${this.ts.t('devises.subtitle.corridors')}`;
+    if (this.loading) return this.translate.instant('devises.subtitle.loading');
+    return `${this.activeCount} ${this.translate.instant('devises.subtitle.active')} · ${this.corridorCount} ${this.translate.instant('devises.subtitle.corridors')}`;
   }
 
   toggleDevise(d: DeviseResponse): void {
@@ -141,7 +140,7 @@ export class DevisesComponent implements OnInit {
     if (this.panelMode === 'devise-create') {
       this.deviseService.createDevise(raw as any).subscribe({
         next: d => { this.devises.unshift(d); this.saving = false; this.closePanel(); },
-        error: () => { this.error = this.ts.t('devises.error.create'); this.saving = false; },
+        error: () => { this.error = this.translate.instant('devises.error.create'); this.saving = false; },
       });
     } else {
       this.deviseService.updateDevise(this.editingDevise!.id, raw as any).subscribe({
@@ -150,7 +149,7 @@ export class DevisesComponent implements OnInit {
           if (idx !== -1) this.devises[idx] = updated;
           this.saving = false; this.closePanel();
         },
-        error: () => { this.error = this.ts.t('devises.error.update'); this.saving = false; },
+        error: () => { this.error = this.translate.instant('devises.error.update'); this.saving = false; },
       });
     }
   }
@@ -171,7 +170,7 @@ export class DevisesComponent implements OnInit {
 
     this.deviseService.createCorridor(this.corridorForm.value as any).subscribe({
       next: c => { this.corridors.push(c); this.saving = false; this.closePanel(); },
-      error: () => { this.error = this.ts.t('devises.error.createCorridor'); this.saving = false; },
+      error: () => { this.error = this.translate.instant('devises.error.createCorridor'); this.saving = false; },
     });
   }
 
