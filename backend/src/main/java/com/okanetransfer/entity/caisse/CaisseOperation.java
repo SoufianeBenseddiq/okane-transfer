@@ -14,8 +14,8 @@ public class CaisseOperation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "agent_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "agent_id")
     private Agent agent;
 
     @Enumerated(EnumType.STRING)
