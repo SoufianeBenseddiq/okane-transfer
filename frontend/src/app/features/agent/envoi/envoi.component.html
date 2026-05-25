@@ -1,3 +1,5 @@
+<!-- src/app/features/agent/envoi/envoi.component.html -->
+
 <div class="min-h-screen bg-[#0B1120] text-white flex flex-col">
 
   <!-- ═══ STEPPER ═══════════════════════════════════════════ -->
@@ -11,11 +13,11 @@
                  [class.text-black]="isEtapeActive(etape.num)"
                  [class.bg-green-500]="isEtapeComplete(etape.num)"
                  [class.text-white]="isEtapeComplete(etape.num) || (!isEtapeActive(etape.num) && !isEtapeComplete(etape.num))"
-                 [class.bg-[#1F2937]]="!isEtapeActive(etape.num) && !isEtapeComplete(etape.num)">
+                 [class.bg-gray-800]="!isEtapeActive(etape.num) && !isEtapeComplete(etape.num)">
               @if (isEtapeComplete(etape.num)) { ✓ } @else { {{ etape.num }} }
             </div>
             <div class="flex flex-col leading-tight">
-              <span class="text-[10px] text-gray-500 uppercase tracking-widest">{{ etape.num }}</span>
+              <span class="text-[10px] text-gray-500 uppercase tracking-widest">Étape {{ etape.num }}</span>
               <span class="text-sm font-semibold"
                     [class.text-amber-400]="isEtapeActive(etape.num)"
                     [class.text-white]="isEtapeComplete(etape.num)"
@@ -27,7 +29,7 @@
           @if (!last) {
             <div class="flex-1 h-px mx-4 transition-all duration-500"
                  [class.bg-green-500]="isEtapeComplete(etape.num)"
-                 [class.bg-[#1F2937]]="!isEtapeComplete(etape.num)">
+                 [class.bg-gray-800]="!isEtapeComplete(etape.num)">
             </div>
           }
         </div>
@@ -45,57 +47,57 @@
            ÉTAPE 1 — EXPÉDITEUR
       ══════════════════════════════════════════════════ -->
       @if (etapeActive() === 1) {
+
         <div>
           <p class="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">{{ 'envoi.step1Badge' | translate }}</p>
           <h1 class="text-2xl font-bold">{{ 'envoi.step1Title' | translate }}</h1>
           <p class="text-sm text-gray-400 mt-1">{{ 'envoi.step1Subtitle' | translate }}</p>
         </div>
 
-        <!-- Recherche -->
+        <!-- ── Bloc recherche ── -->
         <div class="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
           <div class="flex items-center gap-2 mb-4">
             <span class="text-amber-400">🔍</span>
             <span class="text-sm font-semibold">{{ 'envoi.searchTitle' | translate }}</span>
           </div>
+
           <div class="flex gap-3">
             <div class="flex-1 relative">
               <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">🔍</span>
-              <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-                     (keydown)="onSearchKeyDown($event)"
-                     [placeholder]="'envoi.searchPlaceholder' | translate"
-                     class="w-full bg-[#0B1120] border border-[#1F2937] rounded-lg pl-9 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all" />
+              <input
+                type="text"
+                [ngModel]="searchQuery()"
+                (ngModelChange)="searchQuery.set($event)"
+                (keydown)="onSearchKeyDown($event)"
+                [placeholder]="'envoi.searchPlaceholder' | translate"
+                class="w-full bg-[#0B1120] border border-[#1F2937] rounded-lg pl-9 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all" />
             </div>
-            <button (click)="onRechercher()"
-                    class="bg-[#1F2937] hover:bg-[#374151] text-white text-sm font-semibold px-5 py-3 rounded-lg transition-colors border border-[#374151]">
-              {{ 'envoi.searchBtn' | translate }}
+            <button
+              (click)="onRechercher()"
+              [disabled]="chargementRecherche()"
+              class="bg-[#1F2937] hover:bg-[#374151] text-white text-sm font-semibold px-5 py-3 rounded-lg transition-colors border border-[#374151] disabled:opacity-50">
+              {{ chargementRecherche() ? '...' : ('envoi.searchBtn' | translate) }}
             </button>
           </div>
 
+          <!-- Résultats -->
           @if (rechercheEffectuee()) {
             @if (clientsTrouves().length > 0) {
               <div class="mt-4 flex flex-col gap-2">
                 @for (client of clientsTrouves(); track client.id) {
-                  <div class="flex items-center justify-between bg-[#0f1a2e] border border-[#1F2937] rounded-xl px-4 py-3 hover:border-amber-500/40 transition-all">
+                  <div class="flex items-center justify-between bg-[#0B1120] border border-[#1F2937] rounded-xl px-4 py-3 hover:border-amber-500/40 transition-all">
                     <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-teal-600 flex items-center justify-center text-sm font-bold">
-                        {{ client.prenom[0] }}{{ client.nom[0] }}
+                      <div class="w-10 h-10 rounded-full bg-teal-600 flex items-center justify-center text-sm font-bold uppercase">
+                       {{ client.prenom.charAt(0) }}{{ client.nom.charAt(0) }}
                       </div>
                       <div>
-                        <div class="flex items-center gap-2">
-                          <span class="text-sm font-semibold">{{ client.prenom }} {{ client.nom }}</span>
-                          @if (client.kycOk) {
-                            <span class="text-[10px] bg-teal-500/20 text-teal-400 border border-teal-500/30 px-2 py-0.5 rounded-full">
-                              {{ 'envoi.kycOk' | translate }}
-                            </span>
-                          }
-                        </div>
-                        <div class="text-xs text-gray-400 mt-0.5">
-                          CIN · {{ client.cin }} &nbsp;·&nbsp; {{ client.telephone }} &nbsp;·&nbsp; {{ client.nbTransferts }} transferts · client depuis {{ client.clientDepuis }}
-                        </div>
+                        <p class="text-sm font-semibold">{{ client.prenom }} {{ client.nom }}</p>
+                        <p class="text-xs text-gray-400 mt-0.5">{{ client.telephone }} &nbsp;·&nbsp; {{ client.email }}</p>
                       </div>
                     </div>
-                    <button (click)="onSelectionnerClient(client)"
-                            class="text-sm font-semibold text-amber-400 border border-amber-500/40 hover:bg-amber-500/10 px-4 py-2 rounded-lg transition-all">
+                    <button
+                      (click)="onSelectionnerClient(client)"
+                      class="text-sm font-semibold text-amber-400 border border-amber-500/40 hover:bg-amber-500/10 px-4 py-2 rounded-lg transition-all">
                       {{ 'envoi.select' | translate }} ›
                     </button>
                   </div>
@@ -105,16 +107,51 @@
               <p class="mt-4 text-sm text-gray-500 text-center py-4">{{ 'envoi.noClient' | translate }}</p>
             }
           }
+
+          <!-- Client sélectionné -->
+          @if (clientSelectionne(); as client) {
+            <div class="mt-4 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-black text-sm font-bold uppercase">
+                {{ client.prenom.charAt(0) }}
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-bold text-white">{{ client.prenom }} {{ client.nom }}</p>
+                <p class="text-xs text-gray-400">{{ client.telephone }} · {{ client.email }}</p>
+              </div>
+              <span class="text-xs bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-1 rounded-full shrink-0">
+                ✓ Sélectionné
+              </span>
+            </div>
+
+            <!-- Pièce d'identité -->
+            @if (piecesClient().length > 0) {
+              <div class="mt-3 flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-gray-300">
+                  Pièce d'identité <span class="text-amber-400">(optionnel)</span>
+                </label>
+                <select
+                  [(ngModel)]="pieceSelectionneeIdValue"
+                  class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all">
+                  <option [value]="null">-- Aucune --</option>
+                  @for (piece of piecesClient(); track piece.id) {
+                    <option [value]="piece.id">{{ piece.type }} · {{ piece.numero }}</option>
+                  }
+                </select>
+              </div>
+            } @else {
+              <p class="mt-3 text-xs text-gray-500 italic">Aucune pièce d'identité enregistrée pour ce client.</p>
+            }
+          }
         </div>
 
         <!-- Séparateur -->
         <div class="flex items-center gap-4">
           <div class="flex-1 h-px bg-[#1F2937]"></div>
-          <span class="text-xs text-gray-500 font-semibold tracking-widest">{{ 'envoi.orNewClient' | translate }}</span>
+          <span class="text-xs text-gray-500 font-semibold tracking-widest uppercase">{{ 'envoi.orNewClient' | translate }}</span>
           <div class="flex-1 h-px bg-[#1F2937]"></div>
         </div>
 
-        <!-- Formulaire nouveau client -->
+        <!-- ── Formulaire nouveau client ── -->
         <div class="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
           <div class="grid grid-cols-2 gap-4">
             <div class="flex flex-col gap-1.5">
@@ -131,7 +168,9 @@
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.typePiece' | translate }} <span class="text-red-400">*</span></label>
               <select [(ngModel)]="nouveauClient.typePiece"
                       class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all appearance-none">
-                @for (type of typesPiece; track type) { <option [value]="type">{{ type }}</option> }
+                @for (type of typesPiece; track type) {
+                  <option [value]="type">{{ type }}</option>
+                }
               </select>
             </div>
             <div class="flex flex-col gap-1.5">
@@ -151,15 +190,18 @@
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.pays' | translate }} <span class="text-red-400">*</span></label>
               <select [(ngModel)]="nouveauClient.pays"
                       class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all appearance-none">
-                @for (pays of paysList; track pays) { <option [value]="pays">{{ pays }}</option> }
+                @for (pays of paysList; track pays) {
+                  <option [value]="pays">{{ pays }}</option>
+                }
               </select>
             </div>
           </div>
         </div>
 
         <div class="flex justify-end">
-          <button (click)="etapeSuivante()"
-                  class="bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm px-8 py-3 rounded-lg transition-all flex items-center gap-2 hover:-translate-y-0.5">
+          <button
+            (click)="etapeSuivante()"
+            class="bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm px-8 py-3 rounded-lg transition-all flex items-center gap-2 hover:-translate-y-0.5">
             {{ 'envoi.next' | translate }} →
           </button>
         </div>
@@ -169,6 +211,7 @@
            ÉTAPE 2 — BÉNÉFICIAIRE
       ══════════════════════════════════════════════════ -->
       @if (etapeActive() === 2) {
+
         <div>
           <p class="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">{{ 'envoi.step2Badge' | translate }}</p>
           <h1 class="text-2xl font-bold">{{ 'envoi.step2Title' | translate }}</h1>
@@ -214,7 +257,9 @@
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.paysReception' | translate }} <span class="text-red-400">*</span></label>
               <select [(ngModel)]="beneficiaire.paysReception"
                       class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all appearance-none">
-                @for (pays of paysReceptionList; track pays) { <option [value]="pays">{{ pays }}</option> }
+                @for (pays of paysReceptionList; track pays) {
+                  <option [value]="pays">{{ pays }}</option>
+                }
               </select>
             </div>
             <div class="flex flex-col gap-1.5">
@@ -228,7 +273,9 @@
               <select [(ngModel)]="beneficiaire.relation"
                       class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all appearance-none">
                 <option value="">-- Choisir --</option>
-                @for (rel of relationsList; track rel) { <option [value]="rel">{{ rel }}</option> }
+                @for (rel of relationsList; track rel) {
+                  <option [value]="rel">{{ rel }}</option>
+                }
               </select>
               <span class="text-[11px] text-gray-500">{{ 'envoi.relationHint' | translate }}</span>
             </div>
@@ -251,6 +298,7 @@
            ÉTAPE 3 — MONTANT & DEVISE
       ══════════════════════════════════════════════════ -->
       @if (etapeActive() === 3) {
+
         <div>
           <p class="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">{{ 'envoi.step3Badge' | translate }}</p>
           <h1 class="text-2xl font-bold">{{ 'envoi.step3Title' | translate }}</h1>
@@ -258,48 +306,82 @@
         </div>
 
         <div class="bg-[#111827] border border-[#1F2937] rounded-xl p-6 flex flex-col gap-5">
+
+          <!-- Montant -->
           <div class="flex flex-col gap-2">
-            <label class="text-xs font-semibold text-gray-300">{{ 'envoi.montantLabel' | translate }} <span class="text-red-400">*</span></label>
+            <label class="text-xs font-semibold text-gray-300">
+              {{ 'envoi.montantLabel' | translate }} <span class="text-red-400">*</span>
+            </label>
             <div class="relative">
-              <input type="number" [ngModel]="montantEnvoye()" (ngModelChange)="montantEnvoye.set($event)"
-                     class="w-full bg-[#0B1120] border-2 border-amber-500 rounded-xl px-5 py-5 text-3xl font-bold text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all" />
+              <input
+                type="number"
+                [ngModel]="montantEnvoye()"
+                (ngModelChange)="onMontantChange($event)"
+                min="1"
+                class="w-full bg-[#0B1120] border-2 border-amber-500 rounded-xl px-5 py-5 text-3xl font-bold text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all" />
               <span class="absolute right-5 top-1/2 -translate-y-1/2 text-amber-400 font-bold text-lg">MAD</span>
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
+            <!-- Corridor -->
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.corridorLabel' | translate }}</label>
-              <select [ngModel]="corridorSelectionne()" (ngModelChange)="corridorSelectionne.set($event)"
-                      class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all appearance-none">
-                @for (c of corridors; track c) { <option [value]="c">{{ c }}</option> }
-              </select>
+              @if (corridors().length === 0) {
+                <p class="text-xs text-red-400 py-3">Aucun corridor actif disponible.</p>
+              } @else {
+                <select
+                  [ngModel]="corridorSelectionne()?.id"
+                  (ngModelChange)="onCorridorChange($event)"
+                  class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all appearance-none">
+                  @for (c of corridors(); track c.id) {
+                    <option [value]="c.id">{{ c.deviseSource }} → {{ c.deviseDestination }}</option>
+                  }
+                </select>
+              }
             </div>
+            <!-- Mode de réception -->
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.modeLabel' | translate }}</label>
-              <select [ngModel]="modeReception()" (ngModelChange)="modeReception.set($event)"
-                      class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all appearance-none">
-                @for (m of modesReception; track m) { <option [value]="m">{{ m }}</option> }
+              <select
+                [ngModel]="modeReception()"
+                (ngModelChange)="modeReception.set($event)"
+                class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all appearance-none">
+                @for (m of modesReception; track m) {
+                  <option [value]="m">{{ m }}</option>
+                }
               </select>
             </div>
           </div>
 
-          @if (modeReception() !== 'Mobile Money') {
-            <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg px-4 py-3 text-xs text-blue-300 flex items-center gap-2">
-              <span>💡</span>
-              <span>{{ 'envoi.mobileMoneyTip' | translate }}</span>
+          @if (chargementFrais()) {
+            <div class="flex items-center gap-2 text-xs text-gray-400 py-1">
+              <span class="animate-spin">⏳</span> Calcul des frais en cours…
             </div>
           }
         </div>
+
+        <!-- Message d'erreur -->
+        @if (erreurEnvoi()) {
+          <div class="bg-red-900/30 border border-red-500/40 rounded-xl px-4 py-3 text-sm text-red-300 flex items-center gap-2">
+            <span>⚠️</span> {{ erreurEnvoi() }}
+          </div>
+        }
 
         <div class="flex justify-between">
           <button (click)="etapePrecedente()"
                   class="bg-[#1F2937] hover:bg-[#374151] text-white text-sm font-semibold px-6 py-3 rounded-lg transition-colors border border-[#374151]">
             ← {{ 'envoi.back' | translate }}
           </button>
-          <button (click)="etapeSuivante()"
-                  class="bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm px-8 py-3 rounded-lg transition-all flex items-center gap-2 hover:-translate-y-0.5">
-            {{ 'envoi.confirm' | translate }} →
+          <button
+            (click)="etapeSuivante()"
+            [disabled]="chargementEnvoi() || chargementFrais()"
+            class="bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm px-8 py-3 rounded-lg transition-all flex items-center gap-2 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed">
+            @if (chargementEnvoi()) {
+              <span class="animate-spin">⏳</span> Envoi en cours…
+            } @else {
+              {{ 'envoi.confirm' | translate }} →
+            }
           </button>
         </div>
       }
@@ -308,6 +390,7 @@
            ÉTAPE 4 — CONFIRMATION
       ══════════════════════════════════════════════════ -->
       @if (etapeActive() === 4) {
+
         <div>
           <p class="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">{{ 'envoi.step4Badge' | translate }}</p>
           <h1 class="text-2xl font-bold">{{ 'envoi.step4Title' | translate }}</h1>
@@ -316,13 +399,18 @@
 
         <!-- Code de retrait -->
         <div class="bg-[#111827] border border-[#1F2937] rounded-xl p-6">
-          <div class="flex items-start justify-between">
+          <div class="flex items-start justify-between gap-4">
             <div>
-              <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">{{ 'envoi.codeRetrait' | translate }}</p>
-              <p class="text-4xl font-extrabold text-amber-400 tracking-widest">{{ codeRetrait() }}</p>
-              <p class="text-xs text-gray-400 mt-2">{{ 'envoi.reference' | translate }} · <span class="font-mono text-white">{{ referenceTransfert() }}</span></p>
+              <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">
+                {{ 'envoi.codeRetrait' | translate }}
+              </p>
+              <p class="text-4xl font-extrabold text-amber-400 tracking-widest font-mono">{{ codeRetrait() }}</p>
+              <p class="text-xs text-gray-400 mt-2">
+                {{ 'envoi.reference' | translate }} ·
+                <span class="font-mono text-white">{{ referenceTransfert() }}</span>
+              </p>
             </div>
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-2 shrink-0">
               <button (click)="copierCode()"
                       class="flex items-center gap-2 text-xs font-semibold text-white bg-[#1F2937] hover:bg-[#374151] border border-[#374151] px-4 py-2 rounded-lg transition-colors">
                 📋 {{ codeCopie() ? ('envoi.copied' | translate) : ('envoi.copy' | translate) }}
@@ -341,31 +429,38 @@
 
           <div class="h-px bg-[#1F2937] my-5"></div>
 
-          <!-- Détails transfert -->
+          <!-- Détails -->
           <div class="grid grid-cols-2 gap-6">
             <div>
               <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ 'envoi.expediteur' | translate }}</p>
-              <p class="text-sm font-bold text-white">{{ expediteurNom() }}</p>
-              <p class="text-xs text-gray-400">🇲🇦 Casablanca · CIN {{ clientSelectionne()?.cin }}</p>
+              <p class="text-sm font-bold text-white">{{ transfertCree()?.nomExpediteur ?? expediteurNom() ?? '—' }}</p>
+              <p class="text-xs text-gray-400">🇲🇦 {{ transfertCree()?.villeExpediteur ?? 'Maroc' }}</p>
             </div>
             <div>
               <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ 'envoi.beneficiaire' | translate }}</p>
-              <p class="text-sm font-bold text-white">{{ beneficiaireNom() }}</p>
-              <p class="text-xs text-gray-400">🇸🇳 {{ beneficiaire.ville || 'Dakar' }} · {{ beneficiaire.telephone }}</p>
+              <p class="text-sm font-bold text-white">{{ transfertCree()?.nomBeneficiaire ?? beneficiaireNom() ?? '—' }}</p>
+              <p class="text-xs text-gray-400">
+                {{ beneficiaire.ville || 'Destination' }} · {{ transfertCree()?.telephoneBeneficiaire ?? beneficiaire.telephone }}
+              </p>
             </div>
             <div>
               <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ 'envoi.montantEnvoye' | translate }}</p>
-              <p class="text-sm font-bold text-white">{{ formatMontant(calcul().montantEnvoye) }} MAD</p>
-              <p class="text-xs text-gray-400">{{ 'envoi.tauxJour' | translate }} 1 MAD = {{ calcul().taux }} XOF</p>
+              <p class="text-sm font-bold text-white">
+                {{ formatMontant(transfertCree()?.montantEnvoye ?? calcul().montantEnvoye) }} MAD
+              </p>
             </div>
             <div>
               <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ 'envoi.fraisFactures' | translate }}</p>
-              <p class="text-sm font-bold text-white">{{ calcul().frais }} MAD</p>
-              <p class="text-xs text-gray-400">{{ 'envoi.tranche' | translate }}</p>
+              <p class="text-sm font-bold text-white">
+                {{ formatMontant(transfertCree()?.frais ?? calcul().frais) }} MAD
+              </p>
             </div>
             <div>
               <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ 'envoi.montantRecu' | translate }}</p>
-              <p class="text-xl font-extrabold text-amber-400">{{ formatMontant(calcul().montantRecu) }} XOF</p>
+              <p class="text-xl font-extrabold text-amber-400">
+                {{ formatMontant(transfertCree()?.montantRecu ?? calcul().montantRecu) }}
+                <span class="text-sm font-medium ml-1">{{ transfertCree()?.deviseReception ?? calcul().deviseDestination }}</span>
+              </p>
               <p class="text-xs text-gray-400">{{ 'envoi.disponible' | translate }}</p>
             </div>
             <div>
@@ -376,12 +471,14 @@
           </div>
         </div>
 
-        <!-- Confirmation SMS -->
+        <!-- Succès -->
         <div class="bg-green-900/20 border border-green-500/30 rounded-xl px-5 py-4 flex items-center gap-3">
-          <div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-xs font-bold text-black">✓</div>
+          <div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-xs font-bold text-black shrink-0">✓</div>
           <div>
-            <p class="text-sm font-semibold text-white">{{ 'envoi.smsConfirm' | translate }} {{ clientSelectionne()?.telephone }}</p>
-            <p class="text-xs text-gray-400">{{ 'envoi.emailConfirm' | translate }} {{ clientSelectionne()?.email }}</p>
+            <p class="text-sm font-semibold text-white">Transfert créé avec succès</p>
+            <p class="text-xs text-gray-400">
+              Statut : <span class="text-white font-semibold">{{ transfertCree()?.statut ?? 'EN_ATTENTE' }}</span>
+            </p>
           </div>
         </div>
 
@@ -395,39 +492,63 @@
 
     </div>
 
-    <!-- ── Colonne droite (calcul + récap) ───────────────── -->
+    <!-- ── Colonne droite : calcul + récap ───────────────── -->
     <div class="w-72 flex flex-col gap-4 shrink-0">
 
       <!-- Calcul en temps réel -->
       <div class="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
         <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">{{ 'envoi.calcTitle' | translate }}</p>
         <div class="flex flex-col gap-3">
+
           <div class="flex justify-between items-center">
             <span class="text-xs text-gray-400">{{ 'envoi.vouEnvoyez' | translate }}</span>
-            <span class="text-base font-bold">{{ formatMontant(calcul().montantEnvoye) }}<span class="text-xs text-gray-400 ml-1">{{ calcul().deviseSource }}</span></span>
+            <span class="text-base font-bold">
+              {{ formatMontant(calcul().montantEnvoye) }}
+              <span class="text-xs text-gray-400 ml-1">{{ calcul().deviseSource }}</span>
+            </span>
           </div>
-          <div class="flex justify-between items-center">
-            <div class="flex items-center gap-1.5">
-              <span class="text-xs text-gray-400">{{ 'envoi.tauxJour' | translate }}</span>
-              <span class="w-1.5 h-1.5 rounded-full bg-green-400 inline-block"></span>
-            </div>
-            <span class="text-xs font-medium">1 {{ calcul().deviseSource }} = {{ calcul().taux }} {{ calcul().deviseDestination }}</span>
-          </div>
+
           <div class="h-px bg-[#1F2937]"></div>
+
           <div class="flex justify-between items-center">
             <span class="text-xs text-gray-400">{{ 'envoi.fraisOkane' | translate }}</span>
-            <span class="text-sm font-semibold text-red-400">- {{ calcul().frais.toFixed(2) }}<span class="text-xs text-gray-400 ml-1">{{ calcul().deviseSource }}</span></span>
+            <span class="text-sm font-semibold text-red-400">
+              @if (chargementFrais()) {
+                <span class="text-gray-500">…</span>
+              } @else {
+                - {{ formatMontant(calcul().frais) }}
+                <span class="text-xs text-gray-400 ml-1">{{ calcul().deviseSource }}</span>
+              }
+            </span>
           </div>
+
           <div class="flex justify-between items-center">
             <span class="text-xs text-gray-400">{{ 'envoi.commissionAgence' | translate }}</span>
-            <span class="text-sm font-semibold">{{ calcul().commissionAgence.toFixed(2) }}<span class="text-xs text-gray-400 ml-1">{{ calcul().deviseSource }}</span></span>
+            <span class="text-sm font-semibold">
+              @if (chargementFrais()) {
+                <span class="text-gray-500">…</span>
+              } @else {
+                {{ formatMontant(calcul().commissionAgence) }}
+                <span class="text-xs text-gray-400 ml-1">{{ calcul().deviseSource }}</span>
+              }
+            </span>
           </div>
+
           <div class="h-px bg-[#1F2937]"></div>
+
           <div class="flex justify-between items-center">
             <span class="text-xs text-gray-400">{{ 'envoi.beneficiaireRecoit' | translate }}</span>
-            <span class="text-xl font-extrabold text-amber-400">{{ formatMontant(calcul().montantRecu) }}<span class="text-xs font-medium ml-1">{{ calcul().deviseDestination }}</span></span>
+            <span class="text-xl font-extrabold text-amber-400">
+              @if (chargementFrais()) {
+                <span class="text-gray-500 text-sm">Calcul…</span>
+              } @else {
+                {{ formatMontant(calcul().montantRecu) }}
+                <span class="text-xs font-medium ml-1">{{ calcul().deviseDestination }}</span>
+              }
+            </span>
           </div>
         </div>
+
         <div class="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 text-xs text-amber-400">
           <span class="font-bold">≈ {{ calcul().delaiMin }} min</span> · {{ 'envoi.delai' | translate }}
         </div>
@@ -439,17 +560,23 @@
         <div class="flex flex-col gap-3">
           <div class="flex justify-between items-center">
             <span class="text-xs text-gray-400">{{ 'envoi.expediteur' | translate }}</span>
-            <span class="text-xs font-semibold">{{ expediteurNom() ?? '—' }}</span>
+            <span class="text-xs font-semibold" [class.text-gray-600]="!expediteurNom()">
+              {{ expediteurNom() ?? '—' }}
+            </span>
           </div>
           <div class="h-px bg-[#1F2937]"></div>
           <div class="flex justify-between items-center">
             <span class="text-xs text-gray-400">{{ 'envoi.beneficiaire' | translate }}</span>
-            <span class="text-xs font-semibold" [class.text-gray-600]="!beneficiaireNom()">{{ beneficiaireNom() ?? '—' }}</span>
+            <span class="text-xs font-semibold" [class.text-gray-600]="!beneficiaireNom()">
+              {{ beneficiaireNom() ?? '—' }}
+            </span>
           </div>
           <div class="h-px bg-[#1F2937]"></div>
           <div class="flex justify-between items-center">
             <span class="text-xs text-gray-400">Corridor</span>
-            <span class="text-xs font-semibold" [class.text-gray-600]="!corridorNom()">{{ corridorNom() ?? '—' }}</span>
+            <span class="text-xs font-semibold" [class.text-gray-600]="!corridorNom()">
+              {{ corridorNom() ?? '—' }}
+            </span>
           </div>
         </div>
       </div>
