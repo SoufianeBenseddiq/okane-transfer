@@ -63,6 +63,16 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
     // Fetch a specific Agency manager
     @Query("SELECT m FROM Manager m WHERE m.agence.id = :agenceId")
     Optional<Manager> findManagerByAgenceId(@Param("agenceId") Long agenceId);
-
+    @Query("""
+    SELECT c FROM Client c
+    WHERE c.actif = true
+    AND (
+        LOWER(c.nom)       LIKE LOWER(CONCAT('%', :q, '%')) OR
+        LOWER(c.prenom)    LIKE LOWER(CONCAT('%', :q, '%')) OR
+        c.telephone        LIKE CONCAT('%', :q, '%')        OR
+        LOWER(c.email)     LIKE LOWER(CONCAT('%', :q, '%'))
+    )
+""")
+    List<Client> searchClients(@Param("q") String q);
 
 }
