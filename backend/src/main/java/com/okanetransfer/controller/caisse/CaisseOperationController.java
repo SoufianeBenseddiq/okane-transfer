@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,14 +26,14 @@ public class CaisseOperationController {
     @GetMapping("agent/{email}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_AGENT')")
     public ResponseEntity<List<CaisseOperationResponse>> findByAgentEmail(
-            @PathVariable String email) {
+            @PathVariable("email") String email) {
         return ResponseEntity.ok(caisseOperationService.findByAgentEmail(email));
     }
 
     // ADMIN uniquement peut supprimer une opération
     @DeleteMapping("id/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteById(@PathVariable("id") Long id) {
         caisseOperationService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
@@ -53,7 +54,7 @@ public class CaisseOperationController {
 
     @GetMapping("agent/{email}/solde")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_AGENT')")
-    public ResponseEntity<BigDecimal> consulterSolde(@PathVariable String email) {
+    public ResponseEntity<BigDecimal> consulterSolde(@PathVariable("email") String email) {
         return ResponseEntity.ok(
                 caisseOperationService.consulterSolde(email)
         );
@@ -61,14 +62,41 @@ public class CaisseOperationController {
 
     @GetMapping("{email}/operations")
     @PreAuthorize("hasRole('ROLE_AGENT')")
-    public ResponseEntity<List<CaisseOperationResponse>> historiqueOperations(@PathVariable String email) {
+    public ResponseEntity<List<CaisseOperationResponse>> historiqueOperations(@PathVariable("email") String email) {
         return ResponseEntity.ok(
                 caisseOperationService.historiqueOperations(email)
         );
     }
 
-    @GetMapping("{agentEmail}/{debut}/{fin}/solde")
-    public BigDecimal calculerSoldeTheorique(@PathVariable("agentEmail") String agentEmail, @PathVariable("debut") LocalDateTime debut,@PathVariable("fin")  LocalDateTime fin) {
-        return caisseOperationService.calculerSoldeTheorique(agentEmail, debut, fin);
+    @GetMapping("agent/{email}/solde-jour")
+    @PreAuthorize("hasRole('ROLE_AGENT')")
+    public ResponseEntity<BigDecimal> consulterSoldeDuJour(
+            @PathVariable("email") String email) {
+        return ResponseEntity.ok(
+                caisseOperationService.consulterSoldeDuJour(email)
+        );
     }
+
+    @GetMapping("agent/{email}/today")
+    @PreAuthorize("hasRole('ROLE_AGENT')")
+    public ResponseEntity<List<CaisseOperationResponse>> operationsDuJour(
+            @PathVariable("email") String email) {
+        return ResponseEntity.ok(
+                caisseOperationService.operationsDuJour(email)
+        );
+    }
+
+    @GetMapping("agent/{email}/historique")
+    @PreAuthorize("hasRole('ROLE_AGENT')")
+    public ResponseEntity<List<CaisseOperationResponse>> historiqueFiltre(
+            @PathVariable("email") String email,
+            @RequestParam("dateDebut") String dateDebut,
+            @RequestParam("dateFin") String dateFin) {
+
+        LocalDate from = LocalDate.parse(dateDebut);   // yyyy-MM-dd
+        LocalDate to   = LocalDate.parse(dateFin);
+        return ResponseEntity.ok(caisseOperationService.historiqueFiltre(email, from, to));
+    }
+
+
 }

@@ -138,21 +138,36 @@
     "printSlip": "طباعة الفيشة",
     "confirmPayment": "تأكيد الدفع"
   },
+
   "caisse": {
+    "closeCaisse": "إغلاق الصندوق",
     "currentBalance": "الرصيد الحالي",
-    "updatedAt": "محدّث في",
-    "openingBalance": "افتتاح اليوم",
-    "totalEnvois": "إجمالي التحويلات المحصّلة",
-    "totalRetraits": "إجمالي المسحوبات المدفوعة",
-    "theoreticalBalance": "الرصيد النظري المحسوب",
-    "operations": "عمليات",
+    "updatedAt": "تم التحديث في",
+    "openingBalance": "رصيد الافتتاح",
+    "totalEnvois": "إجمالي التحويلات",
+    "totalRetraits": "إجمالي السحوبات",
+    "theoreticalBalance": "الرصيد النظري",
     "matchesReal": "يطابق الرصيد الفعلي",
     "movements": "الحركات",
-    "todayTimeline": "جدول عمليات اليوم",
+    "todayTimeline": "حركات اليوم",
     "movementsCount": "حركة",
-    "send": "إرسال",
-    "withdrawal": "سحب"
-  },
+    "operations": "عمليات",
+    "withdrawal": "سحب",
+    "send": "تحويل",
+    "table": {
+      "time": "الوقت",
+      "ref": "المرجع",
+      "agent": "الوكيل",
+      "type": "النوع",
+      "amount": "المبلغ"
+    },
+    "type": {
+      "ENVOI": "تحويل",
+      "RETRAIT": "سحب",
+      "OUVERTURE": "افتتاح"
+    }
+  }
+,
   "historique": {
     "searchPlaceholder": "بحث بالاسم أو المرجع...",
     "allTypes": "جميع الأنواع",
@@ -177,5 +192,25 @@
     "noResults": "لا توجد عمليات",
     "showing": "عرض",
     "of": "من"
+  },
+  "cloture": {
+    "gapDetected": "فارق مكتشف",
+    "title": "إغلاق الصندوق",
+    "sends": "إرساليات",
+    "withdrawals": "سحوبات",
+    "incoming": "مداخيل",
+    "outgoing": "مصاريف",
+    "theoreticalBalance": "الرصيد النظري (محسوب)",
+    "realBalance": "الرصيد الفعلي المعدود من طرف الوكيل",
+    "noGap": "لا يوجد فارق — ممتاز",
+    "gapFound": "فارق مُلاحَظ",
+    "willBeReported": "سيُبلَّغ عنه تلقائيًا لمديرك",
+    "note": "ملاحظة توضيحية",
+    "notePlaceholder": "خطأ محتمل في الصرف على التحويل TRF-...",
+    "mandatoryIfGap": "إلزامي في حالة وجود فارق",
+    "warningPrefix": "سيُبلَّغ عن فارق بقيمة",
+    "warningSuffix": "إلى كريم بنجلون (المدير).",
+    "cancel": "إلغاء",
+    "validate": "تأكيد الإغلاق"
   }
 }

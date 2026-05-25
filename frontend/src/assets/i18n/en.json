@@ -138,21 +138,36 @@
     "printSlip": "Print slip",
     "confirmPayment": "Confirm payment"
   },
+
   "caisse": {
+    "closeCaisse": "Close cash register",
     "currentBalance": "Current balance",
     "updatedAt": "Updated at",
-    "openingBalance": "day opening",
-    "totalEnvois": "Total sends collected",
-    "totalRetraits": "Total withdrawals paid",
-    "theoreticalBalance": "Calculated theoretical balance",
-    "operations": "operations",
+    "openingBalance": "Opening balance",
+    "totalEnvois": "Total sent",
+    "totalRetraits": "Total withdrawals",
+    "theoreticalBalance": "Theoretical balance",
     "matchesReal": "Matches real balance",
     "movements": "Movements",
     "todayTimeline": "Today's operations timeline",
     "movementsCount": "movements",
-    "send": "send",
-    "withdrawal": "withdrawal"
+    "operations": "operations",
+    "withdrawal": "Withdrawal",
+    "send": "Send",
+    "table": {
+      "time": "Time",
+      "ref": "Reference",
+      "agent": "Agent",
+      "type": "Type",
+      "amount": "Amount"
+    },
+    "type": {
+      "ENVOI": "Send",
+      "RETRAIT": "Withdrawal",
+      "OUVERTURE": "Opening"
+    }
   },
+
   "historique": {
     "searchPlaceholder": "Search by name, reference...",
     "allTypes": "All types",
@@ -177,5 +192,26 @@
     "noResults": "No operations found",
     "showing": "Showing",
     "of": "of"
+  },
+  "cloture": {
+    "gapDetected": "Gap detected",
+    "title": "Cash closing",
+    "sends": "Sends",
+    "withdrawals": "Withdrawals",
+    "incoming": "Incoming",
+    "outgoing": "Outgoing",
+    "theoreticalBalance": "Theoretical balance (calculated)",
+    "realBalance": "Real balance counted by agent",
+    "noGap": "No gap — Perfect",
+    "gapFound": "Gap found",
+    "willBeReported": "Will be automatically reported to your manager",
+    "note": "Explanatory note",
+    "notePlaceholder": "Probable change error on transfer TRF-...",
+    "mandatoryIfGap": "Required if there is a gap",
+    "warningPrefix": "A gap of",
+    "warningSuffix": "will be reported to Karim Benjelloun (Manager).",
+    "cancel": "Cancel",
+    "validate": "Validate closing"
   }
+
 }

@@ -1,143 +1,354 @@
 <div class="space-y-6 mt-4 mb-4">
 
-  <!-- Action Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <a routerLink="/agent/envoi"
-       class="flex items-center justify-between p-5 rounded-2xl bg-amber-400 hover:bg-amber-300 transition-colors cursor-pointer group">
-      <div class="flex items-center gap-4">
-        <div class="w-11 h-11 rounded-xl bg-amber-500 flex items-center justify-center">
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
-          </svg>
-        </div>
-        <div>
-          <p class="text-xs font-semibold text-amber-700 uppercase tracking-widest">{{ 'dashboard.mainAction' | translate }}</p>
-          <p class="text-xl font-bold text-gray-900">{{ 'dashboard.registerTransfer' | translate }}</p>
-          <p class="text-xs text-amber-700 mt-0.5">{{ 'dashboard.wizard4steps' | translate }}</p>
-        </div>
-      </div>
-      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#92400e" stroke-width="2.5" class="group-hover:translate-x-1 transition-transform">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-      </svg>
-    </a>
-
-    <a routerLink="/agent/paiement"
-       class="flex items-center justify-between p-5 rounded-2xl border border-emerald-500 bg-[#0d1f1a] hover:bg-[#122b22] transition-colors cursor-pointer group">
-      <div class="flex items-center gap-4">
-        <div class="w-11 h-11 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l7 7m0 0v-5m0 5H5M21 21l-7-7m0 0v5m0-5h5"/>
-          </svg>
-        </div>
-        <div>
-          <p class="text-xs font-semibold text-emerald-400 uppercase tracking-widest">{{ 'dashboard.withdrawalCode' | translate }}</p>
-          <p class="text-xl font-bold text-white">{{ 'dashboard.payTransfer' | translate }}</p>
-          <p class="text-xs text-gray-400 mt-0.5">{{ 'dashboard.searchByCode' | translate }}</p>
-        </div>
-      </div>
-      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2.5" class="group-hover:translate-x-1 transition-transform">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-      </svg>
-    </a>
+  <!-- ─── Loading ──────────────────────────────────────────────────────────── -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20 gap-3">
+    <svg class="animate-spin text-amber-400" width="22" height="22" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+    </svg>
+    <p class="text-sm text-gray-500">Chargement…</p>
   </div>
 
-  <!-- Stats -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div class="bg-[#151c2c] rounded-2xl p-5">
-      <div class="flex items-center gap-2 mb-3">
-        <div class="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center">
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
-          </svg>
-        </div>
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">{{ 'dashboard.transfersToday' | translate }}</p>
-      </div>
-      <p class="text-4xl font-bold text-white">{{ stats.transfersCount }}</p>
-      <p class="text-xs text-gray-500 mt-1">{{ stats.sends }} {{ 'dashboard.sends' | translate }} · {{ stats.withdrawals }} {{ 'dashboard.withdrawals' | translate }}</p>
-    </div>
-
-    <div class="bg-[#151c2c] rounded-2xl p-5">
-      <div class="flex items-center gap-2 mb-3">
-        <div class="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#60a5fa" stroke-width="2">
-            <rect x="2" y="5" width="20" height="14" rx="2"/>
-            <path stroke-linecap="round" d="M2 10h20"/>
-          </svg>
-        </div>
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">{{ 'dashboard.totalProcessed' | translate }}</p>
-      </div>
-      <p class="text-4xl font-bold text-white">{{ stats.totalAmount }}</p>
-    </div>
-
-    <div class="bg-[#151c2c] rounded-2xl p-5">
-      <div class="flex items-center gap-2 mb-3">
-        <div class="w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-          </svg>
-        </div>
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">{{ 'dashboard.commissionsGenerated' | translate }}</p>
-      </div>
-      <p class="text-4xl font-bold text-white">{{ stats.commissions }}</p>
-      <p class="text-xs text-emerald-400 mt-1">▲ +4%</p>
-    </div>
+  <!-- ─── Error ────────────────────────────────────────────────────────────── -->
+  <div *ngIf="!loading && error"
+       class="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-2xl px-5 py-4">
+    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 8v4m0 4h.01"/>
+    </svg>
+    <p class="text-sm text-red-400">{{ error }}</p>
   </div>
 
-  <!-- Activity Table -->
-  <div class="bg-[#151c2c] rounded-2xl overflow-hidden">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-white/5">
-      <div>
-        <p class="text-xs font-semibold text-amber-400 uppercase tracking-widest">{{ 'dashboard.activity' | translate }}</p>
-        <p class="text-base font-bold text-white">{{ 'dashboard.todayOperations' | translate }}</p>
-      </div>
-      <a routerLink="/agent/historique" class="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors">
-        {{ 'dashboard.viewHistory' | translate }}
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+  <ng-container *ngIf="!loading && !error">
+
+    <!-- ─── Action Cards ────────────────────────────────────────────────────── -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <a routerLink="/agent/envoi"
+         class="flex items-center justify-between p-5 rounded-2xl bg-amber-400 hover:bg-amber-300 transition-colors cursor-pointer group">
+        <div class="flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-amber-500 flex items-center justify-center">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs font-semibold text-amber-700 uppercase tracking-widest">{{ 'dashboard.mainAction' | translate }}</p>
+            <p class="text-xl font-bold text-gray-900">{{ 'dashboard.registerTransfer' | translate }}</p>
+            <p class="text-xs text-amber-700 mt-0.5">{{ 'dashboard.wizard4steps' | translate }}</p>
+          </div>
+        </div>
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#92400e" stroke-width="2.5"
+             class="group-hover:translate-x-1 transition-transform">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
       </a>
+
+      <a routerLink="/agent/paiement"
+         class="flex items-center justify-between p-5 rounded-2xl border border-emerald-500 bg-[#0d1f1a] hover:bg-[#122b22] transition-colors cursor-pointer group">
+        <div class="flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l7 7m0 0v-5m0 5H5M21 21l-7-7m0 0v5m0-5h5"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs font-semibold text-emerald-400 uppercase tracking-widest">{{ 'dashboard.withdrawalCode' | translate }}</p>
+            <p class="text-xl font-bold text-white">{{ 'dashboard.payTransfer' | translate }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ 'dashboard.searchByCode' | translate }}</p>
+          </div>
+        </div>
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2.5"
+             class="group-hover:translate-x-1 transition-transform">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+      </a>
+
     </div>
 
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead>
+    <!-- ─── Stats ──────────────────────────────────────────────────────────── -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+      <!-- Transferts aujourd'hui -->
+      <div class="bg-[#151c2c] rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
+            </svg>
+          </div>
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">{{ 'dashboard.transfersToday' | translate }}</p>
+        </div>
+        <p class="text-4xl font-bold text-white">{{ stats.transfersCount }}</p>
+        <p class="text-xs text-gray-500 mt-1">
+          {{ stats.sends }} {{ 'dashboard.sends' | translate }} ·
+          {{ stats.withdrawals }} {{ 'dashboard.withdrawals' | translate }}
+        </p>
+      </div>
+
+      <!-- Montant total traité -->
+      <div class="bg-[#151c2c] rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#60a5fa" stroke-width="2">
+              <rect x="2" y="5" width="20" height="14" rx="2"/>
+              <path stroke-linecap="round" d="M2 10h20"/>
+            </svg>
+          </div>
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">{{ 'dashboard.totalProcessed' | translate }}</p>
+        </div>
+        <p class="text-4xl font-bold text-white">{{ stats.totalAmount }}</p>
+      </div>
+
+      <!-- Commissions -->
+      <div class="bg-[#151c2c] rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+            </svg>
+          </div>
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">{{ 'dashboard.commissionsGenerated' | translate }}</p>
+        </div>
+        <p class="text-4xl font-bold text-white">{{ stats.commissions }}</p>
+        <p class="text-xs text-gray-500 mt-1">Calculé via transferts</p>
+      </div>
+
+    </div>
+
+    <!-- ─── NEW: Transferts en attente + Plafond journalier ──────────────── -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <!-- Transferts en attente (CDC §3.2) -->
+      <div class="bg-[#151c2c] rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-7 h-7 rounded-lg bg-orange-500/20 flex items-center justify-center">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#fb923c" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">{{ 'dashboard.pendingTransfers' | translate }}</p>
+        </div>
+
+        <!-- Compteurs par statut -->
+        <div class="grid grid-cols-3 gap-3 mb-4">
+          <div class="bg-orange-500/10 rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-orange-400">{{ stats.pendingCount }}</p>
+            <p class="text-[10px] font-semibold text-orange-400/70 uppercase tracking-wider mt-0.5">En attente</p>
+          </div>
+          <div class="bg-emerald-500/10 rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-emerald-400">{{ stats.paidCount }}</p>
+            <p class="text-[10px] font-semibold text-emerald-400/70 uppercase tracking-wider mt-0.5">Payés</p>
+          </div>
+          <div class="bg-red-500/10 rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-red-400">{{ stats.cancelledCount }}</p>
+            <p class="text-[10px] font-semibold text-red-400/70 uppercase tracking-wider mt-0.5">Annulés</p>
+          </div>
+        </div>
+
+        <!-- Alerte si transferts en attente -->
+        <div *ngIf="stats.pendingCount > 0"
+             class="flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-xl px-3 py-2">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#fb923c" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          </svg>
+          <p class="text-xs text-orange-400">
+            {{ stats.pendingCount }} transfert{{ stats.pendingCount > 1 ? 's' : '' }} en attente de paiement
+          </p>
+        </div>
+
+        <div *ngIf="stats.pendingCount === 0"
+             class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/>
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+          <p class="text-xs text-emerald-400">Aucun transfert en attente</p>
+        </div>
+      </div>
+
+      <!-- Plafond journalier (CDC §3.1) -->
+      <div class="bg-[#151c2c] rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v20M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/>
+            </svg>
+          </div>
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Plafond journalier</p>
+        </div>
+
+        <!-- Montant utilisé / plafond -->
+        <div class="flex items-end justify-between mb-2">
+          <div>
+            <p class="text-xs text-gray-500 mb-0.5">Utilisé aujourd'hui</p>
+            <p class="text-2xl font-bold text-white">{{ stats.totalAmount }}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs text-gray-500 mb-0.5">Plafond</p>
+            <p class="text-sm font-semibold text-gray-400">{{ dailyCap | number:'1.0-0' }} MAD</p>
+          </div>
+        </div>
+
+        <!-- Barre de progression -->
+        <div class="w-full bg-white/5 rounded-full h-2.5 mb-2">
+          <div class="h-2.5 rounded-full transition-all duration-700"
+               [style.width.%]="capUsagePercent"
+               [ngClass]="{
+                 'bg-emerald-500': capUsagePercent < 70,
+                 'bg-amber-400':   capUsagePercent >= 70 && capUsagePercent < 90,
+                 'bg-red-500':     capUsagePercent >= 90
+               }">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <p class="text-xs text-gray-500">
+            {{ capUsagePercent | number:'1.0-0' }}% utilisé
+          </p>
+          <p class="text-xs"
+             [ngClass]="{
+               'text-emerald-400': capUsagePercent < 70,
+               'text-amber-400':   capUsagePercent >= 70 && capUsagePercent < 90,
+               'text-red-400':     capUsagePercent >= 90
+             }">
+            {{ capRemaining | number:'1.0-0' }} MAD restants
+          </p>
+        </div>
+
+        <!-- Alerte plafond proche -->
+        <div *ngIf="capUsagePercent >= 90"
+             class="mt-3 flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          </svg>
+          <p class="text-xs text-red-400">Plafond journalier presque atteint</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ─── NEW: Mini graphique d'activité 7 jours (CDC §3.2) ─────────────── -->
+    <div class="bg-[#151c2c] rounded-2xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#60a5fa" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Activité</p>
+            <p class="text-sm font-bold text-white">Transferts — 7 derniers jours</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 text-xs text-gray-500">
+          <span class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span> Envois
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-sm bg-purple-400 inline-block"></span> Retraits
+          </span>
+        </div>
+      </div>
+      <div class="relative h-44">
+        <canvas #activityChart id="activityChart"></canvas>
+      </div>
+    </div>
+
+    <!-- ─── Activity Table ──────────────────────────────────────────────────── -->
+    <div class="bg-[#151c2c] rounded-2xl overflow-hidden">
+
+      <div class="flex items-center justify-between px-6 py-4 border-b border-white/5">
+        <div>
+          <p class="text-xs font-semibold text-amber-400 uppercase tracking-widest">{{ 'dashboard.activity' | translate }}</p>
+          <p class="text-base font-bold text-white">{{ 'dashboard.todayOperations' | translate }}</p>
+        </div>
+        <a routerLink="/agent/historique"
+           class="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors">
+          {{ 'dashboard.viewHistory' | translate }}
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
           <tr class="text-xs text-gray-500 uppercase tracking-widest border-b border-white/5">
             <th class="text-left px-6 py-3 font-medium">{{ 'dashboard.time' | translate }}</th>
             <th class="text-left px-6 py-3 font-medium">{{ 'dashboard.type' | translate }}</th>
             <th class="text-left px-6 py-3 font-medium">{{ 'dashboard.reference' | translate }}</th>
             <th class="text-left px-6 py-3 font-medium">{{ 'dashboard.clientBenef' | translate }}</th>
             <th class="text-right px-6 py-3 font-medium">{{ 'dashboard.amount' | translate }}</th>
+            <!-- NEW: colonne Reçu -->
+            <th class="text-center px-4 py-3 font-medium">Reçu</th>
             <th class="px-4 py-3"></th>
           </tr>
-        </thead>
-        <tbody>
-          @for (op of operations; track op.ref) {
-            <tr class="border-b border-white/5 hover:bg-white/[0.03] transition-colors cursor-pointer">
-              <td class="px-6 py-3.5 text-gray-400 font-mono text-xs">{{ op.time }}</td>
-              <td class="px-6 py-3.5">
-                <span [ngClass]="{
-                  'bg-blue-500/15 text-blue-400': op.type === 'ENVOI',
-                  'bg-purple-500/15 text-purple-400': op.type === 'RETRAIT'
-                }" class="text-[10px] font-bold px-2.5 py-1 rounded-full tracking-widest">
-                  {{ op.type === 'ENVOI' ? ('dashboard.send' | translate) : ('dashboard.withdrawal' | translate) }}
+          </thead>
+          <tbody>
+
+          <!-- Rows -->
+          <tr *ngFor="let op of operations"
+              class="border-b border-white/5 hover:bg-white/[0.03] transition-colors cursor-pointer">
+
+            <td class="px-6 py-3.5 text-gray-400 font-mono text-xs">
+              {{ formatTime(op.dateHeure) }}
+            </td>
+
+            <td class="px-6 py-3.5">
+                <span [ngClass]="badgeClass(op.type)"
+                      class="text-[10px] font-bold px-2.5 py-1 rounded-full tracking-widest">
+                  {{ op.type }}
                 </span>
-              </td>
-              <td class="px-6 py-3.5 text-gray-300 font-mono text-xs">{{ op.ref }}</td>
-              <td class="px-6 py-3.5 text-white font-medium">{{ op.client }}</td>
-              <td class="px-6 py-3.5 text-right font-semibold font-mono text-sm"
-                  [ngClass]="op.amount.startsWith('-') ? 'text-red-400' : 'text-emerald-400'">
-                {{ op.amount }}
-              </td>
-              <td class="px-4 py-3.5 text-gray-600">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </td>
+
+            <td class="px-6 py-3.5 text-gray-300 font-mono text-xs">
+              {{ op.referenceTransfert ?? '—' }}
+            </td>
+
+            <td class="px-6 py-3.5 text-white font-medium">
+              {{ op.agentNom }}
+            </td>
+
+            <td class="px-6 py-3.5 text-right font-semibold font-mono text-sm"
+                [ngClass]="amountClass(op)">
+              {{ formatAmount(op) }}
+            </td>
+
+            <!-- NEW: Bouton imprimer reçu (CDC §3.2) -->
+            <td class="px-4 py-3.5 text-center">
+              <button (click)="printReceipt(op); $event.stopPropagation()"
+                      title="Imprimer le reçu"
+                      class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 hover:bg-amber-500/20 hover:text-amber-400 text-gray-500 transition-colors">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                 </svg>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+              </button>
+            </td>
+
+            <td class="px-4 py-3.5 text-gray-600">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            </td>
+
+          </tr>
+
+          <!-- Empty state -->
+          <tr *ngIf="operations.length === 0">
+            <td colspan="7" class="text-center py-12 text-sm text-gray-500">
+              Aucune opération aujourd'hui.
+            </td>
+          </tr>
+
+          </tbody>
+        </table>
+      </div>
+
     </div>
-  </div>
+
+  </ng-container>
 
 </div>

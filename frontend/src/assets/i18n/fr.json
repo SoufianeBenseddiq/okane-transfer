@@ -12,7 +12,7 @@
     "currentDay": "Journée en cours"
   },
   "pages": {
-    "dashboard": "Dashboard",
+    "dashboard": "DashAboard",
     "envoi": "Enregistrer un envoi",
     "paiement": "Payer un transfert",
     "caisse": "Ma caisse",
@@ -142,21 +142,38 @@
     "alreadyPaid": "Ce transfert a déjà été payé",
     "errorGeneric": "Une erreur est survenue, veuillez réessayer"
   },
+
   "caisse": {
+    "closeCaisse": "Clôture caisse",
     "currentBalance": "Solde actuel",
     "updatedAt": "Mis à jour à",
-    "openingBalance": "ouverture du jour",
-    "totalEnvois": "Total envois encaissés",
-    "totalRetraits": "Total retraits décaissés",
-    "theoreticalBalance": "Solde théorique calculé",
-    "operations": "opérations",
+    "openingBalance": "Solde d'ouverture",
+    "totalEnvois": "Total envois",
+    "totalRetraits": "Total retraits",
+    "theoreticalBalance": "Solde théorique",
     "matchesReal": "Correspond au solde réel",
     "movements": "Mouvements",
     "todayTimeline": "Timeline des opérations du jour",
     "movementsCount": "mouvements",
-    "send": "envoi",
-    "withdrawal": "retrait"
+    "operations": "opérations",
+    "withdrawal": "Retrait",
+    "send": "Envoi",
+    "table": {
+      "time":    "Heure",
+      "ref":     "Référence",
+      "agent":   "Agent",
+      "type":    "Type",
+      "amount":  "Montant",
+      "showing": "Affichage de",
+      "of":      "sur"
+    },
+    "type": {
+      "ENVOI": "Envoi",
+      "RETRAIT": "Retrait",
+      "OUVERTURE": "Ouverture"
+    }
   },
+
   "historique": {
     "searchPlaceholder": "Rechercher par nom, référence...",
     "allTypes": "Tous les types",
@@ -181,5 +198,25 @@
     "noResults": "Aucune opération trouvée",
     "showing": "Affichage de",
     "of": "sur"
+  },
+  "cloture": {
+    "gapDetected": "Écart détecté",
+    "title": "Clôture de caisse",
+    "sends": "Envois",
+    "withdrawals": "Retraits",
+    "incoming": "Entrants",
+    "outgoing": "Sortants",
+    "theoreticalBalance": "Solde théorique (calculé)",
+    "realBalance": "Solde réel compté par l'agent",
+    "noGap": "Aucun écart — Parfait",
+    "gapFound": "Écart constaté",
+    "willBeReported": "Sera signalé automatiquement à votre manager",
+    "note": "Note explicative",
+    "notePlaceholder": "Probable erreur de rendu de monnaie sur l'envoi TRF-...",
+    "mandatoryIfGap": "Obligatoire en cas d'écart",
+    "warningPrefix": "Un écart de",
+    "warningSuffix": "sera signalé à Karim Benjelloun (Manager).",
+    "cancel": "Annuler",
+    "validate": "Valider la clôture"
   }
 }

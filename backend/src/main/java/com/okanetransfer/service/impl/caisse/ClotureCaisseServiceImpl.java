@@ -11,6 +11,7 @@ import com.okanetransfer.service.dto.caisse.response.CaisseOperationResponse;
 import com.okanetransfer.service.dto.caisse.response.ClotureCaisseResponse;
 import com.okanetransfer.service.facade.caisse.CaisseOperationService;
 import com.okanetransfer.service.facade.caisse.ClotureCaisseService;
+import com.okanetransfer.service.facade.user.UtilisateurService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -56,19 +57,18 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
                     "Une clôture existe déjà pour cet agent à la date : " + request.getDate());
         }
 
-        Agent agent= new Agent();
-//        Agent agent = agentRepository.findByEmail(request.getAgentEmail())
-//                .orElseThrow(() -> new EntityNotFoundException(
-//                        "Agent introuvable avec l'email : " + request.getAgentEmail()));
-//
+
+        Agent agent = utilisateurService.getAgentByEmail(request.getAgentEmail());
+        if (agent == null) {
+            throw new EntityNotFoundException("Agent introuvable : " + request.getAgentEmail());
+        }
+
 
         ClotureCaisse cloture = converter.toEntity(request);
 
         // calcul solde théorique sur la journée
-        LocalDateTime debut = request.getDate().atStartOfDay();
-        LocalDateTime fin = request.getDate().atTime(23, 59, 59);
         BigDecimal soldeTheorique = caisseOperationService
-                .calculerSoldeTheorique(agent.getEmail(), debut, fin);
+                .consulterSoldeDuJour(agent.getEmail());
 
         cloture.setSoldeTheorique(soldeTheorique);
         cloture.setEcart(request.getSoldeSaisi().subtract(soldeTheorique));
@@ -168,15 +168,16 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
 
     private final ClotureCaisseRepository repository;
     private final ClotureCaisseConverter converter;
-//    private final AgentService agentService;
+    private final UtilisateurService utilisateurService;
     private final CaisseOperationService caisseOperationService;
 
     public ClotureCaisseServiceImpl(ClotureCaisseRepository repository,
                                     ClotureCaisseConverter converter,
-                                    CaisseOperationService caisseOperationService) {
+                                    CaisseOperationService caisseOperationService,
+                                    UtilisateurService utilisateurService) {
         this.repository = repository;
         this.converter = converter;
-//        this.agentRepository = agentRepository;
         this.caisseOperationService = caisseOperationService;
+        this.utilisateurService = utilisateurService;
     }
 }
