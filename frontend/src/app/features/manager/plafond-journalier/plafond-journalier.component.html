@@ -1,0 +1,231 @@
+<div class="plafond-page">
+
+  <!-- ───── HEADER ───────────────────────────────────────────── -->
+  <div class="page-header">
+    <div>
+      <div class="breadcrumb">MANAGER · AGENCE CASABLANCA MAÂRIF</div>
+      <h1 class="page-title">Plafond journalier</h1>
+      <div class="page-subtitle">Aujourd'hui · {{ stats.date }}</div>
+    </div>
+  </div>
+
+  <!-- ───── LOADING / ERROR ───────────────────────────────────── -->
+  <div *ngIf="loading" class="state-loading">
+    <div class="spinner"></div>
+    <span>Chargement…</span>
+  </div>
+
+  <div *ngIf="error && !loading" class="state-error">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    {{ error }}
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- ───── TOP ROW: DONUT + CHART ────────────────────────── -->
+    <div class="top-row">
+
+      <!-- Donut gauge -->
+      <div class="gauge-card">
+        <svg class="donut-svg" viewBox="0 0 200 200">
+          <!-- track -->
+          <circle
+            cx="100" cy="100" r="70"
+            fill="none"
+            stroke="#1e2a3a"
+            stroke-width="14"/>
+          <!-- progress -->
+          <circle
+            cx="100" cy="100" r="70"
+            fill="none"
+            [attr.stroke]="donutColor"
+            stroke-width="14"
+            stroke-linecap="round"
+            [attr.stroke-dasharray]="donutCircumference"
+            [attr.stroke-dashoffset]="donutOffset"
+            transform="rotate(-90 100 100)"
+            class="donut-arc"/>
+          <!-- centre text -->
+          <text x="100" y="88" text-anchor="middle" class="donut-label">PLAFOND UTILISÉ</text>
+          <text x="100" y="116" text-anchor="middle" class="donut-pct">{{ stats.pourcentageUtilise }}<tspan class="donut-pct-sym">%</tspan></text>
+          <text x="100" y="134" text-anchor="middle" class="donut-date">{{ stats.date }}</text>
+        </svg>
+
+        <div class="gauge-amount">{{ fmt(stats.montantUtilise) }} <span class="unit">MAD</span></div>
+        <div class="gauge-sub">sur {{ fmt(stats.plafondAutorise) }} MAD autorisés</div>
+        <div class="restant-pill" [class.restant-pill--danger]="stats.restant < 20000">
+          {{ fmt(stats.restant) }} MAD restants
+        </div>
+      </div>
+
+      <!-- Area chart evolution -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-tag">ÉVOLUTION</div>
+          <div class="chart-title">Montée horaire du plafond — aujourd'hui</div>
+        </div>
+
+        <svg class="area-chart"
+             [attr.viewBox]="'0 0 ' + chartW + ' ' + chartH"
+             preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="hourGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="#f59e0b" stop-opacity="0.38"/>
+              <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.02"/>
+            </linearGradient>
+          </defs>
+          <path *ngIf="chartAreaPath" [attr.d]="chartAreaPath" fill="url(#hourGrad)"/>
+          <path *ngIf="chartPath"     [attr.d]="chartPath"
+                fill="none" stroke="#f59e0b" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- last dot -->
+          <circle
+            [attr.cx]="chartW - 20"
+            cy="12"
+            r="4"
+            fill="#f59e0b"
+            stroke="#161e2e"
+            stroke-width="2"/>
+          <!-- x labels -->
+          <text *ngFor="let lbl of xLabels"
+            [attr.x]="lbl.x" [attr.y]="chartH - 6"
+            text-anchor="middle" class="chart-label">{{ lbl.label }}</text>
+        </svg>
+
+        <!-- Mini stats bar -->
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <div class="mini-stat__label">PIC HORAIRE</div>
+            <div class="mini-stat__value gold">{{ stats.picHoraire }} · +{{ stats.picVolume }}k</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat__label">MOYENNE / HEURE</div>
+            <div class="mini-stat__value">{{ stats.moyenneHeure }}k MAD</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat__label">HEURE DE SATURATION EST.</div>
+            <div class="mini-stat__value">{{ stats.heureSaturationEst }}</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat__label">COMPARÉ À HIER</div>
+            <div class="mini-stat__value" [class.positive]="stats.compareHier > 0" [class.negative]="stats.compareHier < 0">
+              {{ stats.compareHier > 0 ? '+' : '' }}{{ stats.compareHier }}%
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ───── HISTORY TABLE ──────────────────────────────────── -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-tag">HISTORIQUE</div>
+        <div class="section-title">30 derniers jours · résumé</div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>DATE</th>
+              <th>PLAFOND AUTORISÉ</th>
+              <th class="text-right">MONTANT TRAITÉ</th>
+              <th colspan="2">UTILISATION</th>
+              <th class="text-right">DÉPASSEMENT</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of history" class="history-row">
+              <td class="date-cell">{{ row.date }}</td>
+              <td class="plafond-cell">{{ fmt(row.plafondAutorise) }} MAD</td>
+              <td class="amount-cell">{{ fmt(row.montantTraite) }} MAD</td>
+              <td class="bar-cell">
+                <div class="bar-track">
+                  <div class="bar-fill"
+                    [style.width.%]="row.utilisation"
+                    [style.background]="barColor(row.utilisation)">
+                  </div>
+                </div>
+              </td>
+              <td class="pct-cell">{{ row.utilisation }}%</td>
+              <td class="dep-cell">
+                <span *ngIf="row.depassement" class="oui-badge">OUI</span>
+                <span *ngIf="!row.depassement" class="non-dash">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ───── REVISION FORM ──────────────────────────────────── -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-tag section-tag--orange">DEMANDE</div>
+        <div class="section-title">Demander une révision du plafond</div>
+        <div class="section-sub">
+          Votre demande sera examinée par l'administration sous 24 h.
+          Joignez une justification claire pour accélérer le traitement.
+        </div>
+      </div>
+
+      <div *ngIf="submitSuccess" class="success-banner">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Demande envoyée avec succès. L'administration vous contactera sous 24 h.
+      </div>
+
+      <form class="revision-form" (ngSubmit)="submitRevision()">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">
+              Nouveau plafond souhaité <span class="required">*</span>
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="number"
+                class="form-input"
+                placeholder="ex : 250 000"
+                [class.input-error]="revisionForm.get('nouveauPlafond')?.invalid && revisionForm.get('nouveauPlafond')?.touched"
+                [formControl]="$any(revisionForm.get('nouveauPlafond'))"/>
+              <span class="input-suffix">MAD</span>
+            </div>
+            <div class="field-error"
+              *ngIf="revisionForm.get('nouveauPlafond')?.invalid && revisionForm.get('nouveauPlafond')?.touched">
+              Veuillez saisir un montant valide.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              Justification <span class="required">*</span>
+            </label>
+            <textarea
+              class="form-textarea"
+              rows="3"
+              placeholder="Décrivez la raison de cette demande (minimum 20 caractères)…"
+              [class.input-error]="revisionForm.get('justification')?.invalid && revisionForm.get('justification')?.touched"
+              [formControl]="$any(revisionForm.get('justification'))">
+            </textarea>
+            <div class="field-error"
+              *ngIf="revisionForm.get('justification')?.invalid && revisionForm.get('justification')?.touched">
+              Justification requise (20 caractères minimum).
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-submit" [disabled]="submitLoading">
+            <div *ngIf="submitLoading" class="btn-spinner"></div>
+            <span>{{ submitLoading ? 'Envoi en cours…' : 'Envoyer la demande' }}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </ng-container>
+</div>

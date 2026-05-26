@@ -1,5 +1,7 @@
 package com.okanetransfer.service.facade.transfert;
 
+import java.time.LocalDate;
+import java.util.List;
 
 import com.okanetransfer.service.dto.transfert.request.CreateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.request.PaiementRequest;
@@ -31,5 +33,8 @@ public interface ITransfertService {
 
     TransfertResponse annulerTransfert(Long id);
 
+    TransfertResponse getByTelephoneBeneficiaire(String telephone);
+
+    List<TransfertResponse> findByAgence(Long agenceId, LocalDate debut, LocalDate fin);
     BigDecimal commissionsAgent(String email, LocalDate debut, LocalDate fin);
 }

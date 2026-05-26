@@ -1,16 +1,25 @@
 package com.okanetransfer.controller.agence;
 
+import java.util.List;
 
-import com.okanetransfer.service.dto.agence.request.AgenceRequest;
-import com.okanetransfer.service.dto.agence.response.AgenceResponse;
-import com.okanetransfer.service.facade.agence.AgenceService;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.okanetransfer.service.dto.agence.request.AgenceRequest;
+import com.okanetransfer.service.dto.agence.request.RevisionPlafondRequest;
+import com.okanetransfer.service.dto.agence.response.AgenceResponse;
+import com.okanetransfer.service.facade.agence.AgenceService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/agences/")
@@ -36,7 +45,7 @@ public class AgenceController {
     }
 
     @GetMapping("responsable/{email}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
+    //@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<AgenceResponse> findByResponsable(@PathVariable String email) {
         return ResponseEntity.ok(agenceService.findByResponsableEmail(email));
     }
@@ -59,7 +68,7 @@ public class AgenceController {
     @PutMapping("id/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<AgenceResponse> update(@PathVariable Long id,
-                                                 @RequestBody @Valid AgenceRequest request) {
+            @RequestBody @Valid AgenceRequest request) {
         return ResponseEntity.ok(agenceService.update(id, request));
     }
 
@@ -74,6 +83,15 @@ public class AgenceController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<List<AgenceResponse>> findAll() {
         return ResponseEntity.ok(agenceService.findAll());
+    }
+
+    @PostMapping("id/{id}/revision-plafond")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
+    public ResponseEntity<Void> demanderRevisionPlafond(
+            @PathVariable Long id,
+            @RequestBody @Valid RevisionPlafondRequest request) {
+        agenceService.demanderRevisionPlafond(id, request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 }

@@ -42,4 +42,9 @@ export class AgenceService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/id/${id}`);
   }
+
+  demanderRevisionPlafond(agenceId: number, body: any): Observable<void> {
+    return this.http.post<void>(`${this.base}/id/${agenceId}/revision-plafond`, body);
+  }
 }
+

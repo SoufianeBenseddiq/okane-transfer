@@ -4,7 +4,6 @@ import { roleGuard } from './core/guards/role.guard';
 import { RoleUtilisateur } from './core/models/enums';
 
 export const routes: Routes = [
-
   // ─── Auth ──────────────────────────────────────────────────────────────────
   {
     path: 'auth',
@@ -22,17 +21,23 @@ export const routes: Routes = [
   // ─── Manager ───────────────────────────────────────────────────────────────
   {
     path: 'manager',
+    //canActivate: [authGuard, roleGuard],
+    data: { roles: [RoleUtilisateur.ROLE_MANAGER] },
     loadChildren: () => import('./features/manager/manager.routes').then(m => m.managerRoutes)
   },
 
   // ─── Agent ─────────────────────────────────────────────────────────────────
   {
     path: 'agent',
-    canActivate: [authGuard, roleGuard],
+    // canActivate: [authGuard, roleGuard],
     data: { roles: [RoleUtilisateur.ROLE_AGENT] },
     loadChildren: () => import('./features/agent/agent.routes').then(m => m.agentRoutes)
   },
-
+  {
+    path: 'recu-paiement',  // ← accessible via localhost:4200/recu-paiement
+    loadComponent: () => import('./features/agent/recu-paiement/recu-paiement.component')
+      .then(m => m.RecuPaiementComponent)
+  },
   // ─── Client ────────────────────────────────────────────────────────────────
   {
     path: 'client',

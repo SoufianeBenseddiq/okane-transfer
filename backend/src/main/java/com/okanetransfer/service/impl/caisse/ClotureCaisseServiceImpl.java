@@ -1,23 +1,22 @@
 package com.okanetransfer.service.impl.caisse;
 
-import com.okanetransfer.entity.caisse.ClotureCaisse;
-import com.okanetransfer.entity.user.Agent;
-import com.okanetransfer.repository.caisse.CaisseOperationRepository;
-import com.okanetransfer.repository.caisse.ClotureCaisseRepository;
-//import com.okanetransfer.repository.user.AgentRepository;
-import com.okanetransfer.service.converter.caisse.ClotureCaisseConverter;
-import com.okanetransfer.service.dto.caisse.request.ClotureCaisseRequest;
-import com.okanetransfer.service.dto.caisse.response.CaisseOperationResponse;
-import com.okanetransfer.service.dto.caisse.response.ClotureCaisseResponse;
-import com.okanetransfer.service.facade.caisse.CaisseOperationService;
-import com.okanetransfer.service.facade.caisse.ClotureCaisseService;
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.okanetransfer.entity.caisse.ClotureCaisse;
+import com.okanetransfer.entity.user.Agent;
+import com.okanetransfer.repository.caisse.ClotureCaisseRepository;
+import com.okanetransfer.service.converter.caisse.ClotureCaisseConverter;
+import com.okanetransfer.service.dto.caisse.request.ClotureCaisseRequest;
+import com.okanetransfer.service.dto.caisse.response.ClotureCaisseResponse;
+import com.okanetransfer.service.facade.caisse.CaisseOperationService;
+import com.okanetransfer.service.facade.caisse.ClotureCaisseService;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ClotureCaisseServiceImpl implements ClotureCaisseService {
@@ -35,18 +34,17 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
     @Override
     public List<ClotureCaisseResponse> findByEcartSignaleTrue() {
         return converter.toResponses(
-                repository.findByEcartSignaleTrue()
-        );
+                repository.findByEcartSignaleTrue());
     }
 
     @Override
     public List<ClotureCaisseResponse> findByAgentEmailAndEcartSignaleTrue(String email) {
-        //        if (agentRepository.findByEmail(email)) {
-//            throw new EntityNotFoundException("Agent introuvable avec l'email : " + email);
-//        }
+        // if (agentRepository.findByEmail(email)) {
+        // throw new EntityNotFoundException("Agent introuvable avec l'email : " +
+        // email);
+        // }
         return converter.toResponses(
-                repository.findByAgentEmailAndEcartSignaleTrue(email)
-        );
+                repository.findByAgentEmailAndEcartSignaleTrue(email));
     }
 
     @Override
@@ -56,11 +54,11 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
                     "Une clôture existe déjà pour cet agent à la date : " + request.getDate());
         }
 
-        Agent agent= new Agent();
-//        Agent agent = agentRepository.findByEmail(request.getAgentEmail())
-//                .orElseThrow(() -> new EntityNotFoundException(
-//                        "Agent introuvable avec l'email : " + request.getAgentEmail()));
-//
+        Agent agent = new Agent();
+        // Agent agent = agentRepository.findByEmail(request.getAgentEmail())
+        // .orElseThrow(() -> new EntityNotFoundException(
+        // "Agent introuvable avec l'email : " + request.getAgentEmail()));
+        //
 
         ClotureCaisse cloture = converter.toEntity(request);
 
@@ -121,8 +119,7 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
 
         if (cloture == null) {
             throw new EntityNotFoundException(
-                    "Aucune clôture trouvée"
-            );
+                    "Aucune clôture trouvée");
         }
 
         return converter.toResponse(cloture);
@@ -131,18 +128,17 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
     @Override
     public ClotureCaisseResponse cloturerCaisse(ClotureCaisseRequest request) {
 
-//        Agent agent = agentService.findByEmail(request.getAgentEmail())
-//                .orElseThrow(() ->
-//                        new EntityNotFoundException(
-//                                "Agent introuvable : "
-//                                        + request.getAgentEmail()
-//                        ));
-        Agent agent= new Agent();
+        // Agent agent = agentService.findByEmail(request.getAgentEmail())
+        // .orElseThrow(() ->
+        // new EntityNotFoundException(
+        // "Agent introuvable : "
+        // + request.getAgentEmail()
+        // ));
+        Agent agent = new Agent();
 
         if (repository.findByAgentEmailAndDate(request.getAgentEmail(), request.getDate()) != null) {
             throw new IllegalArgumentException(
-                    "Une clôture existe déjà pour cette date"
-            );
+                    "Une clôture existe déjà pour cette date");
         }
 
         BigDecimal soldeTheorique = caisseOperationService.consulterSolde(request.getAgentEmail());
@@ -160,23 +156,31 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
         cloture.setEcart(ecart);
 
         cloture.setEcartSignale(
-                ecart.compareTo(BigDecimal.ZERO) != 0
-        );
+                ecart.compareTo(BigDecimal.ZERO) != 0);
 
         return converter.toResponse(repository.save(cloture));
     }
 
+    @Override
+    public List<ClotureCaisseResponse> findByAgence(Long agenceId, int limit) {
+        List<ClotureCaisse> clotures = repository.findByAgenceIdOrderByDateDesc(agenceId);
+        if (limit > 0 && clotures.size() > limit) {
+            clotures = clotures.subList(0, limit);
+        }
+        return converter.toResponses(clotures);
+    }
+
     private final ClotureCaisseRepository repository;
     private final ClotureCaisseConverter converter;
-//    private final AgentService agentService;
+    // private final AgentService agentService;
     private final CaisseOperationService caisseOperationService;
 
     public ClotureCaisseServiceImpl(ClotureCaisseRepository repository,
-                                    ClotureCaisseConverter converter,
-                                    CaisseOperationService caisseOperationService) {
+            ClotureCaisseConverter converter,
+            CaisseOperationService caisseOperationService) {
         this.repository = repository;
         this.converter = converter;
-//        this.agentRepository = agentRepository;
+        // this.agentRepository = agentRepository;
         this.caisseOperationService = caisseOperationService;
     }
 }
