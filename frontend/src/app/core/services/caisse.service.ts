@@ -82,4 +82,10 @@ export class CaisseService {
   deleteCloture(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseClotures}/id/${id}`);
   }
+
+  findCloturesByAgence(agenceId: number,limit:number): Observable<ClotureCaisseResponse[]> {
+    return this.http.get<ClotureCaisseResponse[]>(`${this.baseClotures}/agence/${agenceId}`, {
+      params: { limit: limit.toString() }
+    });
+  }
 }

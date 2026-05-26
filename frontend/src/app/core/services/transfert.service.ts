@@ -64,6 +64,10 @@ export class TransfertService {
       params: { clientId: clientId.toString() },
     });
   }
+  getByAgence(agenceid:number , debut: String, fin: String): Observable<TransfertResponse[]> {
+    return this.http.get<TransfertResponse[]>(`${this.baseTransferts}/agence/${agenceid}`, {
+    });
+  }
 
   // ─── Bénéficiaires ─────────────────────────────────────────────────────────
 
