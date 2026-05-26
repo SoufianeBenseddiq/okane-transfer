@@ -3,4 +3,7 @@ export interface FraisResult {
   partAgence: number;
   partCentrale: number;
   montantRecu: number;
+  taux?: number;
+  delaiMin?: number;
+  grilleTarifaireId?: number | null;
 }

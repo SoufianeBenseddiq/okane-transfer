@@ -22,6 +22,7 @@ export interface TransfertResponse {
   paysExpediteur:    string;   // code ISO ex: "MA"
   villeExpediteur:   string;
   agenceEnvoi:       string;
+  telephoneExpediteur: string;
 
   // Bénéficiaire
   nomBeneficiaire:        string;
@@ -33,6 +34,7 @@ export interface TransfertResponse {
   montantEnvoye:    number;
   montantRecu:      number;
   frais:            number;
+  partAgence?:      number;
   deviseReception:  string;   // ex: "XOF"
   tauxChange:       number;
 

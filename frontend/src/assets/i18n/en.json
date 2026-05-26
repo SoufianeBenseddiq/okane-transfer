@@ -89,7 +89,10 @@
     "beneficiaireRecoit": "Beneficiary receives",
     "delai": "min · Estimated reception time for this corridor",
     "recapTitle": "Progressive recap",
-    "tranche": "Bracket 1,500–3,000 MAD"
+    "tranche": "Bracket 1,500–3,000 MAD",
+    "changeToNewClient": "Change to new client",
+    "requiredField": "This field is required",
+    "invalidPhoneFormat": "Invalid phone format"
   },
   "dashboard": {
     "mainAction": "Main action",

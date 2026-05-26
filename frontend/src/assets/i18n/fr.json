@@ -89,7 +89,10 @@
     "beneficiaireRecoit": "Bénéficiaire reçoit",
     "delai": "min · Délai de réception estimé pour ce corridor",
     "recapTitle": "Récap progressif",
-    "tranche": "Tranche 1 500–3 000 MAD"
+    "tranche": "Tranche 1 500–3 000 MAD",
+    "changeToNewClient": "Changer vers un nouveau client",
+    "requiredField": "Ce champ est requis",
+    "invalidPhoneFormat": "Format de téléphone invalide"
   },
   "dashboard": {
     "mainAction": "Action principale",

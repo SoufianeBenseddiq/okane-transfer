@@ -89,7 +89,10 @@
     "beneficiaireRecoit": "يستلم المستفيد",
     "delai": "دقيقة · وقت الاستلام المقدر لهذا الممر",
     "recapTitle": "ملخص تدريجي",
-    "tranche": "الشريحة 1500–3000 درهم"
+    "tranche": "الشريحة 1500–3000 درهم",
+    "changeToNewClient": "تغيير إلى عميل جديد",
+    "requiredField": "هذا الحقل مطلوب",
+    "invalidPhoneFormat": "صيغة الهاتف غير صالحة"
   },
   "dashboard": {
     "mainAction": "الإجراء الرئيسي",

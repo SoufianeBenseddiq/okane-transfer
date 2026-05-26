@@ -74,7 +74,7 @@
             </div>
             <button
               (click)="onRechercher()"
-              [disabled]="chargementRecherche()"
+              [disabled]="chargementRecherche() || searchQuery().trim().length < 1"
               class="bg-[#1F2937] hover:bg-[#374151] text-white text-sm font-semibold px-5 py-3 rounded-lg transition-colors border border-[#374151] disabled:opacity-50">
               {{ chargementRecherche() ? '...' : ('envoi.searchBtn' | translate) }}
             </button>
@@ -83,26 +83,28 @@
           <!-- Résultats -->
           @if (rechercheEffectuee()) {
             @if (clientsTrouves().length > 0) {
-              <div class="mt-4 flex flex-col gap-2">
-                @for (client of clientsTrouves(); track client.id) {
-                  <div class="flex items-center justify-between bg-[#0B1120] border border-[#1F2937] rounded-xl px-4 py-3 hover:border-amber-500/40 transition-all">
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-teal-600 flex items-center justify-center text-sm font-bold uppercase">
-                       {{ client.prenom.charAt(0) }}{{ client.nom.charAt(0) }}
+              @if (clientsAffiches().length > 0) {
+                <div class="mt-4 flex flex-col gap-2 max-h-[250px] overflow-y-auto pr-1">
+                  @for (client of clientsAffiches(); track client.id) {
+                    <div class="flex items-center justify-between bg-[#0B1120] border border-[#1F2937] rounded-xl px-4 py-3 hover:border-amber-500/40 transition-all">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-teal-600 flex items-center justify-center text-sm font-bold uppercase">
+                         {{ client.prenom.charAt(0) }}{{ client.nom.charAt(0) }}
+                        </div>
+                        <div>
+                          <p class="text-sm font-semibold">{{ client.prenom }} {{ client.nom }}</p>
+                          <p class="text-xs text-gray-400 mt-0.5">{{ client.telephone }} &nbsp;·&nbsp; {{ client.email }}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p class="text-sm font-semibold">{{ client.prenom }} {{ client.nom }}</p>
-                        <p class="text-xs text-gray-400 mt-0.5">{{ client.telephone }} &nbsp;·&nbsp; {{ client.email }}</p>
-                      </div>
+                      <button
+                        (click)="onSelectionnerClient(client)"
+                        class="text-sm font-semibold text-amber-400 border border-amber-500/40 hover:bg-amber-500/10 px-4 py-2 rounded-lg transition-all">
+                        {{ 'envoi.select' | translate }} ›
+                      </button>
                     </div>
-                    <button
-                      (click)="onSelectionnerClient(client)"
-                      class="text-sm font-semibold text-amber-400 border border-amber-500/40 hover:bg-amber-500/10 px-4 py-2 rounded-lg transition-all">
-                      {{ 'envoi.select' | translate }} ›
-                    </button>
-                  </div>
-                }
-              </div>
+                  }
+                </div>
+              }
             } @else {
               <p class="mt-4 text-sm text-gray-500 text-center py-4">{{ 'envoi.noClient' | translate }}</p>
             }
@@ -141,9 +143,15 @@
             } @else {
               <p class="mt-3 text-xs text-gray-500 italic">Aucune pièce d'identité enregistrée pour ce client.</p>
             }
+            <div class="mt-4 flex justify-center border-t border-[#1F2937]/50 pt-4">
+              <button (click)="onChangeToNewClient()" class="text-sm bg-[#1F2937]/50 hover:bg-amber-500 hover:text-black border border-amber-500/30 text-amber-400 font-semibold px-6 py-2.5 rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg shadow-amber-500/5 hover:shadow-amber-500/10">
+                🔄 {{ 'envoi.changeToNewClient' | translate }}
+              </button>
+            </div>
           }
         </div>
 
+        @if (!clientSelectionne()) {
         <!-- Séparateur -->
         <div class="flex items-center gap-4">
           <div class="flex-1 h-px bg-[#1F2937]"></div>
@@ -157,12 +165,32 @@
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.nom' | translate }} <span class="text-red-400">*</span></label>
               <input type="text" [(ngModel)]="nouveauClient.nom"
-                     class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all" />
+                     class="bg-[#0B1120] border rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all"
+                     [ngClass]="erreursForm['nom'] ? 'border-red-500' : 'border-[#1F2937]'" />
+              @if (erreursForm['nom']) { <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span> }
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.prenom' | translate }} <span class="text-red-400">*</span></label>
               <input type="text" [(ngModel)]="nouveauClient.prenom"
-                     class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all" />
+                     class="bg-[#0B1120] border rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all"
+                     [ngClass]="erreursForm['prenom'] ? 'border-red-500' : 'border-[#1F2937]'" />
+              @if (erreursForm['prenom']) { <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span> }
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-gray-300">Email <span class="text-red-400">*</span></label>
+              <input type="email" [(ngModel)]="nouveauClient.email" placeholder="client@exemple.com"
+                     class="bg-[#0B1120] border rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all"
+                     [ngClass]="(erreursForm['email'] || erreursForm['email_format']) ? 'border-red-500' : 'border-[#1F2937]'" />
+              @if (erreursForm['email']) { <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span> }
+              @if (erreursForm['email_format']) { <span class="text-[10px] text-red-500">Format email invalide</span> }
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-gray-300">Mot de passe <span class="text-red-400">*</span></label>
+              <input type="password" [(ngModel)]="nouveauClient.motDePasse" placeholder="••••••••"
+                     class="bg-[#0B1120] border rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all"
+                     [ngClass]="(erreursForm['motDePasse'] || erreursForm['motDePasse_strength']) ? 'border-red-500' : 'border-[#1F2937]'" />
+              @if (erreursForm['motDePasse']) { <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span> }
+              @if (erreursForm['motDePasse_strength']) { <span class="text-[10px] text-red-500">Le mot de passe doit contenir au moins 8 caractères, 1 majuscule et 1 chiffre.</span> }
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.typePiece' | translate }} <span class="text-red-400">*</span></label>
@@ -176,19 +204,26 @@
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.numeroPiece' | translate }} <span class="text-red-400">*</span></label>
               <input type="text" [(ngModel)]="nouveauClient.numeroPiece"
-                     class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all" />
+                     class="bg-[#0B1120] border rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all"
+                     [ngClass]="erreursForm['numeroPiece'] ? 'border-red-500' : 'border-[#1F2937]'" />
+              @if (erreursForm['numeroPiece']) { <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span> }
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.telephone' | translate }} <span class="text-red-400">*</span></label>
-              <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">📞</span>
-                <input type="tel" [(ngModel)]="nouveauClient.telephone" placeholder="+212 6 00 00 00 00"
-                       class="w-full bg-[#0B1120] border border-[#1F2937] rounded-lg pl-9 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all" />
+              <div class="flex rounded-lg overflow-hidden border transition-all focus-within:border-amber-500 focus-within:ring-1 focus-within:ring-amber-500/20"
+                   [ngClass]="(erreursForm['telephone'] || erreursForm['telephone_format']) ? 'border-red-500' : 'border-[#1F2937]'">
+                <div class="bg-[#1F2937] px-3 flex items-center justify-center text-sm font-semibold text-gray-300 border-r border-[#374151]">
+                  {{ countryPhoneCodes[nouveauClient.pays] || '+' }}
+                </div>
+                <input type="tel" [ngModel]="nouveauClient.telephone" (ngModelChange)="onPhoneInput($event, 'nouveauClient')" [placeholder]="countryPhonePlaceholders[nouveauClient.pays] || '6 00 00 00 00'"
+                       class="w-full bg-[#0B1120] px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none" />
               </div>
+              @if (erreursForm['telephone']) { <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span> }
+              @if (erreursForm['telephone_format']) { <span class="text-[10px] text-red-500">{{ 'envoi.invalidPhoneFormat' | translate }}</span> }
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.pays' | translate }} <span class="text-red-400">*</span></label>
-              <select [(ngModel)]="nouveauClient.pays"
+              <select [ngModel]="nouveauClient.pays" (ngModelChange)="onPaysChange($event)"
                       class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all appearance-none">
                 @for (pays of paysList; track pays) {
                   <option [value]="pays">{{ pays }}</option>
@@ -197,6 +232,7 @@
             </div>
           </div>
         </div>
+        }
 
         <div class="flex justify-end">
           <button
@@ -238,24 +274,33 @@
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.nom' | translate }} <span class="text-red-400">*</span></label>
               <input type="text" [(ngModel)]="beneficiaire.nom"
-                     class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all" />
+                     class="bg-[#0B1120] border rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all"
+                     [ngClass]="erreursForm['b_nom'] ? 'border-red-500' : 'border-[#1F2937]'" />
+              @if (erreursForm['b_nom']) { <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span> }
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.prenom' | translate }} <span class="text-red-400">*</span></label>
               <input type="text" [(ngModel)]="beneficiaire.prenom"
-                     class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all" />
+                     class="bg-[#0B1120] border rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all"
+                     [ngClass]="erreursForm['b_prenom'] ? 'border-red-500' : 'border-[#1F2937]'" />
+              @if (erreursForm['b_prenom']) { <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span> }
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.telephone' | translate }} <span class="text-red-400">*</span></label>
-              <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">📞</span>
-                <input type="tel" [(ngModel)]="beneficiaire.telephone" placeholder="+221 77 000 00 00"
-                       class="w-full bg-[#0B1120] border border-[#1F2937] rounded-lg pl-9 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all" />
+              <div class="flex rounded-lg overflow-hidden border transition-all focus-within:border-amber-500 focus-within:ring-1 focus-within:ring-amber-500/20"
+                   [ngClass]="(erreursForm['b_telephone'] || erreursForm['b_telephone_format']) ? 'border-red-500' : 'border-[#1F2937]'">
+                <div class="bg-[#1F2937] px-3 flex items-center justify-center text-sm font-semibold text-gray-300 border-r border-[#374151]">
+                  {{ countryPhoneCodes[beneficiaire.paysReception] || '+' }}
+                </div>
+                <input type="tel" [ngModel]="beneficiaire.telephone" (ngModelChange)="onPhoneInput($event, 'beneficiaire')" [placeholder]="countryPhonePlaceholders[beneficiaire.paysReception] || '77 000 00 00'"
+                       class="w-full bg-[#0B1120] px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none" />
               </div>
+              @if (erreursForm['b_telephone']) { <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span> }
+              @if (erreursForm['b_telephone_format']) { <span class="text-[10px] text-red-500">{{ 'envoi.invalidPhoneFormat' | translate }}</span> }
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.paysReception' | translate }} <span class="text-red-400">*</span></label>
-              <select [(ngModel)]="beneficiaire.paysReception"
+              <select [ngModel]="beneficiaire.paysReception" (ngModelChange)="onPaysReceptionChange($event)"
                       class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all appearance-none">
                 @for (pays of paysReceptionList; track pays) {
                   <option [value]="pays">{{ pays }}</option>
@@ -318,9 +363,13 @@
                 [ngModel]="montantEnvoye()"
                 (ngModelChange)="onMontantChange($event)"
                 min="1"
-                class="w-full bg-[#0B1120] border-2 border-amber-500 rounded-xl px-5 py-5 text-3xl font-bold text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all" />
-              <span class="absolute right-5 top-1/2 -translate-y-1/2 text-amber-400 font-bold text-lg">MAD</span>
+                class="w-full bg-[#0B1120] border-2 rounded-xl px-5 py-5 text-3xl font-bold text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all"
+                [ngClass]="erreursForm['montant'] ? 'border-red-500' : 'border-amber-500'" />
+              <span class="absolute right-5 top-1/2 -translate-y-1/2 text-amber-400 font-bold text-lg">
+                {{ calcul().deviseSource ?? '—' }}
+              </span>
             </div>
+            @if (erreursForm['montant']) { <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span> }
           </div>
 
           <div class="grid grid-cols-2 gap-4">
@@ -415,17 +464,38 @@
                       class="flex items-center gap-2 text-xs font-semibold text-white bg-[#1F2937] hover:bg-[#374151] border border-[#374151] px-4 py-2 rounded-lg transition-colors">
                 📋 {{ codeCopie() ? ('envoi.copied' | translate) : ('envoi.copy' | translate) }}
               </button>
-              <button class="flex items-center gap-2 text-xs font-semibold text-white bg-[#1F2937] hover:bg-[#374151] border border-[#374151] px-4 py-2 rounded-lg transition-colors">
+              <button (click)="imprimerRecu()" class="flex items-center gap-2 text-xs font-semibold text-white bg-[#1F2937] hover:bg-[#374151] border border-[#374151] px-4 py-2 rounded-lg transition-colors">
                 🖨️ {{ 'envoi.print' | translate }}
+              </button>
+              <button (click)="shareRecu()" class="flex items-center gap-2 text-xs font-semibold text-white bg-[#1F2937] hover:bg-[#374151] border border-[#374151] px-4 py-2 rounded-lg transition-colors">
+                📤 Partager
               </button>
               <button class="flex items-center gap-2 text-xs font-semibold text-white bg-[#1F2937] hover:bg-[#374151] border border-[#374151] px-4 py-2 rounded-lg transition-colors">
                 💬 {{ 'envoi.sms' | translate }}
               </button>
-              <button class="flex items-center gap-2 text-xs font-semibold text-white bg-[#1F2937] hover:bg-[#374151] border border-[#374151] px-4 py-2 rounded-lg transition-colors">
-                ✉️ {{ 'envoi.email' | translate }}
+              <button (click)="envoyerRecuParEmail()"
+                      [disabled]="envoiEmailEnCours()"
+                      class="flex items-center gap-2 text-xs font-semibold text-white bg-[#1F2937] hover:bg-[#374151] border border-[#374151] px-4 py-2 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+                @if (envoiEmailEnCours()) {
+                  ⏳ Envoi...
+                } @else {
+                  ✉️ {{ 'envoi.email' | translate }}
+                }
               </button>
             </div>
           </div>
+
+          @if (messageEmail()) {
+            <div class="mt-4 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-300">
+              {{ messageEmail() }}
+            </div>
+          }
+
+          @if (erreurEmail()) {
+            <div class="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              {{ erreurEmail() }}
+            </div>
+          }
 
           <div class="h-px bg-[#1F2937] my-5"></div>
 
@@ -434,25 +504,35 @@
             <div>
               <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ 'envoi.expediteur' | translate }}</p>
               <p class="text-sm font-bold text-white">{{ transfertCree()?.nomExpediteur ?? expediteurNom() ?? '—' }}</p>
-              <p class="text-xs text-gray-400">🇲🇦 {{ transfertCree()?.villeExpediteur ?? 'Maroc' }}</p>
+              <p class="text-xs text-gray-400">
+                {{ getFlagEmoji(transfertCree()?.paysExpediteur ?? clientSelectionne()?.pays ?? nouveauClient.pays) }}
+                {{ transfertCree()?.villeExpediteur ?? 'Maroc' }}
+              </p>
             </div>
             <div>
               <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ 'envoi.beneficiaire' | translate }}</p>
               <p class="text-sm font-bold text-white">{{ transfertCree()?.nomBeneficiaire ?? beneficiaireNom() ?? '—' }}</p>
               <p class="text-xs text-gray-400">
+                {{ getFlagEmoji(transfertCree()?.paysBeneficiaire ?? beneficiaire.paysReception) }}
                 {{ beneficiaire.ville || 'Destination' }} · {{ transfertCree()?.telephoneBeneficiaire ?? beneficiaire.telephone }}
               </p>
             </div>
             <div>
               <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ 'envoi.montantEnvoye' | translate }}</p>
               <p class="text-sm font-bold text-white">
-                {{ formatMontant(transfertCree()?.montantEnvoye ?? calcul().montantEnvoye) }} MAD
+                {{ formatMontant(transfertCree()?.montantEnvoye ?? calcul().montantEnvoye) }} {{ calcul().deviseSource ?? '—' }}
               </p>
             </div>
             <div>
-              <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ 'envoi.fraisFactures' | translate }}</p>
+              <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ 'envoi.fraisOkane' | translate }}</p>
               <p class="text-sm font-bold text-white">
-                {{ formatMontant(transfertCree()?.frais ?? calcul().frais) }} MAD
+                {{ formatMontant(transfertCree()?.frais ?? calcul().frais) }} {{ calcul().deviseSource ?? '—' }}
+              </p>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ 'envoi.commissionAgence' | translate }}</p>
+              <p class="text-sm font-bold text-white">
+                {{ formatMontant(transfertCree()?.partAgence ?? calcul().commissionAgence) }} {{ calcul().deviseSource ?? '—' }}
               </p>
             </div>
             <div>
@@ -496,6 +576,7 @@
     <div class="w-72 flex flex-col gap-4 shrink-0">
 
       <!-- Calcul en temps réel -->
+      @if (etapeActive() >= 3) {
       <div class="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
         <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">{{ 'envoi.calcTitle' | translate }}</p>
         <div class="flex flex-col gap-3">
@@ -504,7 +585,7 @@
             <span class="text-xs text-gray-400">{{ 'envoi.vouEnvoyez' | translate }}</span>
             <span class="text-base font-bold">
               {{ formatMontant(calcul().montantEnvoye) }}
-              <span class="text-xs text-gray-400 ml-1">{{ calcul().deviseSource }}</span>
+              <span class="text-xs text-gray-400 ml-1">{{ calcul().deviseSource ?? '—' }}</span>
             </span>
           </div>
 
@@ -517,19 +598,19 @@
                 <span class="text-gray-500">…</span>
               } @else {
                 - {{ formatMontant(calcul().frais) }}
-                <span class="text-xs text-gray-400 ml-1">{{ calcul().deviseSource }}</span>
+                <span class="text-xs text-gray-400 ml-1">{{ calcul().deviseSource ?? '—' }}</span>
               }
             </span>
           </div>
 
           <div class="flex justify-between items-center">
             <span class="text-xs text-gray-400">{{ 'envoi.commissionAgence' | translate }}</span>
-            <span class="text-sm font-semibold">
+            <span class="text-sm font-semibold text-red-400">
               @if (chargementFrais()) {
                 <span class="text-gray-500">…</span>
               } @else {
-                {{ formatMontant(calcul().commissionAgence) }}
-                <span class="text-xs text-gray-400 ml-1">{{ calcul().deviseSource }}</span>
+                - {{ formatMontant(calcul().commissionAgence) }}
+                <span class="text-xs text-gray-400 ml-1">{{ calcul().deviseSource ?? '—' }}</span>
               }
             </span>
           </div>
@@ -543,16 +624,22 @@
                 <span class="text-gray-500 text-sm">Calcul…</span>
               } @else {
                 {{ formatMontant(calcul().montantRecu) }}
-                <span class="text-xs font-medium ml-1">{{ calcul().deviseDestination }}</span>
+                <span class="text-xs font-medium ml-1">{{ calcul().deviseDestination ?? '—' }}</span>
               }
             </span>
           </div>
         </div>
 
-        <div class="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 text-xs text-amber-400">
-          <span class="font-bold">≈ {{ calcul().delaiMin }} min</span> · {{ 'envoi.delai' | translate }}
-        </div>
+        @if (calcul().taux !== null) {
+          <div class="mt-4 bg-sky-500/10 border border-sky-500/20 rounded-lg px-3 py-2 text-xs text-sky-300">
+            <span class="font-bold">1 {{ calcul().deviseSource ?? '—' }} = {{ formatTaux(calcul().taux) }} {{ calcul().deviseDestination ?? '—' }}</span>
+            <div class="text-[10px] text-sky-400/80 mt-1">
+              ≈ {{ calcul().delaiMin }} {{ 'envoi.delai' | translate }}
+            </div>
+          </div>
+        }
       </div>
+      }
 
       <!-- Récap progressif -->
       <div class="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
@@ -580,6 +667,7 @@
           </div>
         </div>
       </div>
+
 
     </div>
   </div>
