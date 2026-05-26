@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 
 public class TransfertResponse {
 
+    private Long id;
+
     private String codeRetrait;
 
     private String numeroReference;
@@ -19,7 +21,23 @@ public class TransfertResponse {
 
     private LocalDateTime creeLe;
 
+    private LocalDateTime payeLe;
+
+    private Long agentId;
+
+    private Long agenceEnvoiId;
+
+    private Long agenceRetraitId;
+
     public TransfertResponse() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getCodeRetrait() {
@@ -76,5 +94,37 @@ public class TransfertResponse {
 
     public void setCreeLe(LocalDateTime creeLe) {
         this.creeLe = creeLe;
+    }
+
+    public LocalDateTime getPayeLe() {
+        return payeLe;
+    }
+
+    public void setPayeLe(LocalDateTime payeLe) {
+        this.payeLe = payeLe;
+    }
+
+    public Long getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(Long agentId) {
+        this.agentId = agentId;
+    }
+
+    public Long getAgenceEnvoiId() {
+        return agenceEnvoiId;
+    }
+
+    public void setAgenceEnvoiId(Long agenceEnvoiId) {
+        this.agenceEnvoiId = agenceEnvoiId;
+    }
+
+    public Long getAgenceRetraitId() {
+        return agenceRetraitId;
+    }
+
+    public void setAgenceRetraitId(Long agenceRetraitId) {
+        this.agenceRetraitId = agenceRetraitId;
     }
 }

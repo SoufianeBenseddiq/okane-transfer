@@ -1,6 +1,7 @@
 package com.okanetransfer.entity.transfert;
 
 import com.okanetransfer.entity.agence.Agence;
+import com.okanetransfer.entity.caisse.CaisseOperation;
 import com.okanetransfer.entity.devise.Corridor;
 import com.okanetransfer.entity.devise.GrilleTarifaire;
 import com.okanetransfer.entity.user.Agent;
@@ -8,6 +9,8 @@ import com.okanetransfer.shared.enums.StatutTransfert;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "transferts")
@@ -63,6 +66,9 @@ public class Transfert {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "grille_tarifaire_id")
     private GrilleTarifaire grilleTarifaire;
+
+    @OneToMany(mappedBy = "transfert", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CaisseOperation> operationsCaisse = new ArrayList<>();
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime creeLe;
@@ -184,6 +190,14 @@ public class Transfert {
 
     public void setGrilleTarifaire(GrilleTarifaire grilleTarifaire) {
         this.grilleTarifaire = grilleTarifaire;
+    }
+
+    public List<CaisseOperation> getOperationsCaisse() {
+        return operationsCaisse;
+    }
+
+    public void setOperationsCaisse(List<CaisseOperation> operationsCaisse) {
+        this.operationsCaisse = operationsCaisse;
     }
 
     public LocalDateTime getCreeLe() {

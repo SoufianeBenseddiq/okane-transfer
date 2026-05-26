@@ -13,6 +13,7 @@ public class TransfertConverter {
 
         TransfertResponse r = new TransfertResponse();
 
+        r.setId(t.getId());
         r.setCodeRetrait(t.getCodeRetrait());
         r.setNumeroReference(t.getNumeroReference());
         r.setMontantEnvoye(t.getMontantEnvoye());
@@ -20,6 +21,16 @@ public class TransfertConverter {
         r.setFrais(t.getFrais());
         r.setStatut(t.getStatut().name());
         r.setCreeLe(t.getCreeLe());
+        r.setPayeLe(t.getPayeLe());
+        if (t.getAgentSaisie() != null) {
+            r.setAgentId(t.getAgentSaisie().getId());
+        }
+        if (t.getAgenceEnvoi() != null) {
+            r.setAgenceEnvoiId(t.getAgenceEnvoi().getId());
+        }
+        if (t.getAgenceRetrait() != null) {
+            r.setAgenceRetraitId(t.getAgenceRetrait().getId());
+        }
 
         return r;
     }

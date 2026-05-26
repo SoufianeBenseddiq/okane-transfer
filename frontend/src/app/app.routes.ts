@@ -22,8 +22,6 @@ export const routes: Routes = [
   // ─── Manager ───────────────────────────────────────────────────────────────
   {
     path: 'manager',
-    canActivate: [authGuard, roleGuard],
-    data: { roles: [RoleUtilisateur.ROLE_MANAGER] },
     loadChildren: () => import('./features/manager/manager.routes').then(m => m.managerRoutes)
   },
 

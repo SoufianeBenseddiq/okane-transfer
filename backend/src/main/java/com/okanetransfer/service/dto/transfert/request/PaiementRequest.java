@@ -6,6 +6,8 @@ public class PaiementRequest {
 
     private Long agenceRetraitId;
 
+    private Long agentId;
+
     public PaiementRequest() {
     }
 
@@ -23,5 +25,13 @@ public class PaiementRequest {
 
     public void setAgenceRetraitId(Long agenceRetraitId) {
         this.agenceRetraitId = agenceRetraitId;
+    }
+
+    public Long getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(Long agentId) {
+        this.agentId = agentId;
     }
 }

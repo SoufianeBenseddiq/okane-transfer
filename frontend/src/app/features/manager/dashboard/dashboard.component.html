@@ -1,0 +1,124 @@
+<div class="dashboard-container">
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-left">
+      <h1 class="dashboard-title">Tableau de bord</h1>
+      <p class="header-subtitle">{{ currentDate | date:'EEEE d MMMM yyyy' }} · Vue agence</p>
+    </div>
+  </div>
+
+  <!-- Alert -->
+  <div class="alert alert-warning" *ngIf="false">
+    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+    <div class="alert-content">
+      <span class="alert-text">
+        <strong>{{ dailyUsagePercent }}%</strong> du plafond journalier consommé ·
+        {{ dailyUsed | number }} / {{ dailyLimit | number }} MAD ·
+        contactez l'administration si vous prévoyez des opérations urgentes.
+      </span>
+    </div>
+    <button class="alert-action">Demander révision</button>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div *ngFor="let stat of stats; trackBy: trackByStatId" class="stat-card" [ngClass]="'status-' + stat.status">
+      <div class="stat-header">
+        <span class="stat-label">{{ stat.label }}</span>
+      </div>
+      <div class="stat-value">{{ stat.value }}</div>
+      <div class="stat-subtext" *ngIf="stat.subtext">{{ stat.subtext }}</div>
+      <div class="stat-progress" *ngIf="stat.progress">
+        <div class="stat-progress-fill" [class.critical]="stat.status === 'critical'" [style.width.%]="stat.progress"></div>
+      </div>
+      <div class="stat-trend" *ngIf="stat.trend" [class.negative]="stat.trendDown">{{ stat.trend }}</div>
+      <div class="stat-critical-label" *ngIf="stat.status === 'critical'">
+        <span class="dot-pulse"></span> Seuil critique
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="dashboard-content">
+
+    <!-- Performance Chart -->
+    <div class="performance-section">
+      <div class="section-header">
+        <span class="section-label">PERFORMANCE</span>
+        <h2 class="section-title">Transferts par agent cette semaine</h2>
+      </div>
+
+      <div class="chart-container">
+        <div class="chart-legend">
+          <span class="legend-total">{{ totalTransferts }} transferts au total</span>
+        </div>
+        <div class="bars">
+          <div *ngFor="let agent of agentPerformance; trackBy: trackByAgentId"
+               class="bar"
+               [title]="agent.prenom + ' ' + agent.nom + ' — ' + agent.count + ' transferts (' + (totalTransferts > 0 ? ((agent.count / totalTransferts) * 100 | number:'1.0-0') : 0) + '%)'">
+
+            <div class="bar-percent">
+              {{ totalTransferts > 0 ? ((agent.count / totalTransferts) * 100 | number:'1.0-0') : 0 }}%
+            </div>
+
+            <div class="bar-height"
+                 [style.height.%]="totalTransferts > 0 ? (agent.count / totalTransferts) * 100 : 0"
+                 [class.bar-zero]="agent.count === 0">
+            </div>
+
+            <div class="bar-label-group">
+              <span class="bar-label">{{ agent.prenom }}</span>
+              <span class="bar-sublabel">{{ agent.nom }}</span>
+              <span class="bar-count">{{ agent.count }} tr.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Validations -->
+    <div class="actions-section">
+      <div class="section-header">
+        <span class="section-label">ACTION REQUISE</span>
+        <h2 class="section-title">
+          Validations en attente
+          <span class="badge">{{ pendingValidations.length }}</span>
+        </h2>
+      </div>
+      <div class="validations-list">
+        <div *ngFor="let transfer of pendingValidations; trackBy: trackByTransferId" class="validation-item">
+          <div class="validation-info">
+            <div class="transfer-id">{{ transfer.id }} <span class="transfer-agent">par {{ transfer.agent }}</span></div>
+            <div class="transfer-parties">{{ transfer.sender }} → <strong>{{ transfer.receiver }}</strong></div>
+            <div class="transfer-remark">
+              <svg class="remark-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              {{ transfer.remark }}
+            </div>
+          </div>
+          <div class="validation-amount">{{ transfer.amount | number:'1.0-0' }} MAD</div>
+          <div class="validation-actions">
+            <button class="btn-approve" (click)="approvePending(transfer)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Approuver
+            </button>
+            <button class="btn-reject" (click)="rejectPending(transfer)" title="Rejeter">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
