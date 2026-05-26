@@ -47,6 +47,9 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
     @Query("SELECT a FROM Agent a WHERE a.id = :id AND a.actif = true")
     Optional<Agent> findAgentById(@Param("id") Long id);
 
+    @Query("SELECT a FROM Agent a WHERE a.actif = true ORDER BY a.id ASC")
+    List<Agent> findAllActiveAgentsOrderByIdAsc();
+
     // Fetch a specific Agency agents
     @Query("SELECT a FROM Agent a WHERE a.agence.id = :agenceId")
     List<Agent> findAgentsByAgenceId(@Param("agenceId") Long agenceId);

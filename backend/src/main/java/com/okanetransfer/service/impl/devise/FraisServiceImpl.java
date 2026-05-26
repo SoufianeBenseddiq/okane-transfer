@@ -61,7 +61,25 @@ public class FraisServiceImpl implements IFraisService, ICorridorService {
         result.setMontantFrais(montantFrais);
         result.setPartAgence(grille.getPartAgence());
         result.setPartCentrale(grille.getPartCentrale());
-        result.setMontantRecu(montant.subtract(montantFrais));
+        BigDecimal commissionAgence = grille.getPartAgence() != null
+                ? grille.getPartAgence()
+                : BigDecimal.ZERO;
+        result.setMontantRecu(montant.subtract(montantFrais).subtract(commissionAgence));
+
+        // Calculate rate (taux): tauxSource / tauxDest
+        BigDecimal tauxSource = grille.getCorridor().getDeviseSource() != null
+                ? grille.getCorridor().getDeviseSource().getTauxVersEuro()
+                : BigDecimal.ONE;
+        BigDecimal tauxDest = grille.getCorridor().getDeviseDestination().getTauxVersEuro();
+        BigDecimal taux = BigDecimal.ZERO;
+        if (tauxSource != null && tauxDest != null && tauxDest.compareTo(BigDecimal.ZERO) != 0) {
+            taux = tauxSource.divide(tauxDest, 4, RoundingMode.HALF_UP);
+        }
+        result.setTaux(taux);
+        result.setDelaiMin(5); // default min delay
+        // expose which grille tarifaire was used so frontend can reuse it on submit
+        result.setGrilleTarifaireId(grille.getId());
+
         return result;
     }
 

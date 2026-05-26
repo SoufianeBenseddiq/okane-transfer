@@ -40,6 +40,7 @@ public class TransfertConverter {
         r.setMontantEnvoye(t.getMontantEnvoye());
         r.setMontantRecu(t.getMontantRecu());
         r.setFrais(t.getFrais());
+        r.setPartAgence(t.getGrilleTarifaire() != null ? t.getGrilleTarifaire().getPartAgence() : java.math.BigDecimal.ZERO);
 
         // ── Statut & Dates ────────────────────────────────────────────────────
         r.setStatut(t.getStatut().name());
@@ -63,6 +64,7 @@ public class TransfertConverter {
             r.setNomExpediteur(client.getNom() + " " + client.getPrenom());
             r.setPaysExpediteur(client.getPays());
             r.setVilleExpediteur(client.getPays());
+            r.setTelephoneExpediteur(client.getTelephone());
         }
 
         // ── Agence d'envoi ────────────────────────────────────────────────────

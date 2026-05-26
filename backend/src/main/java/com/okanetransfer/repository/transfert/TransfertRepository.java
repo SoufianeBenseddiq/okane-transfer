@@ -14,6 +14,15 @@ import java.util.Optional;
 public interface TransfertRepository
         extends JpaRepository<Transfert, Long> {
 
+    @Query("""
+        SELECT t FROM Transfert t
+        WHERE function('replace', upper(t.codeRetrait), '-', '') = :codeRetrait
+           OR upper(t.codeRetrait) = :codeRetrait
+        """)
+    Optional<Transfert> findByCodeRetraitNormalise(
+            @Param("codeRetrait") String codeRetrait
+    );
+
     Optional<Transfert> findByCodeRetrait(String codeRetrait);
 
     Optional<Transfert> findByNumeroReference(String numeroReference);

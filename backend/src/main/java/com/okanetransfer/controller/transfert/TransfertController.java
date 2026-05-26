@@ -2,10 +2,13 @@ package com.okanetransfer.controller.transfert;
 
 
 import com.okanetransfer.service.dto.transfert.request.CreateTransfertRequest;
+import com.okanetransfer.service.dto.transfert.request.CreateTransfertAvecNouveauClientRequest;
 import com.okanetransfer.service.dto.transfert.request.PaiementRequest;
+import com.okanetransfer.service.dto.transfert.request.SendTransfertReceiptEmailRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.response.TransfertResponse;
 import com.okanetransfer.service.facade.transfert.ITransfertService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +48,15 @@ public class TransfertController {
 
         return ResponseEntity.ok(
                 transfertService.creerTransfert(request)
+        );
+    }
+
+    @PostMapping("/avec-nouveau-client")
+    public ResponseEntity<TransfertResponse> createAvecNouveauClient(
+            @RequestBody @Valid CreateTransfertAvecNouveauClientRequest request) {
+
+        return ResponseEntity.ok(
+                transfertService.creerTransfertAvecNouveauClient(request)
         );
     }
 
@@ -102,5 +114,13 @@ public class TransfertController {
                 transfertService.getByTelephoneBeneficiaire(telephone)
         );
     }
+
+        @PostMapping("/email-recu")
+        public ResponseEntity<Void> envoyerRecuParEmail(
+                        @RequestBody @Valid SendTransfertReceiptEmailRequest request) {
+
+                transfertService.envoyerRecuParEmail(request);
+                return ResponseEntity.ok().build();
+        }
 
 }

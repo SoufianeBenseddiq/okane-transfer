@@ -14,6 +14,7 @@ public class TransfertResponse {
     private String paysExpediteur;      // ex: "MA"
     private String villeExpediteur;     // ex: "Casablanca, Maroc"
     private String agenceEnvoi;         // ex: "Agence Casablanca Maârif"
+    private String telephoneExpediteur; // ex: "+212 6 12 34 56 78"
 
     // ── Bénéficiaire ──────────────────────────────────────────────────────────
     private String nomBeneficiaire;     // ex: "Aminata Diallo"
@@ -25,6 +26,7 @@ public class TransfertResponse {
     private BigDecimal montantEnvoye;   // en MAD
     private BigDecimal montantRecu;     // dans la devise locale du bénéficiaire
     private BigDecimal frais;
+    private BigDecimal partAgence;
     private String deviseReception;     // ex: "XOF"
     private BigDecimal tauxChange;      // ex: 107.7
 
@@ -55,6 +57,9 @@ public class TransfertResponse {
     public String getAgenceEnvoi() { return agenceEnvoi; }
     public void setAgenceEnvoi(String agenceEnvoi) { this.agenceEnvoi = agenceEnvoi; }
 
+    public String getTelephoneExpediteur() { return telephoneExpediteur; }
+    public void setTelephoneExpediteur(String telephoneExpediteur) { this.telephoneExpediteur = telephoneExpediteur; }
+
     public String getNomBeneficiaire() { return nomBeneficiaire; }
     public void setNomBeneficiaire(String nomBeneficiaire) { this.nomBeneficiaire = nomBeneficiaire; }
 
@@ -75,6 +80,9 @@ public class TransfertResponse {
 
     public BigDecimal getFrais() { return frais; }
     public void setFrais(BigDecimal frais) { this.frais = frais; }
+
+    public BigDecimal getPartAgence() { return partAgence; }
+    public void setPartAgence(BigDecimal partAgence) { this.partAgence = partAgence; }
 
     public String getDeviseReception() { return deviseReception; }
     public void setDeviseReception(String deviseReception) { this.deviseReception = deviseReception; }

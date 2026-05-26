@@ -20,10 +20,10 @@ public abstract class Utilisateur {
     @Column(nullable = false)
     private String prenom;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String motDePasseHash;
 
     @Column(nullable = false)

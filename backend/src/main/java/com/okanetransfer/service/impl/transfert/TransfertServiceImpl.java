@@ -20,20 +20,33 @@ import com.okanetransfer.repository.user.PieceIdentiteRepository;
 import com.okanetransfer.repository.user.UtilisateurRepository;
 import com.okanetransfer.service.converter.transfert.TransfertConverter;
 import com.okanetransfer.service.dto.transfert.request.CreateTransfertRequest;
+import com.okanetransfer.service.dto.transfert.request.CreateTransfertAvecNouveauClientRequest;
 import com.okanetransfer.service.dto.transfert.request.PaiementRequest;
+import com.okanetransfer.service.dto.transfert.request.SendTransfertReceiptEmailRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.response.TransfertResponse;
+import com.okanetransfer.service.dto.user.request.PieceIdentiteRequest;
+import com.okanetransfer.service.dto.user.response.PieceIdentiteResponse;
 import com.okanetransfer.service.facade.transfert.ITransfertService;
+import com.okanetransfer.service.facade.user.PieceIdentiteService;
+import com.okanetransfer.shared.enums.RoleUtilisateur;
 import com.okanetransfer.shared.enums.StatutTransfert;
 import com.okanetransfer.shared.exception.TransfertNotFoundException;
+import com.okanetransfer.shared.util.CodeGenerator;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.mail.internet.MimeMessage;
+
+import java.nio.charset.StandardCharsets;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -47,6 +60,11 @@ public class TransfertServiceImpl implements ITransfertService {
     private final AgenceRepository agenceRepository;
     private final CorridorRepository corridorRepository;
     private final GrilleTarifaireRepository grilleTarifaireRepository;
+    private final PieceIdentiteService pieceIdentiteService;
+    private final CodeGenerator codeGenerator;
+    private final PasswordEncoder passwordEncoder;
+    private final JavaMailSender javaMailSender;
+    private final String mailFrom;
 
     public TransfertServiceImpl(
             TransfertRepository transfertRepository,
@@ -56,7 +74,12 @@ public class TransfertServiceImpl implements ITransfertService {
             PieceIdentiteRepository pieceIdentiteRepository,
             AgenceRepository agenceRepository,
             CorridorRepository corridorRepository,
-            GrilleTarifaireRepository grilleTarifaireRepository) {
+            GrilleTarifaireRepository grilleTarifaireRepository,
+            PieceIdentiteService pieceIdentiteService,
+            CodeGenerator codeGenerator,
+            PasswordEncoder passwordEncoder,
+            JavaMailSender javaMailSender,
+            @Value("${mail.from:no-reply@okanetransfer.local}") String mailFrom) {
 
         this.transfertRepository = transfertRepository;
         this.beneficiaireRepository = beneficiaireRepository;
@@ -66,6 +89,11 @@ public class TransfertServiceImpl implements ITransfertService {
         this.agenceRepository = agenceRepository;
         this.corridorRepository = corridorRepository;
         this.grilleTarifaireRepository = grilleTarifaireRepository;
+        this.pieceIdentiteService = pieceIdentiteService;
+        this.codeGenerator = codeGenerator;
+        this.passwordEncoder = passwordEncoder;
+        this.javaMailSender = javaMailSender;
+        this.mailFrom = mailFrom;
     }
 
     // ── Lecture ───────────────────────────────────────────────────────────────
@@ -90,8 +118,9 @@ public class TransfertServiceImpl implements ITransfertService {
     @Override
     @Transactional(readOnly = true)
     public TransfertResponse getByCodeRetrait(String codeRetrait) {
+        String codeNormalise = codeGenerator.normaliseCodeRetrait(codeRetrait);
         Transfert transfert = transfertRepository
-                .findByCodeRetrait(codeRetrait)
+            .findByCodeRetraitNormalise(codeNormalise)
                 .orElseThrow(() -> new TransfertNotFoundException("Transfert introuvable"));
         return TransfertConverter.toResponse(transfert);
     }
@@ -145,7 +174,7 @@ public class TransfertServiceImpl implements ITransfertService {
                 : utilisateurRepository.findAgentById(request.getAgentId()).orElse(null);
 
         Agence agenceEnvoi = request.getAgenceEnvoiId() == null
-                ? null
+                ? (agent != null ? agent.getAgence() : null)
                 : agenceRepository.findById(request.getAgenceEnvoiId()).orElse(null);
 
         Corridor corridor = request.getCorridorId() == null
@@ -183,8 +212,12 @@ public class TransfertServiceImpl implements ITransfertService {
             frais = request.getMontant().multiply(BigDecimal.valueOf(0.05));
         }
 
+        BigDecimal commissionAgence = grilleTarifaire != null && grilleTarifaire.getPartAgence() != null
+            ? grilleTarifaire.getPartAgence()
+            : BigDecimal.ZERO;
+
         // Calcul montant reçu — converti en devise destination si corridor disponible
-        BigDecimal montantNetMAD = request.getMontant().subtract(frais);
+        BigDecimal montantNetMAD = request.getMontant().subtract(frais).subtract(commissionAgence);
         BigDecimal montantRecu;
 
         if (corridor != null
@@ -200,10 +233,7 @@ public class TransfertServiceImpl implements ITransfertService {
         }
 
         // Génération des identifiants
-        String codeRetrait = UUID.randomUUID()
-                .toString()
-                .substring(0, 8)
-                .toUpperCase();
+        String codeRetrait = codeGenerator.generateCodeRetrait();
         String numeroReference = "TRF-" + System.currentTimeMillis();
 
         // Construction du transfert
@@ -223,6 +253,594 @@ public class TransfertServiceImpl implements ITransfertService {
 
         transfert = transfertRepository.save(transfert);
         return TransfertConverter.toResponse(transfert);
+    }
+
+    @Override
+    public TransfertResponse creerTransfertAvecNouveauClient(CreateTransfertAvecNouveauClientRequest request) {
+        validerTransfertAvecNouveauClient(request);
+
+        CreateTransfertAvecNouveauClientRequest.NouveauClientRequest nouveauClientRequest =
+                request.getNouveauClient();
+
+        String telephoneClient = normaliserTelephone(nouveauClientRequest.getTelephone());
+        String emailClient = nouveauClientRequest.getEmail().trim();
+        if (utilisateurRepository.findClientByTelephone(telephoneClient).isPresent()) {
+            throw new IllegalArgumentException("Un client actif existe déjà avec ce téléphone.");
+        }
+        if (utilisateurRepository.existsByEmail(emailClient)) {
+            throw new IllegalArgumentException("Un client actif existe déjà avec cet email.");
+        }
+
+        Client client = new Client();
+        client.setNom(nouveauClientRequest.getNom().trim());
+        client.setPrenom(nouveauClientRequest.getPrenom().trim());
+        client.setTelephone(telephoneClient);
+        client.setEmail(emailClient);
+        client.setMotDePasseHash(passwordEncoder.encode(nouveauClientRequest.getMotDePasse()));
+        client.setPays(nouveauClientRequest.getPays().trim());
+        client.setRole(RoleUtilisateur.ROLE_CLIENT);
+        client.setActif(true);
+        client.setTwoFactorActive(false);
+        client = utilisateurRepository.save(client);
+
+        PieceIdentiteRequest pieceRequest = request.getPieceIdentite();
+        pieceRequest.setNumero(pieceRequest.getNumero().trim());
+        pieceRequest.setType(pieceRequest.getType().trim());
+        pieceRequest.setPaysEmetteur(pieceRequest.getPaysEmetteur().trim());
+        PieceIdentiteResponse piece = pieceIdentiteService.ajouterPiece(client.getId(), pieceRequest);
+
+        CreateTransfertRequest transfertRequest = new CreateTransfertRequest();
+        transfertRequest.setClientId(client.getId());
+        transfertRequest.setPieceIdentiteId(piece.getId());
+        transfertRequest.setAgentId(request.getAgentId());
+        transfertRequest.setAgenceEnvoiId(request.getAgenceEnvoiId());
+        transfertRequest.setCorridorId(request.getCorridorId());
+        transfertRequest.setGrilleTarifaireId(request.getGrilleTarifaireId());
+        transfertRequest.setNomBeneficiaire(request.getNomBeneficiaire().trim());
+        transfertRequest.setPrenomBeneficiaire(request.getPrenomBeneficiaire().trim());
+        transfertRequest.setTelephoneBeneficiaire(normaliserTelephone(request.getTelephoneBeneficiaire()));
+        transfertRequest.setPaysBeneficiaire(request.getPaysBeneficiaire().trim());
+        transfertRequest.setMontant(request.getMontant());
+
+        return creerTransfert(transfertRequest);
+    }
+
+    @Override
+    public void envoyerRecuParEmail(SendTransfertReceiptEmailRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("La demande d'envoi du reçu est obligatoire.");
+        }
+
+        String codeRetrait = codeGenerator.normaliseCodeRetrait(request.getCodeRetrait());
+        if (isBlank(codeRetrait)) {
+            throw new IllegalArgumentException("Le code de retrait est obligatoire.");
+        }
+
+        Transfert transfert = transfertRepository.findByCodeRetraitNormalise(codeRetrait)
+                .orElseThrow(() -> new TransfertNotFoundException("Transfert introuvable"));
+
+        String destinataireEmail = resolveDestinataireEmail(request, transfert);
+        if (isBlank(destinataireEmail)) {
+            throw new IllegalArgumentException("Aucune adresse email disponible pour ce reçu.");
+        }
+
+        TransfertResponse response = TransfertConverter.toResponse(transfert);
+        String html = buildReceiptEmailHtml(response, destinataireEmail.trim());
+
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name()
+            );
+            helper.setFrom(mailFrom, "Okane Transfer");
+            helper.setTo(destinataireEmail.trim());
+            helper.setSubject("[Okane Transfer] Reçu de votre transfert - Réf: " + response.getNumeroReference());
+            
+            String plainText = """
+                    Okane Transfer - Reçu officiel de transfert
+                    
+                    Merci d'avoir choisi Okane Transfer pour vos envois d'argent.
+                    
+                    Code de retrait obligatoire : %s
+                    Référence de transaction : %s
+                    
+                    Expéditeur : %s (%s)
+                    Bénéficiaire : %s (%s)
+                    Pays de réception : %s
+                    Date d'expiration : %s
+                    
+                    Détails Financiers :
+                    - Montant envoyé : %s MAD
+                    - Frais de service : %s MAD
+                    - Commission agence : %s MAD
+                    - Montant à recevoir : %s %s
+                    
+                    Ce reçu a été généré automatiquement pour la transaction %s.
+                    Veuillez ne pas partager ce code de retrait avec des tiers non autorisés. Pour toute assistance, contactez notre service client.
+                    """.formatted(
+                            response.getCodeRetrait(),
+                            response.getNumeroReference(),
+                            response.getNomExpediteur(),
+                            response.getTelephoneExpediteur(),
+                            response.getNomBeneficiaire(),
+                            response.getTelephoneBeneficiaire(),
+                            response.getPaysBeneficiaire(),
+                            response.getExpireLe() != null ? response.getExpireLe().toLocalDate().toString() : "—",
+                            formatMoney(response.getMontantEnvoye()),
+                            formatMoney(response.getFrais()),
+                            formatMoney(response.getPartAgence()),
+                            formatMoney(response.getMontantRecu()),
+                            response.getDeviseReception(),
+                            response.getCodeRetrait()
+                    );
+                    
+            helper.setText(plainText, html);
+            javaMailSender.send(message);
+        } catch (Exception exception) {
+            throw new RuntimeException("Impossible d'envoyer le reçu par email.", exception);
+        }
+    }
+
+    private void validerTransfertAvecNouveauClient(CreateTransfertAvecNouveauClientRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("La demande de transfert est obligatoire.");
+        }
+        if (request.getMontant() == null || request.getMontant().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Montant invalide.");
+        }
+        if (request.getNouveauClient() == null) {
+            throw new IllegalArgumentException("Les informations du nouveau client sont obligatoires.");
+        }
+        if (isBlank(request.getNouveauClient().getNom())) {
+            throw new IllegalArgumentException("Le nom du client est obligatoire.");
+        }
+        if (isBlank(request.getNouveauClient().getPrenom())) {
+            throw new IllegalArgumentException("Le prénom du client est obligatoire.");
+        }
+        if (isBlank(request.getNouveauClient().getEmail())) {
+            throw new IllegalArgumentException("L'email du client est obligatoire.");
+        }
+        if (isBlank(request.getNouveauClient().getMotDePasse())) {
+            throw new IllegalArgumentException("Le mot de passe du client est obligatoire.");
+        }
+        if (isBlank(request.getNouveauClient().getPays())) {
+            throw new IllegalArgumentException("Le pays du client est obligatoire.");
+        }
+        validerTelephone(request.getNouveauClient().getTelephone(), "Format téléphone client invalide.");
+        validerEmail(request.getNouveauClient().getEmail());
+        validerMotDePasse(request.getNouveauClient().getMotDePasse());
+
+        if (request.getPieceIdentite() == null) {
+            throw new IllegalArgumentException("La pièce d'identité est obligatoire.");
+        }
+        if (isBlank(request.getPieceIdentite().getNumero())) {
+            throw new IllegalArgumentException("Le numéro de pièce est obligatoire.");
+        }
+        if (isBlank(request.getPieceIdentite().getType())) {
+            throw new IllegalArgumentException("Le type de pièce est obligatoire.");
+        }
+        if (!request.getPieceIdentite().getType().trim().matches("^(CIN|PASSEPORT|CARTE_SEJOUR|PERMIS)$")) {
+            throw new IllegalArgumentException("Type de pièce invalide.");
+        }
+        if (isBlank(request.getPieceIdentite().getPaysEmetteur())) {
+            throw new IllegalArgumentException("Le pays émetteur est obligatoire.");
+        }
+
+        if (isBlank(request.getNomBeneficiaire())) {
+            throw new IllegalArgumentException("Le nom du bénéficiaire est obligatoire.");
+        }
+        if (isBlank(request.getPrenomBeneficiaire())) {
+            throw new IllegalArgumentException("Le prénom du bénéficiaire est obligatoire.");
+        }
+        if (isBlank(request.getPaysBeneficiaire())) {
+            throw new IllegalArgumentException("Le pays du bénéficiaire est obligatoire.");
+        }
+        validerTelephone(request.getTelephoneBeneficiaire(), "Format téléphone bénéficiaire invalide.");
+    }
+
+    private void validerTelephone(String telephone, String message) {
+        String normalized = normaliserTelephone(telephone);
+        if (!normalized.matches("^\\+?[0-9]{8,15}$")) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    private void validerEmail(String email) {
+        String normalized = email == null ? "" : email.trim();
+        if (!normalized.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            throw new IllegalArgumentException("Format email invalide.");
+        }
+    }
+
+    private void validerMotDePasse(String motDePasse) {
+        if (motDePasse == null || !motDePasse.matches("^(?=.*[A-Z])(?=.*[0-9]).{8,}$")) {
+            throw new IllegalArgumentException("Le mot de passe doit contenir au moins 8 caractères, 1 majuscule et 1 chiffre.");
+        }
+    }
+
+        private String resolveDestinataireEmail(SendTransfertReceiptEmailRequest request, Transfert transfert) {
+                if (!isBlank(request.getDestinataireEmail())) {
+                        return request.getDestinataireEmail().trim();
+                }
+
+                if (transfert.getExpediteur() != null && transfert.getExpediteur().getClient() != null) {
+                        String emailClient = transfert.getExpediteur().getClient().getEmail();
+                        if (!isBlank(emailClient)) {
+                                return emailClient.trim();
+                        }
+                }
+
+                return null;
+        }
+
+        private String buildReceiptEmailHtml(TransfertResponse transfert, String destinataireEmail) {
+                String expediteur = safe(transfert.getNomExpediteur());
+                String beneficiaire = safe(transfert.getNomBeneficiaire());
+                String deviseSource = safe(transfert.getDeviseReception());
+                String deviseRecu = safe(transfert.getDeviseReception());
+                String codeRetrait = safe(transfert.getCodeRetrait());
+                String reference = safe(transfert.getNumeroReference());
+                String telephoneExpediteur = safe(transfert.getTelephoneExpediteur());
+                String telephoneBeneficiaire = safe(transfert.getTelephoneBeneficiaire());
+                String paysReception = safe(transfert.getPaysBeneficiaire());
+                String montantEnvoye = formatMoney(transfert.getMontantEnvoye());
+                String frais = formatMoney(transfert.getFrais());
+                String commission = formatMoney(transfert.getPartAgence());
+                String montantRecu = formatMoney(transfert.getMontantRecu());
+                String expiration = transfert.getExpireLe() != null ? transfert.getExpireLe().toLocalDate().toString() : "—";
+
+                return """
+                                <html>
+                                <head>
+                                    <meta charset="utf-8" />
+                                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                                    <title>Reçu de transfert - Okane Transfer</title>
+                                    <style>
+                                        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+                                        body {
+                                            margin: 0;
+                                            padding: 0;
+                                            background-color: #f1f5f9;
+                                            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                                            -webkit-font-smoothing: antialiased;
+                                        }
+                                        .wrapper {
+                                            width: 100%%;
+                                            background-color: #f1f5f9;
+                                            padding: 40px 20px;
+                                            box-sizing: border-box;
+                                        }
+                                        .container {
+                                            max-width: 600px;
+                                            margin: 0 auto;
+                                            background-color: #ffffff;
+                                            border-radius: 16px;
+                                            overflow: hidden;
+                                            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+                                            border: 1px solid #e2e8f0;
+                                        }
+                                        .header {
+                                            background-color: #0f172a;
+                                            padding: 32px;
+                                            text-align: center;
+                                        }
+                                        .brand {
+                                            color: #ffffff;
+                                            font-size: 24px;
+                                            font-weight: 800;
+                                            letter-spacing: -0.025em;
+                                            margin: 0;
+                                            text-transform: uppercase;
+                                        }
+                                        .brand span {
+                                            color: #fbbf24;
+                                        }
+                                        .subtitle {
+                                            color: #94a3b8;
+                                            font-size: 11px;
+                                            margin-top: 6px;
+                                            margin-bottom: 0;
+                                            font-weight: 600;
+                                            letter-spacing: 0.08em;
+                                            text-transform: uppercase;
+                                        }
+                                        .content {
+                                            padding: 32px;
+                                        }
+                                        .badge-container {
+                                            text-align: center;
+                                            margin-bottom: 24px;
+                                        }
+                                        .badge {
+                                            display: inline-block;
+                                            background-color: #fef3c7;
+                                            color: #d97706;
+                                            font-size: 12px;
+                                            font-weight: 700;
+                                            padding: 6px 14px;
+                                            border-radius: 9999px;
+                                            border: 1px solid #fde68a;
+                                        }
+                                        .code-section {
+                                            background: linear-gradient(135deg, #fef3c7 0%%, #fffbeb 100%%);
+                                            border: 2px dashed #f59e0b;
+                                            border-radius: 12px;
+                                            padding: 24px;
+                                            text-align: center;
+                                            margin-bottom: 32px;
+                                        }
+                                        .code-label {
+                                            font-size: 11px;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.1em;
+                                            color: #b45309;
+                                            font-weight: 700;
+                                            margin-bottom: 8px;
+                                        }
+                                        .code-value {
+                                            font-family: 'Courier New', Courier, monospace;
+                                            font-size: 36px;
+                                            font-weight: 800;
+                                            color: #78350f;
+                                            letter-spacing: 4px;
+                                            margin: 0;
+                                        }
+                                        .reference-text {
+                                            font-size: 12px;
+                                            color: #64748b;
+                                            text-align: center;
+                                            margin-top: -16px;
+                                            margin-bottom: 32px;
+                                        }
+                                        .reference-text strong {
+                                            color: #334155;
+                                        }
+                                        .section-title {
+                                            font-size: 13px;
+                                            font-weight: 700;
+                                            color: #1e293b;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.05em;
+                                            margin-bottom: 16px;
+                                            border-bottom: 1px solid #f1f5f9;
+                                            padding-bottom: 8px;
+                                        }
+                                        .detail-card {
+                                            background-color: #f8fafc;
+                                            border: 1px solid #f1f5f9;
+                                            border-radius: 10px;
+                                            padding: 16px;
+                                            margin-bottom: 16px;
+                                        }
+                                        .detail-card-title {
+                                            font-size: 10px;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.05em;
+                                            color: #64748b;
+                                            font-weight: 600;
+                                            margin-bottom: 6px;
+                                        }
+                                        .detail-card-value {
+                                            font-size: 15px;
+                                            font-weight: 700;
+                                            color: #0f172a;
+                                            margin: 0;
+                                        }
+                                        .detail-card-sub {
+                                            font-size: 13px;
+                                            color: #64748b;
+                                            margin-top: 4px;
+                                            margin-bottom: 0;
+                                        }
+                                        .invoice-table {
+                                            width: 100%%;
+                                            border-collapse: collapse;
+                                            margin-bottom: 8px;
+                                        }
+                                        .invoice-row {
+                                            border-bottom: 1px solid #f1f5f9;
+                                        }
+                                        .invoice-row.total {
+                                            border-top: 2px solid #e2e8f0;
+                                            border-bottom: none;
+                                            background-color: #f8fafc;
+                                        }
+                                        .invoice-label {
+                                            padding: 14px 0;
+                                            font-size: 14px;
+                                            color: #64748b;
+                                            font-weight: 500;
+                                        }
+                                        .invoice-value {
+                                            padding: 14px 0;
+                                            font-size: 14px;
+                                            color: #0f172a;
+                                            font-weight: 700;
+                                            text-align: right;
+                                        }
+                                        .invoice-row.total .invoice-label {
+                                            padding: 18px 16px;
+                                            color: #0f172a;
+                                            font-weight: 700;
+                                            border-bottom-left-radius: 10px;
+                                            border-top-left-radius: 10px;
+                                        }
+                                        .invoice-row.total .invoice-value {
+                                            padding: 18px 16px;
+                                            color: #d97706;
+                                            font-size: 20px;
+                                            font-weight: 800;
+                                            border-bottom-right-radius: 10px;
+                                            border-top-right-radius: 10px;
+                                            text-align: right;
+                                        }
+                                        .footer {
+                                            background-color: #f8fafc;
+                                            padding: 24px 32px;
+                                            text-align: center;
+                                            border-top: 1px solid #e2e8f0;
+                                        }
+                                        .footer-text {
+                                            font-size: 12px;
+                                            color: #64748b;
+                                            line-height: 1.6;
+                                            margin: 0;
+                                        }
+                                        .footer-disclaimer {
+                                            font-size: 11px;
+                                            color: #94a3b8;
+                                            margin-top: 12px;
+                                            line-height: 1.5;
+                                        }
+                                    </style>
+                                </head>
+                                <body>
+                                    <div class="wrapper">
+                                        <div class="container">
+                                            <div class="header">
+                                                <h1 class="brand">Okane <span>Transfer</span></h1>
+                                                <p class="subtitle">Reçu officiel de transfert d'argent</p>
+                                            </div>
+                                            
+                                            <div class="content">
+                                                <div class="badge-container">
+                                                    <span class="badge">Envoyé à %s</span>
+                                                </div>
+                                                
+                                                <div class="code-section">
+                                                    <div class="code-label">Code de Retrait Obligatoire</div>
+                                                    <div class="code-value">%s</div>
+                                                </div>
+                                                
+                                                <div class="reference-text">
+                                                    Référence de transaction : <strong>%s</strong>
+                                                </div>
+                                                
+                                                <div class="section-title">Informations de Transfert</div>
+                                                
+                                                <table style="width: 100%%; border-spacing: 0; margin-bottom: 8px;">
+                                                    <tr>
+                                                        <td style="width: 48%%; padding: 0; vertical-align: top;">
+                                                            <div class="detail-card">
+                                                                <div class="detail-card-title">Expéditeur</div>
+                                                                <div class="detail-card-value">%s</div>
+                                                                <p class="detail-card-sub">%s</p>
+                                                            </div>
+                                                        </td>
+                                                        <td style="width: 4%%;"></td>
+                                                        <td style="width: 48%%; padding: 0; vertical-align: top;">
+                                                            <div class="detail-card">
+                                                                <div class="detail-card-title">Bénéficiaire</div>
+                                                                <div class="detail-card-value">%s</div>
+                                                                <p class="detail-card-sub">%s</p>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                
+                                                <table style="width: 100%%; border-spacing: 0; margin-bottom: 24px;">
+                                                    <tr>
+                                                        <td style="width: 48%%; padding: 0; vertical-align: top;">
+                                                            <div class="detail-card">
+                                                                <div class="detail-card-title">Pays de réception</div>
+                                                                <div class="detail-card-value">%s</div>
+                                                            </div>
+                                                        </td>
+                                                        <td style="width: 4%%;"></td>
+                                                        <td style="width: 48%%; padding: 0; vertical-align: top;">
+                                                            <div class="detail-card">
+                                                                <div class="detail-card-title">Date d'expiration</div>
+                                                                <div class="detail-card-value">%s</div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                
+                                                <div class="section-title">Détails Financiers</div>
+                                                
+                                                <table class="invoice-table">
+                                                    <tr class="invoice-row">
+                                                        <td class="invoice-label">Montant envoyé</td>
+                                                        <td class="invoice-value">%s MAD</td>
+                                                    </tr>
+                                                    <tr class="invoice-row">
+                                                        <td class="invoice-label">Frais de service</td>
+                                                        <td class="invoice-value">%s MAD</td>
+                                                    </tr>
+                                                    <tr class="invoice-row">
+                                                        <td class="invoice-label">Commission agence</td>
+                                                        <td class="invoice-value">%s MAD</td>
+                                                    </tr>
+                                                    <tr class="invoice-row total">
+                                                        <td class="invoice-label">Montant à recevoir</td>
+                                                        <td class="invoice-value">%s %s</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            
+                                            <div class="footer">
+                                                <p class="footer-text">
+                                                    Ce reçu officiel a été généré automatiquement pour la transaction <strong>%s</strong>.
+                                                </p>
+                                                <p class="footer-disclaimer">
+                                                    Veuillez ne pas partager ce code de retrait avec des tiers non autorisés. Pour toute assistance, contactez notre service client.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </body>
+                                </html>
+                                """.formatted(
+                                escapeHtml(destinataireEmail),
+                                escapeHtml(codeRetrait),
+                                escapeHtml(reference),
+                                escapeHtml(expediteur),
+                                escapeHtml(telephoneExpediteur),
+                                escapeHtml(beneficiaire),
+                                escapeHtml(telephoneBeneficiaire),
+                                escapeHtml(paysReception),
+                                escapeHtml(expiration),
+                                escapeHtml(montantEnvoye),
+                                escapeHtml(frais),
+                                escapeHtml(commission),
+                                escapeHtml(montantRecu),
+                                escapeHtml(deviseRecu),
+                                escapeHtml(codeRetrait)
+                );
+        }
+
+        private String formatMoney(BigDecimal amount) {
+                if (amount == null) {
+                        return "0,00";
+                }
+                return amount.setScale(2, RoundingMode.HALF_UP).toPlainString();
+        }
+
+        private String escapeHtml(String value) {
+                if (value == null) {
+                        return "";
+                }
+                return value
+                                .replace("&", "&amp;")
+                                .replace("<", "&lt;")
+                                .replace(">", "&gt;")
+                                .replace("\"", "&quot;")
+                                .replace("'", "&#39;");
+        }
+
+        private String safe(String value) {
+                return value == null ? "—" : value;
+        }
+
+    private String normaliserTelephone(String telephone) {
+        if (telephone == null) return "";
+        return telephone.replaceAll("\\s+", "").trim();
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     @Override

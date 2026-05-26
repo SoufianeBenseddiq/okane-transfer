@@ -111,13 +111,18 @@ public class CaisseOperationServiceImpl implements CaisseOperationService {
 
     @Override
     public BigDecimal consulterSoldeDuJour(String agentEmail) {
+        return consulterSoldePourDate(agentEmail, LocalDate.now());
+    }
+
+    @Override
+    public BigDecimal consulterSoldePourDate(String agentEmail, LocalDate date) {
         Agent agent = (Agent) utilisateurService.getAgentByEmail(agentEmail);
         if (agent == null) {
             throw new EntityNotFoundException("Agent introuvable : " + agentEmail);
         }
 
-        LocalDateTime debut = LocalDate.now().atStartOfDay();
-        LocalDateTime fin   = LocalDateTime.now();
+        LocalDateTime debut = date.atStartOfDay();
+        LocalDateTime fin   = date.plusDays(1).atStartOfDay().minusNanos(1);
 
         return repository.calculerSoldeTheorique(agent.getId(), debut, fin);
     }
