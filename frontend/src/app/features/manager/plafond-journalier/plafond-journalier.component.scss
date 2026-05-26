@@ -1,0 +1,481 @@
+// ── Variables ───────────────────────────────────────────────────────
+$bg-base:       #0f1623;
+$bg-card:       #161e2e;
+$bg-card-alt:   #1a2236;
+$border:        #242e42;
+$text-primary:  #e8eaf2;
+$text-secondary:#8892a4;
+$text-muted:    #5a6478;
+$gold:          #f59e0b;
+$blue:          #3b82f6;
+$green:         #22c55e;
+$red:           #ef4444;
+$orange:        #f97316;
+$cyan:          #06b6d4;
+
+// ── Page ────────────────────────────────────────────────────────────
+.plafond-page {
+  padding: 28px 32px 56px;
+  min-height: 100vh;
+  background: $bg-base;
+  color: $text-primary;
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+}
+
+// ── Header ──────────────────────────────────────────────────────────
+.page-header {
+  margin-bottom: 28px;
+}
+
+.breadcrumb {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: $text-muted;
+  margin-bottom: 4px;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: $text-secondary;
+}
+
+// ── States ───────────────────────────────────────────────────────────
+.state-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 0;
+  color: $text-secondary;
+  font-size: 14px;
+}
+
+.spinner, .btn-spinner {
+  width: 18px; height: 18px;
+  border: 2px solid $border;
+  border-top-color: $gold;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.state-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: rgba($red, 0.08);
+  border: 1px solid rgba($red, 0.25);
+  border-radius: 10px;
+  color: #fca5a5;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+// ── Top row ──────────────────────────────────────────────────────────
+.top-row {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+}
+
+// ── Gauge card ───────────────────────────────────────────────────────
+.gauge-card {
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: 14px;
+  padding: 24px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.donut-svg {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 12px;
+}
+
+.donut-arc {
+  transition: stroke-dashoffset 0.8s ease, stroke 0.4s ease;
+}
+
+.donut-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  fill: $text-muted;
+  text-transform: uppercase;
+}
+
+.donut-pct {
+  font-size: 36px;
+  font-weight: 800;
+  fill: $text-primary;
+  font-family: 'DM Sans', sans-serif;
+
+  .donut-pct-sym {
+    font-size: 20px;
+    fill: $text-secondary;
+  }
+}
+
+.donut-date {
+  font-size: 11px;
+  fill: $text-muted;
+}
+
+.gauge-amount {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: $text-primary;
+  margin-bottom: 4px;
+
+  .unit { font-size: 16px; font-weight: 500; color: $text-secondary; }
+}
+
+.gauge-sub {
+  font-size: 13px;
+  color: $text-muted;
+  margin-bottom: 16px;
+}
+
+.restant-pill {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  background: rgba($red, 0.15);
+  color: #fca5a5;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid rgba($red, 0.25);
+
+  &--danger { /* already red */ }
+}
+
+// ── Chart card ───────────────────────────────────────────────────────
+.chart-card {
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: 14px;
+  padding: 22px 24px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-header {
+  margin-bottom: 12px;
+}
+
+.chart-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: $gold;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.chart-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.area-chart {
+  width: 100%;
+  height: 160px;
+  display: block;
+  flex: 1;
+}
+
+.chart-label {
+  font-size: 11px;
+  fill: $text-muted;
+  font-family: 'DM Sans', sans-serif;
+}
+
+// ── Mini stats bar ────────────────────────────────────────────────────
+.mini-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid $border;
+  margin-top: 4px;
+
+  @media (max-width: 700px) { grid-template-columns: repeat(2, 1fr); }
+}
+
+.mini-stat {
+  padding: 14px 16px;
+  border-right: 1px solid $border;
+
+  &:last-child { border-right: none; }
+}
+
+.mini-stat__label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: $text-muted;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.mini-stat__value {
+  font-size: 16px;
+  font-weight: 700;
+  color: $text-primary;
+
+  &.gold     { color: $gold; }
+  &.positive { color: $green; }
+  &.negative { color: $red; }
+}
+
+// ── Section cards ─────────────────────────────────────────────────────
+.section-card {
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.section-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid $border;
+}
+
+.section-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: $gold;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+
+  &--orange { color: $orange; }
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: $text-primary;
+  margin-bottom: 2px;
+}
+
+.section-sub {
+  font-size: 13px;
+  color: $text-secondary;
+  margin-top: 6px;
+}
+
+// ── History table ─────────────────────────────────────────────────────
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    padding: 10px 20px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: $text-muted;
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    &.text-right { text-align: right; }
+  }
+
+  .history-row {
+    border-top: 1px solid $border;
+    transition: background 0.12s;
+
+    &:hover { background: rgba($border, 0.4); }
+  }
+
+  td { padding: 14px 20px; color: $text-secondary; white-space: nowrap; }
+}
+
+.date-cell   { color: $text-secondary !important; }
+.plafond-cell { color: $text-muted !important; }
+.amount-cell  { text-align: right; font-weight: 700 !important; color: $text-primary !important; }
+.pct-cell    { color: $text-muted !important; font-size: 12px !important; width: 48px; }
+.dep-cell    { text-align: right; }
+
+.bar-cell {
+  width: 240px;
+  padding-right: 8px !important;
+}
+
+.bar-track {
+  height: 6px;
+  background: rgba(#fff, 0.06);
+  border-radius: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.oui-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 6px;
+  background: rgba($red, 0.15);
+  color: #fca5a5;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid rgba($red, 0.3);
+}
+
+.non-dash {
+  color: $text-muted;
+  font-size: 16px;
+}
+
+// ── Revision form ──────────────────────────────────────────────────────
+.revision-form {
+  padding: 20px 24px 24px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+
+  @media (max-width: 700px) { grid-template-columns: 1fr; }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.required {
+  color: $orange;
+  margin-left: 2px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 52px 10px 14px;
+  background: $bg-card-alt;
+  border: 1px solid $border;
+  border-radius: 8px;
+  color: $text-primary;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+
+  &:focus { border-color: $gold; }
+  &.input-error { border-color: $red; }
+  &::placeholder { color: $text-muted; }
+}
+
+.input-suffix {
+  position: absolute;
+  right: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $text-muted;
+  pointer-events: none;
+}
+
+.form-textarea {
+  padding: 10px 14px;
+  background: $bg-card-alt;
+  border: 1px solid $border;
+  border-radius: 8px;
+  color: $text-primary;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+  line-height: 1.5;
+
+  &:focus { border-color: $gold; }
+  &.input-error { border-color: $red; }
+  &::placeholder { color: $text-muted; }
+}
+
+.field-error {
+  font-size: 12px;
+  color: #fca5a5;
+}
+
+.form-actions {
+  margin-top: 20px;
+}
+
+.btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 28px;
+  background: $gold;
+  color: #0f1623;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+
+  &:hover:not(:disabled) { background: darken($gold, 6%); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.success-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 24px;
+  padding: 12px 16px;
+  background: rgba($green, 0.1);
+  border: 1px solid rgba($green, 0.25);
+  border-radius: 8px;
+  color: #86efac;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 16px;
+
+  svg { stroke: #86efac; flex-shrink: 0; }
+}
