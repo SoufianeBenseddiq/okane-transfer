@@ -8,9 +8,11 @@
 //   frais: number;
 //   statut: StatutTransfert;
 //   creeLe: string;
+//   expireLe: string;
 // }
 
 import { StatutTransfert } from '../enums/statut-transfert.enum';
+import { UserResponse } from '../user';
 
 export interface TransfertResponse {
   // Identifiants
@@ -41,6 +43,12 @@ export interface TransfertResponse {
   creeLe:    string;   // ISO string — à parser avec DatePipe côté template
   expireLe:  string;
 }
+export interface TransfertWithMeta extends TransfertResponse {
+  agent?: UserResponse;
+  corridor?: { libelle: string };
+  // frais already exists in TransfertResponse, so no need to repeat unless optional
+}
+
 
 
 

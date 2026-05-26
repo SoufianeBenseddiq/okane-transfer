@@ -1,12 +1,12 @@
 package com.okanetransfer.service.facade.transfert;
 
+import java.time.Instant;
+import java.util.List;
 
 import com.okanetransfer.service.dto.transfert.request.CreateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.request.PaiementRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.response.TransfertResponse;
-
-import java.util.List;
 
 public interface ITransfertService {
 
@@ -27,4 +27,6 @@ public interface ITransfertService {
     TransfertResponse annulerTransfert(Long id);
 
     TransfertResponse getByTelephoneBeneficiaire(String telephone);
+
+    List<TransfertResponse> getByAgence(Long agenceId, Instant debut, Instant fin);
 }

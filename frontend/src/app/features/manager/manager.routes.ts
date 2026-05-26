@@ -1,6 +1,9 @@
 import { Routes } from '@angular/router';
 
 export const managerRoutes: Routes = [
-  // Sub-routes for:
-  //   dashboard, agents, rapports-agence
+  { 
+    path: 'rapports', 
+    loadComponent: () => import('./rapports-agence/ rapport-agence.component').then(m => m.RapportAgenceComponent) 
+  },
+  
 ];

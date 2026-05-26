@@ -1,6 +1,17 @@
 package com.okanetransfer.service.impl.user;
 
-import com.okanetransfer.entity.user.*;
+import java.util.List;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.okanetransfer.entity.user.Administrateur;
+import com.okanetransfer.entity.user.Agent;
+import com.okanetransfer.entity.user.Client;
+import com.okanetransfer.entity.user.Manager;
+import com.okanetransfer.entity.user.Utilisateur;
 import com.okanetransfer.repository.user.UtilisateurRepository;
 import com.okanetransfer.service.converter.user.UtilisateurConverter;
 import com.okanetransfer.service.dto.user.request.CreateUserRequest;
@@ -13,21 +24,14 @@ import com.okanetransfer.service.facade.user.UtilisateurService;
 import com.okanetransfer.shared.enums.RoleUtilisateur;
 import com.okanetransfer.shared.exception.AccesRefuseException;
 import com.okanetransfer.shared.exception.TransfertNotFoundException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
 
 /**
  * Implémentation du service utilisateur.
  *
  * Dépendances :
- *   - UtilisateurRepository   → CRUD utilisateurs (seul repo autorisé ici)
- *   - IPieceIdentiteService   → toutes les opérations sur les pièces d'identité
- *   - PasswordEncoder         → hachage BCrypt du mot de passe à la création
+ * - UtilisateurRepository → CRUD utilisateurs (seul repo autorisé ici)
+ * - IPieceIdentiteService → toutes les opérations sur les pièces d'identité
+ * - PasswordEncoder → hachage BCrypt du mot de passe à la création
  *
  * RÈGLE RESPECTÉE : UserServiceImpl n'injecte JAMAIS PieceIdentiteRepository.
  * Toutes les opérations sur les pièces passent par IPieceIdentiteService.
@@ -46,13 +50,13 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     private final UtilisateurConverter utilisateurConverter;
 
     public UtilisateurServiceImpl(UtilisateurRepository utilisateurRepository,
-                                  PieceIdentiteService pieceIdentiteService,
-                                  PasswordEncoder passwordEncoder,
-                                  UtilisateurConverter utilisateurConverter) {
+            PieceIdentiteService pieceIdentiteService,
+            PasswordEncoder passwordEncoder,
+            UtilisateurConverter utilisateurConverter) {
         this.utilisateurRepository = utilisateurRepository;
-        this.pieceIdentiteService  = pieceIdentiteService;
-        this.passwordEncoder       = passwordEncoder;
-        this.utilisateurConverter  = utilisateurConverter;
+        this.pieceIdentiteService = pieceIdentiteService;
+        this.passwordEncoder = passwordEncoder;
+        this.utilisateurConverter = utilisateurConverter;
     }
 
     // =========================================================================
@@ -70,8 +74,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         return utilisateurRepository
                 .findByEmail(email)
                 .orElseThrow(() -> new AccesRefuseException(
-                        "Utilisateur introuvable pour l'email : " + email
-                ));
+                        "Utilisateur introuvable pour l'email : " + email));
     }
 
     /**
@@ -83,8 +86,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         return utilisateurRepository
                 .findAgentByEmail(email)
                 .orElseThrow(() -> new AccesRefuseException(
-                        "Agent introuvable ou inactif : " + email
-                ));
+                        "Agent introuvable ou inactif : " + email));
     }
 
     /**
@@ -109,8 +111,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         return utilisateurRepository
                 .findClientByEmail(email)
                 .orElseThrow(() -> new AccesRefuseException(
-                        "Client introuvable : " + email
-                ));
+                        "Client introuvable : " + email));
     }
 
     // =========================================================================
@@ -128,16 +129,15 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         // vérifier l'unicité de l'email
         if (utilisateurRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException(
-                    "Cet email est déjà utilisé : " + request.getEmail()
-            );
+                    "Cet email est déjà utilisé : " + request.getEmail());
         }
 
         // instancier la bonne sous-classe selon le rôle
         Utilisateur utilisateur = switch (request.getRole()) {
-            case ROLE_ADMIN   -> new Administrateur();
+            case ROLE_ADMIN -> new Administrateur();
             case ROLE_MANAGER -> new Manager();
-            case ROLE_AGENT   -> new Agent();
-            case ROLE_CLIENT  -> new Client();
+            case ROLE_AGENT -> new Agent();
+            case ROLE_CLIENT -> new Client();
         };
 
         utilisateurConverter.applyCreate(utilisateur, request, passwordEncoder);
@@ -152,8 +152,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     public void desactiver(Long userId) {
         Utilisateur user = utilisateurRepository.findById(userId)
                 .orElseThrow(() -> new TransfertNotFoundException(
-                        "Utilisateur introuvable (id=" + userId + ")"
-                ));
+                        "Utilisateur introuvable (id=" + userId + ")"));
         user.setActif(false);
         utilisateurRepository.save(user);
     }
@@ -165,8 +164,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     public void reactiver(Long userId) {
         Utilisateur user = utilisateurRepository.findById(userId)
                 .orElseThrow(() -> new TransfertNotFoundException(
-                        "Utilisateur introuvable (id=" + userId + ")"
-                ));
+                        "Utilisateur introuvable (id=" + userId + ")"));
         user.setActif(true);
         utilisateurRepository.save(user);
     }
@@ -181,8 +179,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
         if (role != null && !role.isBlank()) {
             users = utilisateurRepository.findByRole(
-                    RoleUtilisateur.valueOf(role.toUpperCase())
-            );
+                    RoleUtilisateur.valueOf(role.toUpperCase()));
         } else {
             users = utilisateurRepository.findAll();
         }
@@ -199,9 +196,34 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         return utilisateurConverter.toResponse(
                 utilisateurRepository.findById(userId)
                         .orElseThrow(() -> new TransfertNotFoundException(
-                                "Utilisateur introuvable (id=" + userId + ")"
-                        ))
-        );
+                                "Utilisateur introuvable (id=" + userId + ")")));
+    }
+
+    /**
+     * Liste les utilisateurs d'une agence avec filtre optionnel par rôle.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> findByAgence(Long agenceId, RoleUtilisateur role) {
+        List<Utilisateur> users;
+
+        if (role != null) {
+            users = utilisateurRepository.findByRoleAndActif(role, true);
+        } else {
+            users = utilisateurRepository.findAll();
+        }
+
+        return users.stream()
+                .filter(u -> {
+                    if (u instanceof Agent agent) {
+                        return agent.getAgence() != null && agent.getAgence().getId().equals(agenceId);
+                    } else if (u instanceof Manager manager) {
+                        return manager.getAgence() != null && manager.getAgence().getId().equals(agenceId);
+                    }
+                    return false;
+                })
+                .map(utilisateurConverter::toResponse)
+                .toList();
     }
 
     // =========================================================================
@@ -216,8 +238,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     public UserResponse updateProfil(Long clientId, UpdateProfilRequest request) {
         Utilisateur user = utilisateurRepository.findById(clientId)
                 .orElseThrow(() -> new TransfertNotFoundException(
-                        "Client introuvable (id=" + clientId + ")"
-                ));
+                        "Client introuvable (id=" + clientId + ")"));
 
         utilisateurConverter.applyUpdate(user, request);
 
@@ -274,8 +295,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     public void demanderEffacement(Long clientId) {
         Utilisateur user = utilisateurRepository.findById(clientId)
                 .orElseThrow(() -> new TransfertNotFoundException(
-                        "Client introuvable (id=" + clientId + ")"
-                ));
+                        "Client introuvable (id=" + clientId + ")"));
 
         // pseudonymisation de toutes les données personnelles
         user.setNom("SUPPRIME");
@@ -283,7 +303,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         user.setEmail("deleted_" + clientId + "@supprime.local");
         user.setTelephone("0000000000");
         user.setPays("XX");
-        user.setMotDePasseHash("SUPPRIME");   // hash invalide → connexion impossible
+        user.setMotDePasseHash("SUPPRIME"); // hash invalide → connexion impossible
         user.setActif(false);
 
         // délégation à IPieceIdentiteService pour la suppression des pièces

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -63,6 +63,13 @@ export class TransfertService {
     return this.http.get<TransfertResponse[]>(`${this.baseTransferts}/mes-transferts`, {
       params: { clientId: clientId.toString() },
     });
+  }
+
+  getByAgence(agenceId: number, debut:Date, fin:Date): Observable<TransfertResponse[]> {
+    let params = new HttpParams();
+    if (debut) params = params.set('debut', debut.toISOString());
+    if (fin)   params = params.set('fin', fin.toISOString());
+    return this.http.get<TransfertResponse[]>(`${this.baseTransferts}/agence/${agenceId}`, { params });
   }
 
   // ─── Bénéficiaires ─────────────────────────────────────────────────────────

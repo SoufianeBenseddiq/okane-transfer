@@ -1,0 +1,383 @@
+<div class="rapport-page">
+  <!-- ───── HEADER ───── -->
+  <div class="rapport-header">
+    <div class="header-left">
+      <div class="breadcrumb">
+        MANAGER · {{ agence?.nom ?? "AGENCE" | uppercase }}
+      </div>
+      <h1 class="page-title">Rapport d'agence</h1>
+      <div class="page-subtitle">Mai 2026 · vue détaillée</div>
+    </div>
+
+    <div class="header-actions">
+      <div class="period-tabs">
+        <button
+          class="period-btn"
+          [class.active]="selectedPeriod === 'today'"
+          (click)="setPeriod('today')"
+        >
+          Auj.
+        </button>
+        <button
+          class="period-btn"
+          [class.active]="selectedPeriod === 'week'"
+          (click)="setPeriod('week')"
+        >
+          Sem.
+        </button>
+        <button
+          class="period-btn"
+          [class.active]="selectedPeriod === 'month'"
+          (click)="setPeriod('month')"
+        >
+          Mois
+        </button>
+        <button
+          class="period-btn"
+          [class.active]="selectedPeriod === 'custom'"
+          (click)="setPeriod('custom')"
+        >
+          Période
+        </button>
+      </div>
+      <button class="btn-export" (click)="exportPdf()">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"
+          />
+        </svg>
+        Exporter PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- ───── LOADING / ERROR ───── -->
+  @if (loading) {
+    <div class="state-loading">
+      <div class="spinner"></div>
+      <span>Chargement des données…</span>
+    </div>
+  }
+
+  @if (error && !loading) {
+    <div class="state-error">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+      {{ error }}
+    </div>
+  }
+
+  @if (!loading && !error) {
+    <!-- ───── KPI CARDS ───── -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon kpi-icon--blue">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="22" y1="2" x2="11" y2="13" />
+            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+          </svg>
+        </div>
+        <div class="kpi-label">TRANSFERTS</div>
+        <div class="kpi-value">{{ kpis.totalTransferts }}</div>
+        <div class="kpi-growth positive">↑ +{{ kpis.growthTransferts }}%</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon kpi-icon--gold">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="16" />
+            <line x1="8" y1="12" x2="16" y2="12" />
+          </svg>
+        </div>
+        <div class="kpi-label">CA TOTAL</div>
+        <div class="kpi-value">{{ formatAmount(kpis.caTotal) }} MAD</div>
+        <div class="kpi-growth positive">↑ +{{ kpis.growthCa }}%</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon kpi-icon--green">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+            <polyline points="16 7 22 7 22 13" />
+          </svg>
+        </div>
+        <div class="kpi-label">COMMISSIONS AGENCE</div>
+        <div class="kpi-value">
+          {{ formatAmount(kpis.commissionsAgence) }} MAD
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-card--best-agent">
+        <div class="kpi-label kpi-label--trophy">
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="#f59e0b"
+            stroke="none"
+          >
+            <path
+              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+            />
+          </svg>
+          MEILLEUR AGENT
+        </div>
+
+        @if (kpis.meilleurAgent) {
+          <div class="best-agent-row">
+            <div class="agent-avatar">
+              {{ getAgentInitials(kpis.meilleurAgent) }}
+            </div>
+            <div>
+              <div class="kpi-value kpi-value--sm">
+                {{ kpis.meilleurAgent.prenom }} {{ kpis.meilleurAgent.nom }}
+              </div>
+              <div class="kpi-growth positive">
+                {{ formatAmount(kpis.meilleurAgentCommission) }} MAD com.
+              </div>
+            </div>
+          </div>
+        } @else {
+          <div class="kpi-empty">Aucune donnée</div>
+        }
+      </div>
+    </div>
+
+    <!-- ───── CHART ───── -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-tag">ÉVOLUTION</div>
+        <div class="chart-title">Volume journalier (mai 2026 · k MAD)</div>
+      </div>
+
+      <svg
+        class="area-chart"
+        [attr.viewBox]="'0 0 ' + chartWidth + ' ' + chartHeight"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35" />
+            <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.02" />
+          </linearGradient>
+        </defs>
+
+        <!-- Area fill -->
+        @if (chartAreaPath) {
+          <path
+            [attr.d]="chartAreaPath"
+            fill="url(#areaGrad)"
+          />
+        }
+
+        <!-- Line -->
+        @if (chartPath) {
+          <path
+            [attr.d]="chartPath"
+            fill="none"
+            stroke="#f59e0b"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        }
+
+        <!-- Dot at last point -->
+        @if (dailyVolumes.length) {
+          <circle
+            [attr.cx]="
+              chartPadding.left +
+              (chartWidth - chartPadding.left - chartPadding.right)
+            "
+            [attr.cy]="
+  chartPadding.top +
+  (chartHeight - chartPadding.top - chartPadding.bottom) -
+  (dailyVolumes[dailyVolumes.length - 1].volume / getMaxVolume()) *
+  (chartHeight - chartPadding.top - chartPadding.bottom)
+"
+            r="4"
+            fill="#f59e0b"
+            stroke="#1e2535"
+            stroke-width="2"
+          />
+        }
+
+        <!-- X-axis labels -->
+        @for (lbl of chartXLabels; track lbl.label) {
+          <text
+            [attr.x]="lbl.x"
+            [attr.y]="chartHeight - 5"
+            text-anchor="middle"
+            class="chart-label"
+          >
+            {{ lbl.label }}
+          </text>
+        }
+      </svg>
+    </div>
+
+    <!-- ───── FILTERABLE TABLE ───── -->
+    <div class="table-card">
+      <div class="table-header">
+        <div>
+          <div class="table-tag">DÉTAIL</div>
+          <div class="table-title">Transferts filtrables</div>
+        </div>
+        <div class="table-filters">
+          <div class="filter-chip">
+            <label>Date</label>
+            <input
+              type="date"
+              [(ngModel)]="filterDate"
+              (ngModelChange)="onFilterChange()"
+              class="filter-input"
+            />
+          </div>
+
+          <div class="filter-chip">
+            <label>Agent</label>
+            <select
+              [(ngModel)]="filterAgent"
+              (ngModelChange)="onFilterChange()"
+              class="filter-select"
+            >
+              @for (opt of agentOptions; track opt) {
+                <option [value]="opt">
+                  {{ opt === "tous" ? "tous" : opt }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="filter-chip">
+            <label>Corridor</label>
+            <select
+              [(ngModel)]="filterCorridor"
+              (ngModelChange)="onFilterChange()"
+              class="filter-select"
+            >
+              @for (opt of corridorOptions; track opt) {
+                <option [value]="opt">
+                  {{ opt }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <button class="filter-chip filter-chip--active">
+            Statut · {{ filterStatuts.length }} sélectionnés
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="transferts-table">
+          <thead>
+            <tr>
+              <th>RÉF.</th>
+              <th>DATE</th>
+              <th>AGENT</th>
+              <th>EXPÉDITEUR</th>
+              <th>BÉNÉFICIAIRE</th>
+              <th>CORRIDOR</th>
+              <th class="text-right">MONTANT</th>
+              <th class="text-right">FRAIS</th>
+              <th>STATUT</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (t of filteredTransferts; track t.codeRetrait) {
+              <tr class="table-row">
+                <td class="ref-cell">{{ t.numeroReference }}</td>
+
+                <td class="date-cell">
+                  {{ t.creeLe | date: "dd/MM · HH:mm" }}
+                </td>
+
+                <td>{{ t.agent?.prenom }} {{ t.agent?.nom }}</td>
+
+                <td>{{ t.nomExpediteur }}</td>
+
+                <td>
+                  {{ t.nomBeneficiaire }}
+                </td>
+
+                <td>
+                  <span class="corridor-badge">
+                    {{ t.corridor?.libelle }}
+                  </span>
+                </td>
+
+                <td class="amount-cell">
+                  {{ formatAmount(t.montantEnvoye) }} MAD
+                </td>
+
+                <td class="frais-cell">
+                  {{ formatAmount(t.frais) }} MAD
+                </td>
+
+                <td>
+                  <span
+                    class="statut-badge"
+                    [ngClass]="getStatutClass(t.statut)"
+                  >
+                    <span class="statut-dot"></span>
+                    {{ getStatutLabel(t.statut) }}
+                  </span>
+                </td>
+              </tr>
+            }
+
+            @if (filteredTransferts.length === 0) {
+              <tr>
+                <td colspan="9" class="empty-row">
+                  Aucun transfert pour les filtres sélectionnés
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

@@ -1,5 +1,9 @@
 package com.okanetransfer.service.facade.user;
 
+import java.util.List;
+
+import org.springframework.security.core.Authentication;
+
 import com.okanetransfer.entity.user.Agent;
 import com.okanetransfer.entity.user.Client;
 import com.okanetransfer.entity.user.Utilisateur;
@@ -8,23 +12,24 @@ import com.okanetransfer.service.dto.user.request.PieceIdentiteRequest;
 import com.okanetransfer.service.dto.user.request.UpdateProfilRequest;
 import com.okanetransfer.service.dto.user.response.PieceIdentiteResponse;
 import com.okanetransfer.service.dto.user.response.UserResponse;
-import org.springframework.security.core.Authentication;
-
-import java.util.List;
+import com.okanetransfer.shared.enums.RoleUtilisateur;
 
 /**
  * Interface du service utilisateur.
  *
  * Contrat public utilisé par :
- *   - UserController        → CRUD utilisateurs, profil
- *   - AuthController        → getCurrentUser
- *   - TransfertServiceImpl  → getAgentByEmail, findClientByTelephone  (Membre 4)
- *   - AmlServiceImpl        → getClientByEmail                        (Membre 5)
+ * - UserController → CRUD utilisateurs, profil
+ * - AuthController → getCurrentUser
+ * - TransfertServiceImpl → getAgentByEmail, findClientByTelephone (Membre 4)
+ * - AmlServiceImpl → getClientByEmail (Membre 5)
  *
- * Note : les opérations sur les pièces d'identité sont dans IPieceIdentiteService.
- * UserServiceImpl délègue vers IPieceIdentiteService — jamais vers PieceIdentiteRepository.
+ * Note : les opérations sur les pièces d'identité sont dans
+ * IPieceIdentiteService.
+ * UserServiceImpl délègue vers IPieceIdentiteService — jamais vers
+ * PieceIdentiteRepository.
  *
- * IMPORTANT : les autres membres injectent cette interface, jamais UserServiceImpl.
+ * IMPORTANT : les autres membres injectent cette interface, jamais
+ * UserServiceImpl.
  */
 public interface UtilisateurService {
 
@@ -38,17 +43,21 @@ public interface UtilisateurService {
      *
      * @param authentication objet Spring Security injecté automatiquement
      * @return l'entité Utilisateur
-     * @throws com.okanetransfer.shared.exception.AccesRefuseException si introuvable
+     * @throws com.okanetransfer.shared.exception.AccesRefuseException si
+     *                                                                 introuvable
      */
     Utilisateur getCurrentUser(Authentication authentication);
 
     /**
      * Récupère l'agent connecté par son email.
-     * Utilisé par TransfertServiceImpl pour identifier l'agent qui saisit un transfert.
+     * Utilisé par TransfertServiceImpl pour identifier l'agent qui saisit un
+     * transfert.
      *
      * @param email l'email de l'agent (= authentication.getName())
      * @return l'entité Agent avec son agence chargée
-     * @throws com.okanetransfer.shared.exception.AccesRefuseException si agent introuvable ou inactif
+     * @throws com.okanetransfer.shared.exception.AccesRefuseException si agent
+     *                                                                 introuvable
+     *                                                                 ou inactif
      */
     Agent getAgentByEmail(String email);
 
@@ -68,7 +77,8 @@ public interface UtilisateurService {
      *
      * @param email l'email du client
      * @return l'entité Client
-     * @throws com.okanetransfer.shared.exception.AccesRefuseException si introuvable
+     * @throws com.okanetransfer.shared.exception.AccesRefuseException si
+     *                                                                 introuvable
      */
     Client getClientByEmail(String email);
 
@@ -116,6 +126,15 @@ public interface UtilisateurService {
      * @return UserResponse
      */
     UserResponse getById(Long userId);
+
+    /**
+     * Liste les utilisateurs d'une agence avec filtre optionnel par rôle.
+     *
+     * @param agenceId id de l'agence
+     * @param role     filtre optionnel (ex: ROLE_AGENT)
+     * @return liste de UserResponse appartenant à cette agence
+     */
+    List<UserResponse> findByAgence(Long agenceId, RoleUtilisateur role);
 
     // =========================================================================
     // CLIENT — gestion du profil

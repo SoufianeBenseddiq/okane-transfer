@@ -24,6 +24,12 @@ export class UserService {
     return this.http.get<UserResponse[]>(this.base, { params });
   }
 
+  findByAgence(agenceId: number, role?: RoleUtilisateur): Observable<UserResponse[]> {
+    let params = new HttpParams();
+    if (role) params = params.set('role', role);
+    return this.http.get<UserResponse[]>(`${this.base}/agence/${agenceId}`, { params });
+  }
+
   findById(id: number): Observable<UserResponse> {
     return this.http.get<UserResponse>(`${this.base}/${id}`);
   }
