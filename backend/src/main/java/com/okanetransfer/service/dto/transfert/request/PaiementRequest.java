@@ -8,9 +8,13 @@ public class PaiementRequest {
 
     private Long agenceRetraitId;
 
+<<<<<<< HEAD
     private TypePiece typePieceBeneficiaire;
 
     private String numeroPieceBeneficiaire;
+=======
+    private Long agentId;
+>>>>>>> 78c7d10560abb4927f42ed9e093d2c396875add6
 
     public PaiementRequest() {
     }
@@ -31,6 +35,7 @@ public class PaiementRequest {
         this.agenceRetraitId = agenceRetraitId;
     }
 
+<<<<<<< HEAD
     public TypePiece getTypePieceBeneficiaire() { return typePieceBeneficiaire; }
 
     public void setTypePieceBeneficiaire(TypePiece typePieceBeneficiaire) { this.typePieceBeneficiaire = typePieceBeneficiaire; }
@@ -39,3 +44,13 @@ public class PaiementRequest {
 
     public void setNumeroPieceBeneficiaire(String numeroPieceBeneficiaire) { this.numeroPieceBeneficiaire = numeroPieceBeneficiaire; }
 }
+=======
+    public Long getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(Long agentId) {
+        this.agentId = agentId;
+    }
+}
+>>>>>>> 78c7d10560abb4927f42ed9e093d2c396875add6

@@ -30,11 +30,13 @@ public class DeclarationSoupconServiceImpl implements IDeclarationSoupconService
     public DeclarationSoupcon update(Long id, DeclarationSoupcon declaration) {
         DeclarationSoupcon existing = declarationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("DeclarationSoupcon introuvable pour l'id: " + id));
-        existing.setTransfert(declaration.getTransfert());
-        existing.setRegle(declaration.getRegle());
-        existing.setMotif(declaration.getMotif());
-        existing.setMontantTotal(declaration.getMontantTotal());
-        existing.setTraitee(declaration.getTraitee());
+
+        if (declaration.getTransfert() != null)   existing.setTransfert(declaration.getTransfert());
+        if (declaration.getRegle() != null)        existing.setRegle(declaration.getRegle());
+        if (declaration.getMotif() != null)        existing.setMotif(declaration.getMotif());
+        if (declaration.getMontantTotal() != null) existing.setMontantTotal(declaration.getMontantTotal());
+        if (declaration.getTraitee() != null)      existing.setTraitee(declaration.getTraitee());
+
         return declarationRepository.save(existing);
     }
 

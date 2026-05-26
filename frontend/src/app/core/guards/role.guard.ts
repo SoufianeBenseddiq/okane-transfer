@@ -20,8 +20,8 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   if (allowedRoles.length === 0) {
     return true;
   }
-
-  const user = auth['_currentUser$'].value;
+ // const user = auth['_currentUser$'].value;
+  const user = auth.currentUser;
   if (user && allowedRoles.includes(user.role as RoleUtilisateur)) {
     return true;
   }

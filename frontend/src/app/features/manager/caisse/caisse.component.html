@@ -1,0 +1,48 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>Historique</h1>
+    <p>Historique de toutes les transactions de l'agence</p>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading-state">
+    <p>Chargement des données...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error && !loading" class="error-state">
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Content -->
+  <ng-container *ngIf="!loading && !error">
+    <div class="balance-section">
+      <div class="balance-card opening">
+        <span class="label">Solde d'ouverture</span>
+        <span class="amount">{{ openingBalance | number: '1.0-0' }} MAD</span>
+      </div>
+      <div class="balance-card current">
+        <span class="label">Solde actuel</span>
+        <span class="amount">{{ currentBalance | number: '1.0-0' }} MAD</span>
+      </div>
+    </div>
+
+    <div class="transactions-section">
+      <h2>Historique des transactions</h2>
+      <div class="transactions-list">
+        <div *ngFor="let tx of transactions" class="transaction-item" [ngClass]="'type-' + tx.type">
+          <div class="transaction-info">
+            <span class="transaction-id">{{ tx.id }}</span>
+            <span class="description">{{ tx.description }}</span>
+            <span class="time">{{ tx.time }}</span>
+          </div>
+          <span class="amount" [ngClass]="tx.type">{{ (tx.type === 'in' ? '+' : '-') }} {{ tx.amount | number: '1.0-0' }} MAD</span>
+        </div>
+
+        <div *ngIf="transactions.length === 0" class="no-data">
+          <p>Aucune transaction disponible</p>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
