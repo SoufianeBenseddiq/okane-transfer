@@ -11,6 +11,7 @@ public class PaiementRequest {
     private TypePiece typePieceBeneficiaire;
 
     private String numeroPieceBeneficiaire;
+    private Long agentId;
 
     public PaiementRequest() {
     }
@@ -38,4 +39,12 @@ public class PaiementRequest {
     public String getNumeroPieceBeneficiaire() { return numeroPieceBeneficiaire; }
 
     public void setNumeroPieceBeneficiaire(String numeroPieceBeneficiaire) { this.numeroPieceBeneficiaire = numeroPieceBeneficiaire; }
+}
+    public Long getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(Long agentId) {
+        this.agentId = agentId;
+    }
 }

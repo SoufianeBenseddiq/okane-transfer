@@ -9,5 +9,6 @@ export interface UserResponse {
   pays: string;
   role: RoleUtilisateur;
   actif: boolean;
+  agenceId?: number;
   creeLe: string;
 }

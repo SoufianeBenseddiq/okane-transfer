@@ -17,8 +17,9 @@ public interface CaisseOperationRepository extends JpaRepository<CaisseOperation
     @Query(value = """
     SELECT COALESCE(SUM(
         CASE
-            WHEN type IN ('OUVERTURE', 'DEPOT', 'REMBOURSEMENT') THEN montant
-            ELSE -montant
+            WHEN type IN ('OUVERTURE', 'ENVOI', 'AJUSTEMENT') THEN montant
+            WHEN type = 'RETRAIT' THEN -montant
+            ELSE 0
         END
     ), 0)
     FROM caisse_operations

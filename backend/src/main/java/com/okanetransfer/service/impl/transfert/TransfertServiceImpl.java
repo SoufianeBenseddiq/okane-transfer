@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.okanetransfer.entity.agence.Agence;
+import com.okanetransfer.entity.caisse.CaisseOperation;
 import com.okanetransfer.entity.devise.Corridor;
 import com.okanetransfer.entity.devise.GrilleTarifaire;
 import com.okanetransfer.entity.transfert.Beneficiaire;
@@ -20,6 +21,7 @@ import com.okanetransfer.entity.user.Agent;
 import com.okanetransfer.entity.user.Client;
 import com.okanetransfer.entity.user.PieceIdentite;
 import com.okanetransfer.repository.agence.AgenceRepository;
+import com.okanetransfer.repository.caisse.CaisseOperationRepository;
 import com.okanetransfer.repository.devise.CorridorRepository;
 import com.okanetransfer.repository.devise.GrilleTarifaireRepository;
 import com.okanetransfer.repository.transfert.BeneficiaireRepository;
@@ -32,9 +34,22 @@ import com.okanetransfer.service.dto.transfert.request.CreateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.request.PaiementRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.response.TransfertResponse;
+import com.okanetransfer.service.dto.transfert.response.TransfertStatsResponse;
 import com.okanetransfer.service.facade.transfert.ITransfertService;
 import com.okanetransfer.shared.enums.StatutTransfert;
 import com.okanetransfer.shared.exception.TransfertNotFoundException;
+import com.okanetransfer.shared.enums.TypeOperation;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -49,6 +64,8 @@ public class TransfertServiceImpl implements ITransfertService {
     private final CorridorRepository corridorRepository;
     private final GrilleTarifaireRepository grilleTarifaireRepository;
 
+    private final CaisseOperationRepository caisseOperationRepository;
+
     public TransfertServiceImpl(
             TransfertRepository transfertRepository,
             BeneficiaireRepository beneficiaireRepository,
@@ -57,7 +74,8 @@ public class TransfertServiceImpl implements ITransfertService {
             PieceIdentiteRepository pieceIdentiteRepository,
             AgenceRepository agenceRepository,
             CorridorRepository corridorRepository,
-            GrilleTarifaireRepository grilleTarifaireRepository) {
+            GrilleTarifaireRepository grilleTarifaireRepository,
+            CaisseOperationRepository caisseOperationRepository) {
 
         this.transfertRepository = transfertRepository;
         this.beneficiaireRepository = beneficiaireRepository;
@@ -67,6 +85,7 @@ public class TransfertServiceImpl implements ITransfertService {
         this.agenceRepository = agenceRepository;
         this.corridorRepository = corridorRepository;
         this.grilleTarifaireRepository = grilleTarifaireRepository;
+        this.caisseOperationRepository = caisseOperationRepository;
     }
 
     // ── Lecture ───────────────────────────────────────────────────────────────
@@ -74,10 +93,55 @@ public class TransfertServiceImpl implements ITransfertService {
     @Override
     @Transactional(readOnly = true)
     public List<TransfertResponse> getAllTransferts() {
-        return transfertRepository.findAll()
+        return transfertRepository.findAll(Sort.by(Sort.Direction.DESC, "creeLe"))
                 .stream()
                 .map(TransfertConverter::toResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TransfertStatsResponse getStats() {
+        TransfertStatsResponse stats = new TransfertStatsResponse();
+        List<Transfert> transferts = transfertRepository.findAll();
+
+        stats.setTotal(transferts.size());
+
+        BigDecimal montantTotalEnvoye = BigDecimal.ZERO;
+        BigDecimal montantTotalPaye = BigDecimal.ZERO;
+        BigDecimal fraisTotal = BigDecimal.ZERO;
+        long enAttente = 0;
+        long payes = 0;
+        long annules = 0;
+
+        for (Transfert transfert : transferts) {
+            if (transfert.getStatut() == StatutTransfert.EN_ATTENTE) {
+                enAttente++;
+            } else if (transfert.getStatut() == StatutTransfert.PAYE) {
+                payes++;
+                if (transfert.getMontantRecu() != null) {
+                    montantTotalPaye = montantTotalPaye.add(transfert.getMontantRecu());
+                }
+            } else if (transfert.getStatut() == StatutTransfert.ANNULE) {
+                annules++;
+            }
+
+            if (transfert.getMontantEnvoye() != null) {
+                montantTotalEnvoye = montantTotalEnvoye.add(transfert.getMontantEnvoye());
+            }
+            if (transfert.getFrais() != null) {
+                fraisTotal = fraisTotal.add(transfert.getFrais());
+            }
+        }
+
+        stats.setEnAttente(enAttente);
+        stats.setPayes(payes);
+        stats.setAnnules(annules);
+        stats.setMontantTotalEnvoye(montantTotalEnvoye);
+        stats.setMontantTotalPaye(montantTotalPaye);
+        stats.setFraisTotal(fraisTotal);
+
+        return stats;
     }
 
     @Override
@@ -87,6 +151,7 @@ public class TransfertServiceImpl implements ITransfertService {
                 .orElseThrow(() -> new TransfertNotFoundException("Transfert introuvable"));
         return TransfertConverter.toResponse(transfert);
     }
+                .orElseThrow(() -> new IllegalArgumentException("Transfert introuvable"));
 
     @Override
     @Transactional(readOnly = true)
@@ -126,13 +191,14 @@ public class TransfertServiceImpl implements ITransfertService {
     public TransfertResponse creerTransfert(CreateTransfertRequest request) {
 
         if (request.getMontant() == null || request.getMontant().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Montant invalide");
+            throw new IllegalArgumentException("Montant invalide");
         }
 
         // Récupération des entités liées
         Client client = request.getClientId() == null
                 ? null
-                : utilisateurRepository.findClientById(request.getClientId()).orElse(null);
+                : utilisateurRepository.findClientById(request.getClientId())
+                .orElseThrow(() -> new IllegalArgumentException("Client introuvable"));
 
         PieceIdentite pieceIdentite = null;
         if (request.getPieceIdentiteId() != null) {
@@ -140,23 +206,33 @@ public class TransfertServiceImpl implements ITransfertService {
                     ? pieceIdentiteRepository.findById(request.getPieceIdentiteId()).orElse(null)
                     : pieceIdentiteRepository.findByIdAndClientId(request.getPieceIdentiteId(), client.getId())
                             .orElse(null);
+                    ? pieceIdentiteRepository.findById(request.getPieceIdentiteId())
+                    .orElseThrow(() -> new IllegalArgumentException("Piece d'identite introuvable"))
+                    : pieceIdentiteRepository.findByIdAndClientId(request.getPieceIdentiteId(), client.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Piece d'identite introuvable pour ce client"));
         }
 
-        Agent agent = request.getAgentId() == null
-                ? null
-                : utilisateurRepository.findAgentById(request.getAgentId()).orElse(null);
+        if (request.getAgentId() == null) {
+            throw new IllegalArgumentException("Agent obligatoire pour enregistrer l'operation de caisse");
+        }
+
+        Agent agent = utilisateurRepository.findAgentById(request.getAgentId())
+                .orElseThrow(() -> new IllegalArgumentException("Agent introuvable ou inactif"));
 
         Agence agenceEnvoi = request.getAgenceEnvoiId() == null
                 ? null
-                : agenceRepository.findById(request.getAgenceEnvoiId()).orElse(null);
+                : agenceRepository.findById(request.getAgenceEnvoiId())
+                .orElseThrow(() -> new IllegalArgumentException("Agence d'envoi introuvable"));
 
         Corridor corridor = request.getCorridorId() == null
                 ? null
-                : corridorRepository.findById(request.getCorridorId()).orElse(null);
+                : corridorRepository.findById(request.getCorridorId())
+                .orElseThrow(() -> new IllegalArgumentException("Corridor introuvable"));
 
         GrilleTarifaire grilleTarifaire = request.getGrilleTarifaireId() == null
                 ? null
-                : grilleTarifaireRepository.findById(request.getGrilleTarifaireId()).orElse(null);
+                : grilleTarifaireRepository.findById(request.getGrilleTarifaireId())
+                .orElseThrow(() -> new IllegalArgumentException("Grille tarifaire introuvable"));
 
         // Expéditeur
         Expediteur expediteur = new Expediteur();
@@ -176,6 +252,18 @@ public class TransfertServiceImpl implements ITransfertService {
         // Calcul des frais
         BigDecimal frais;
         if (grilleTarifaire != null) {
+            if (grilleTarifaire.getFraisFixe() == null || grilleTarifaire.getFraisPourcentage() == null) {
+                throw new IllegalArgumentException("Grille tarifaire incomplete");
+            }
+            if (grilleTarifaire.getMontantMin() != null
+                    && request.getMontant().compareTo(grilleTarifaire.getMontantMin()) < 0) {
+                throw new IllegalArgumentException("Montant inferieur au minimum de la grille tarifaire");
+            }
+            if (grilleTarifaire.getMontantMax() != null
+                    && request.getMontant().compareTo(grilleTarifaire.getMontantMax()) > 0) {
+                throw new IllegalArgumentException("Montant superieur au maximum de la grille tarifaire");
+            }
+
             BigDecimal fraisVariables = request.getMontant()
                     .multiply(grilleTarifaire.getFraisPourcentage())
                     .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
@@ -224,6 +312,9 @@ public class TransfertServiceImpl implements ITransfertService {
         transfert.setGrilleTarifaire(grilleTarifaire);
 
         transfert = transfertRepository.save(transfert);
+
+        enregistrerOperationCaisse(transfert, agent, TypeOperation.ENVOI, transfert.getMontantEnvoye());
+
         return TransfertConverter.toResponse(transfert);
     }
 
@@ -277,6 +368,28 @@ public class TransfertServiceImpl implements ITransfertService {
             throw new RuntimeException("Transfert déjà payé");
         }
 
+        Agent agentPaiement = request.getAgentId() == null
+                ? transfert.getAgentSaisie()
+                : utilisateurRepository.findAgentById(request.getAgentId())
+                .orElseThrow(() -> new RuntimeException("Agent introuvable"));
+
+        if (agentPaiement == null) {
+            throw new RuntimeException("Agent de paiement obligatoire");
+        }
+
+        Agence agenceRetrait = request.getAgenceRetraitId() == null
+                ? null
+                : agenceRepository.findById(request.getAgenceRetraitId())
+                .orElseThrow(() -> new RuntimeException("Agence de retrait introuvable"));
+
+        BigDecimal soldeActuel = agentPaiement.getSoldeCaisse() == null
+                ? BigDecimal.ZERO
+                : agentPaiement.getSoldeCaisse();
+
+        if (soldeActuel.compareTo(transfert.getMontantRecu()) < 0) {
+            throw new RuntimeException("Solde caisse insuffisant pour payer ce transfert");
+        }
+
         transfert.setStatut(StatutTransfert.PAYE);
         transfert.setPayeLe(LocalDateTime.now());
         transfert.setAgenceRetrait(null); // TODO: brancher agenceRetraitId
@@ -284,6 +397,13 @@ public class TransfertServiceImpl implements ITransfertService {
         transfert.setNumeroPieceBeneficiaire(request.getNumeroPieceBeneficiaire());
 
         transfert = transfertRepository.save(transfert);
+
+        transfert.setAgenceRetrait(agenceRetrait);
+
+        transfert = transfertRepository.save(transfert);
+
+        enregistrerOperationCaisse(transfert, agentPaiement, TypeOperation.RETRAIT, transfert.getMontantRecu());
+
         return TransfertConverter.toResponse(transfert);
     }
 
@@ -309,4 +429,51 @@ public class TransfertServiceImpl implements ITransfertService {
     // Je n'ai pas implémenté DELETE /api/transferts/{id} car les transactions
     // doivent rester toujours traçables.
     // À la place, j'ai créé un endpoint d'annulation de transaction.
+}
+    private void enregistrerOperationCaisse(Transfert transfert, Agent agent, TypeOperation type, BigDecimal montant) {
+        if (agent == null || montant == null) {
+            return;
+        }
+
+        CaisseOperation operation = new CaisseOperation();
+        operation.setAgent(agent);
+        operation.setTransfert(transfert);
+        operation.setReferenceTransfert(transfert.getNumeroReference());
+        operation.setType(type);
+        operation.setMontant(montant);
+        operation.setDateHeure(LocalDateTime.now());
+
+        caisseOperationRepository.save(operation);
+
+        BigDecimal soldeActuel = agent.getSoldeCaisse() == null
+                ? BigDecimal.ZERO
+                : agent.getSoldeCaisse();
+
+        if (type == TypeOperation.RETRAIT) {
+            agent.setSoldeCaisse(soldeActuel.subtract(montant));
+        } else {
+            agent.setSoldeCaisse(soldeActuel.add(montant));
+        }
+
+        utilisateurRepository.save(agent);
+    }
+
+    @Override
+    public BigDecimal commissionsAgent(String email, LocalDate debut, LocalDate fin) {
+        return transfertRepository.sumCommissionsAgent(
+                email,
+                debut.atStartOfDay(),
+                fin.atTime(23, 59, 59)
+        );
+    }
+    @Override
+    public TransfertResponse annulerTransfert(Long id) {
+        Transfert transfert = transfertRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transfert introuvable"));
+
+        transfert.setStatut(StatutTransfert.ANNULE);
+        transfert = transfertRepository.save(transfert);
+
+        return TransfertConverter.toResponse(transfert);
+    }
 }

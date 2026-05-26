@@ -10,6 +10,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.okanetransfer.entity.transfert.Transfert;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TransfertRepository
@@ -39,4 +43,15 @@ public interface TransfertRepository
             @Param("agenceId") Long agenceId,
             @Param("debut") LocalDate debut,
             @Param("fin") LocalDate fin);
+    SELECT COALESCE(SUM(t.grilleTarifaire.partAgence), 0)
+    FROM Transfert t
+    WHERE t.agentSaisie.email = :email
+    AND t.creeLe BETWEEN :from AND :to
+    AND t.statut <> 'ANNULE'
+""")
+    BigDecimal sumCommissionsAgent(
+            @Param("email") String email,
+            @Param("from") LocalDateTime from,
+            @Param("to")    LocalDateTime to
+    );
 }
