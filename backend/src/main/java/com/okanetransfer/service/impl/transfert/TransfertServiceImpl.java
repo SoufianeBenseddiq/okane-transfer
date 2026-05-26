@@ -1,5 +1,14 @@
 package com.okanetransfer.service.impl.transfert;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.okanetransfer.entity.agence.Agence;
 import com.okanetransfer.entity.devise.Corridor;
@@ -26,14 +35,6 @@ import com.okanetransfer.service.dto.transfert.response.TransfertResponse;
 import com.okanetransfer.service.facade.transfert.ITransfertService;
 import com.okanetransfer.shared.enums.StatutTransfert;
 import com.okanetransfer.shared.exception.TransfertNotFoundException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -137,7 +138,8 @@ public class TransfertServiceImpl implements ITransfertService {
         if (request.getPieceIdentiteId() != null) {
             pieceIdentite = client == null
                     ? pieceIdentiteRepository.findById(request.getPieceIdentiteId()).orElse(null)
-                    : pieceIdentiteRepository.findByIdAndClientId(request.getPieceIdentiteId(), client.getId()).orElse(null);
+                    : pieceIdentiteRepository.findByIdAndClientId(request.getPieceIdentiteId(), client.getId())
+                            .orElse(null);
         }
 
         Agent agent = request.getAgentId() == null
@@ -295,6 +297,16 @@ public class TransfertServiceImpl implements ITransfertService {
         return TransfertConverter.toResponse(transfert);
     }
 
-    // Je n'ai pas implémenté DELETE /api/transferts/{id} car les transactions doivent rester toujours traçables.
+    @Override
+    @Transactional(readOnly = true)
+    public List<TransfertResponse> findByAgence(Long agenceId, LocalDate debut, LocalDate fin) {
+        return transfertRepository.findByAgenceAndDateRange(agenceId, debut, fin)
+                .stream()
+                .map(TransfertConverter::toResponse)
+                .toList();
+    }
+
+    // Je n'ai pas implémenté DELETE /api/transferts/{id} car les transactions
+    // doivent rester toujours traçables.
     // À la place, j'ai créé un endpoint d'annulation de transaction.
 }

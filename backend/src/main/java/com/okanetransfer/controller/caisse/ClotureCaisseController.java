@@ -1,18 +1,27 @@
 package com.okanetransfer.controller.caisse;
 
+import java.time.LocalDate;
+import java.util.List;
 
-import com.okanetransfer.service.dto.caisse.request.ClotureCaisseRequest;
-import com.okanetransfer.service.dto.caisse.response.ClotureCaisseResponse;
-import com.okanetransfer.service.facade.caisse.ClotureCaisseService;
-import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.util.List;
+import com.okanetransfer.service.dto.caisse.request.ClotureCaisseRequest;
+import com.okanetransfer.service.dto.caisse.response.ClotureCaisseResponse;
+import com.okanetransfer.service.facade.caisse.ClotureCaisseService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/clotures-caisse/")
@@ -24,7 +33,8 @@ public class ClotureCaisseController {
         this.clotureCaisseService = clotureCaisseService;
     }
 
-    // AGENT consulte sa propre clôture, MANAGER et ADMIN consultent n'importe laquelle
+    // AGENT consulte sa propre clôture, MANAGER et ADMIN consultent n'importe
+    // laquelle
     @GetMapping("agent/{email}/date/{date}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_AGENT')")
     public ResponseEntity<ClotureCaisseResponse> findByAgentEmailAndDate(
@@ -82,17 +92,26 @@ public class ClotureCaisseController {
     @PreAuthorize("hasRole('ROLE_AGENT')")
     public ResponseEntity<ClotureCaisseResponse> rapportCloture(@PathVariable String email, @RequestParam String date) {
         return ResponseEntity.ok(
-                clotureCaisseService.rapportCloture(email, LocalDate.parse(date))
-        );
+                clotureCaisseService.rapportCloture(email, LocalDate.parse(date)));
     }
 
     @PostMapping("/{email}/cloturer")
     @PreAuthorize("hasRole('ROLE_AGENT')")
-    public ResponseEntity<ClotureCaisseResponse> cloturerCaisse(@PathVariable String email, @RequestBody ClotureCaisseRequest request) {
+    public ResponseEntity<ClotureCaisseResponse> cloturerCaisse(@PathVariable String email,
+            @RequestBody ClotureCaisseRequest request) {
         request.setAgentEmail(email);
 
         return ResponseEntity.ok(
-                clotureCaisseService.cloturerCaisse(request)
-        );
+                clotureCaisseService.cloturerCaisse(request));
     }
+
+    @GetMapping("/agence/{agenceId}")
+    //@PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
+    public ResponseEntity<List<ClotureCaisseResponse>> getByAgence(
+            @PathVariable Long agenceId,
+            @RequestParam(defaultValue = "30") int limit) {
+        return ResponseEntity.ok(
+                clotureCaisseService.findByAgence(agenceId, limit));
+    }
+
 }

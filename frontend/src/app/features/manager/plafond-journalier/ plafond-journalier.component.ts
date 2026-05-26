@@ -152,9 +152,9 @@ export class PlafondJournalierComponent implements OnInit, OnDestroy {
   //     So consulterSolde is NOT used here — we compute solde from transferts.
   // ═══════════════════════════════════════════════════════════════════════
   loadData(): void {
-   const  email = 'manager.marrakech@okane.com';
-    //const email = this.auth.currentUser?.email;
-  //  if (!email) return;
+   //const  email = 'manager.marrakech@okane.com';
+    const email = this.auth.currentUser?.email;
+   if (!email) return;
 
     this.loading = true;
     this.error   = '';
