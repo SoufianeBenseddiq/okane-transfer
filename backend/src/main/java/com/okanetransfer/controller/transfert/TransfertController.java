@@ -7,11 +7,14 @@ import com.okanetransfer.service.dto.transfert.request.PaiementRequest;
 import com.okanetransfer.service.dto.transfert.request.SendTransfertReceiptEmailRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.response.TransfertResponse;
+import com.okanetransfer.service.dto.transfert.response.TransfertStatsResponse;
 import com.okanetransfer.service.facade.transfert.ITransfertService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -33,12 +36,33 @@ public class TransfertController {
         );
     }
 
+    @GetMapping("/stats")
+    public ResponseEntity<TransfertStatsResponse> getStats() {
+        return ResponseEntity.ok(
+                transfertService.getStats()
+        );
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TransfertResponse> getById(
             @PathVariable("id") Long id) {
 
         return ResponseEntity.ok(
                 transfertService.getTransfertById(id)
+        );
+    }
+
+    @GetMapping("/agent/{email}/commissions")
+    public ResponseEntity<BigDecimal> commissionsAgent(
+            @PathVariable String email,
+            @RequestParam String dateDebut,
+            @RequestParam String dateFin) {
+
+        return ResponseEntity.ok(
+                transfertService.commissionsAgent(
+                        email,
+                        LocalDate.parse(dateDebut),
+                        LocalDate.parse(dateFin))
         );
     }
 

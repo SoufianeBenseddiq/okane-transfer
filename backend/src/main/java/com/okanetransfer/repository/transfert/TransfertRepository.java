@@ -7,18 +7,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TransfertRepository
-        extends JpaRepository<Transfert, Long> {
+public interface TransfertRepository extends JpaRepository<Transfert, Long> {
 
     @Query("""
-        SELECT t FROM Transfert t
-        WHERE function('replace', upper(t.codeRetrait), '-', '') = :codeRetrait
-           OR upper(t.codeRetrait) = :codeRetrait
-        """)
+            SELECT t FROM Transfert t
+            WHERE function('replace', upper(t.codeRetrait), '-', '') = :codeRetrait
+               OR upper(t.codeRetrait) = :codeRetrait
+            """)
     Optional<Transfert> findByCodeRetraitNormalise(
             @Param("codeRetrait") String codeRetrait
     );
@@ -30,11 +31,24 @@ public interface TransfertRepository
     List<Transfert> findByExpediteurClientId(Long clientId);
 
     @Query("""
-        SELECT t FROM Transfert t
-        WHERE t.beneficiaire.telephone = :telephone
-        ORDER BY t.creeLe DESC
-        """)
+            SELECT t FROM Transfert t
+            WHERE t.beneficiaire.telephone = :telephone
+            ORDER BY t.creeLe DESC
+            """)
     List<Transfert> findByBeneficiairePhone(
             @Param("telephone") String telephone
+    );
+
+    @Query("""
+            SELECT COALESCE(SUM(t.grilleTarifaire.partAgence), 0)
+            FROM Transfert t
+            WHERE t.agentSaisie.email = :email
+            AND t.creeLe BETWEEN :from AND :to
+            AND t.statut <> 'ANNULE'
+            """)
+    BigDecimal sumCommissionsAgent(
+            @Param("email") String email,
+            @Param("from") LocalDateTime from,
+            @Param("to")   LocalDateTime to
     );
 }

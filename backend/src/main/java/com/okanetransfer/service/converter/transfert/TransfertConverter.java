@@ -32,7 +32,11 @@ public class TransfertConverter {
 
         TransfertResponse r = new TransfertResponse();
 
+<<<<<<< HEAD
         // ── Identifiants ──────────────────────────────────────────────────────
+=======
+        r.setId(t.getId());
+>>>>>>> 78c7d10560abb4927f42ed9e093d2c396875add6
         r.setCodeRetrait(t.getCodeRetrait());
         r.setNumeroReference(t.getNumeroReference());
 
@@ -45,6 +49,7 @@ public class TransfertConverter {
         // ── Statut & Dates ────────────────────────────────────────────────────
         r.setStatut(t.getStatut().name());
         r.setCreeLe(t.getCreeLe());
+<<<<<<< HEAD
         r.setExpireLe(t.getCreeLe() != null ? t.getCreeLe().plusDays(30) : null);
 
         // ── Bénéficiaire ──────────────────────────────────────────────────────
@@ -88,6 +93,17 @@ public class TransfertConverter {
                 BigDecimal taux = tauxSource.divide(tauxDest, 4, RoundingMode.HALF_UP);
                 r.setTauxChange(taux);
             }
+=======
+        r.setPayeLe(t.getPayeLe());
+        if (t.getAgentSaisie() != null) {
+            r.setAgentId(t.getAgentSaisie().getId());
+        }
+        if (t.getAgenceEnvoi() != null) {
+            r.setAgenceEnvoiId(t.getAgenceEnvoi().getId());
+        }
+        if (t.getAgenceRetrait() != null) {
+            r.setAgenceRetraitId(t.getAgenceRetrait().getId());
+>>>>>>> 78c7d10560abb4927f42ed9e093d2c396875add6
         }
 
         return r;
