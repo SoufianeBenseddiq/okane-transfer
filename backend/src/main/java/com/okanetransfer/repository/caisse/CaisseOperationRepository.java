@@ -19,17 +19,17 @@ public interface CaisseOperationRepository extends JpaRepository<CaisseOperation
     void deleteById(Long id);
 
     @Query(value = """
-        SELECT COALESCE(SUM(
-            CASE
-                WHEN type IN ('OUVERTURE', 'ENVOI', 'DEPOT', 'REMBOURSEMENT', 'AJUSTEMENT') THEN montant
-                WHEN type IN ('RETRAIT') THEN -montant
-                ELSE 0
-            END
-        ), 0)
-        FROM caisse_operations
-        WHERE agent_id = :agentId
-          AND date_heure BETWEEN :debut AND :fin
-        """, nativeQuery = true)
+    SELECT COALESCE(SUM(
+        CASE
+            WHEN type IN ('OUVERTURE', 'ENVOI', 'DEPOT', 'REMBOURSEMENT', 'AJUSTEMENT') THEN montant
+            WHEN type IN ('RETRAIT') THEN -montant
+            ELSE 0
+        END
+    ), 0)
+    FROM caisse_operations
+    WHERE agent_id = :agentId
+      AND date_heure BETWEEN :debut AND :fin
+    """, nativeQuery = true)
     BigDecimal calculerSoldeTheorique(
             @Param("agentId") Long agentId,
             @Param("debut") LocalDateTime debut,
