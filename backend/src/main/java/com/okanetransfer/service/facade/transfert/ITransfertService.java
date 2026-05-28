@@ -37,9 +37,7 @@ public interface ITransfertService {
 
     TransfertResponse annulerTransfert(Long id);
 
-<<<<<<< HEAD
     TransfertResponse getByTelephoneBeneficiaire(String telephone);
-=======
+
     BigDecimal commissionsAgent(String email, LocalDate debut, LocalDate fin);
->>>>>>> 78c7d10560abb4927f42ed9e093d2c396875add6
 }

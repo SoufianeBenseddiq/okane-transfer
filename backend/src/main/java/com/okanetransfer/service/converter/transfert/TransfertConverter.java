@@ -13,30 +13,12 @@ public class TransfertConverter {
     private TransfertConverter() {
     }
 
-//    public static TransfertResponse toResponse(Transfert t) {
-//
-//        TransfertResponse r = new TransfertResponse();
-//
-//        r.setCodeRetrait(t.getCodeRetrait());
-//        r.setNumeroReference(t.getNumeroReference());
-//        r.setMontantEnvoye(t.getMontantEnvoye());
-//        r.setMontantRecu(t.getMontantRecu());
-//        r.setFrais(t.getFrais());
-//        r.setStatut(t.getStatut().name());
-//        r.setCreeLe(t.getCreeLe());
-//
-//        return r;
-//    }
-
     public static TransfertResponse toResponse(Transfert t) {
 
         TransfertResponse r = new TransfertResponse();
 
-<<<<<<< HEAD
         // ── Identifiants ──────────────────────────────────────────────────────
-=======
         r.setId(t.getId());
->>>>>>> 78c7d10560abb4927f42ed9e093d2c396875add6
         r.setCodeRetrait(t.getCodeRetrait());
         r.setNumeroReference(t.getNumeroReference());
 
@@ -44,26 +26,23 @@ public class TransfertConverter {
         r.setMontantEnvoye(t.getMontantEnvoye());
         r.setMontantRecu(t.getMontantRecu());
         r.setFrais(t.getFrais());
-        r.setPartAgence(t.getGrilleTarifaire() != null ? t.getGrilleTarifaire().getPartAgence() : java.math.BigDecimal.ZERO);
+        r.setPartAgence(t.getGrilleTarifaire() != null ? t.getGrilleTarifaire().getPartAgence() : BigDecimal.ZERO);
 
         // ── Statut & Dates ────────────────────────────────────────────────────
         r.setStatut(t.getStatut().name());
         r.setCreeLe(t.getCreeLe());
-<<<<<<< HEAD
         r.setExpireLe(t.getCreeLe() != null ? t.getCreeLe().plusDays(30) : null);
+        r.setPayeLe(t.getPayeLe());
 
         // ── Bénéficiaire ──────────────────────────────────────────────────────
         if (t.getBeneficiaire() != null) {
-            r.setNomBeneficiaire(
-                    t.getBeneficiaire().getNom() + " " + t.getBeneficiaire().getPrenom()
-            );
+            r.setNomBeneficiaire(t.getBeneficiaire().getNom() + " " + t.getBeneficiaire().getPrenom());
             r.setPaysBeneficiaire(t.getBeneficiaire().getPays());
             r.setVilleBeneficiaire(t.getBeneficiaire().getPays()); // pas de ville dans l'entité
             r.setTelephoneBeneficiaire(t.getBeneficiaire().getTelephone());
         }
 
         // ── Expéditeur ────────────────────────────────────────────────────────
-        // nom/prénom viennent de Expediteur → Client (→ Utilisateur si héritage)
         if (t.getExpediteur() != null && t.getExpediteur().getClient() != null) {
             Client client = t.getExpediteur().getClient();
             r.setNomExpediteur(client.getNom() + " " + client.getPrenom());
@@ -72,17 +51,24 @@ public class TransfertConverter {
             r.setTelephoneExpediteur(client.getTelephone());
         }
 
-        // ── Agence d'envoi ────────────────────────────────────────────────────
+        // ── Agence ────────────────────────────────────────────────────────────
         if (t.getAgenceEnvoi() != null) {
             r.setAgenceEnvoi(t.getAgenceEnvoi().getNom());
+            r.setAgenceEnvoiId(t.getAgenceEnvoi().getId());
+        }
+        if (t.getAgenceRetrait() != null) {
+            r.setAgenceRetraitId(t.getAgenceRetrait().getId());
+        }
+
+        // ── Agent ─────────────────────────────────────────────────────────────
+        if (t.getAgentSaisie() != null) {
+            r.setAgentId(t.getAgentSaisie().getId());
         }
 
         // ── Corridor → devise de réception ────────────────────────────────────
         if (t.getCorridor() != null && t.getCorridor().getDeviseDestination() != null) {
-            r.setDeviseReception(t.getCorridor().getDeviseDestination().getCode()); // ex: "XOF"
+            r.setDeviseReception(t.getCorridor().getDeviseDestination().getCode());
 
-            // Taux MAD → devise destination calculé via tauxVersEuro des deux devises
-            // taux = tauxVersEuro(source) / tauxVersEuro(destination)
             BigDecimal tauxSource = t.getCorridor().getDeviseSource() != null
                     ? t.getCorridor().getDeviseSource().getTauxVersEuro()
                     : null;
@@ -93,17 +79,6 @@ public class TransfertConverter {
                 BigDecimal taux = tauxSource.divide(tauxDest, 4, RoundingMode.HALF_UP);
                 r.setTauxChange(taux);
             }
-=======
-        r.setPayeLe(t.getPayeLe());
-        if (t.getAgentSaisie() != null) {
-            r.setAgentId(t.getAgentSaisie().getId());
-        }
-        if (t.getAgenceEnvoi() != null) {
-            r.setAgenceEnvoiId(t.getAgenceEnvoi().getId());
-        }
-        if (t.getAgenceRetrait() != null) {
-            r.setAgenceRetraitId(t.getAgenceRetrait().getId());
->>>>>>> 78c7d10560abb4927f42ed9e093d2c396875add6
         }
 
         return r;

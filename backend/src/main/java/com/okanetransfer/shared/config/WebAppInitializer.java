@@ -21,13 +21,9 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
     }
 
     @Override
-<<<<<<< HEAD
     protected String[] getServletMappings() {
         return new String[]{"/"};
     }
-}
-=======
-    protected String[] getServletMappings() { return new String[]{"/"}; }
 
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
@@ -36,4 +32,3 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
         super.onStartup(servletContext);
     }
 }
->>>>>>> 78c7d10560abb4927f42ed9e093d2c396875add6
