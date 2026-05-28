@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
 import { RoleUtilisateur } from '../../../core/models/enums';
@@ -25,9 +26,10 @@ export class LoginComponent {
     rememberMe: [true],
   });
 
-  showPwd   = false;
-  loading   = false;
-  loginError: string | null = null;
+  showPwd         = false;
+  loading         = false;
+  loginError:     string | null = null;
+  accountInactive = false;
 
   constructor(
     private fb:          FormBuilder,
@@ -38,8 +40,9 @@ export class LoginComponent {
 
   onSubmit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.loading   = true;
-    this.loginError = null;
+    this.loading         = true;
+    this.loginError      = null;
+    this.accountInactive = false;
 
     const { email, motDePasse } = this.form.value;
     this.authService.login({ email: email!, motDePasse: motDePasse! }).subscribe({
@@ -51,9 +54,13 @@ export class LoginComponent {
           this.redirectByRole();
         }
       },
-      error: () => {
-        this.loading    = false;
-        this.loginError = 'Identifiants incorrects. Vérifiez votre email et mot de passe.';
+      error: (err: HttpErrorResponse) => {
+        this.loading = false;
+        if (err.status === 403) {
+          this.accountInactive = true;
+        } else {
+          this.loginError = 'Identifiants incorrects. Vérifiez votre email et mot de passe.';
+        }
       },
     });
   }

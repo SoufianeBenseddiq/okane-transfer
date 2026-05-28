@@ -1,0 +1,22 @@
+.layout {
+  display: block;
+  height: 100vh;
+  background-color: #0f172a;
+  position: relative;
+}
+
+.main {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-left: 210px;
+}
+
+.content {
+  flex: 1;
+  padding: 0;
+  background: #0f172a;
+  overflow-y: auto;
+  overflow-x: hidden;
+}

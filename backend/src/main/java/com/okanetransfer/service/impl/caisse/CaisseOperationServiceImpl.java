@@ -8,23 +8,26 @@ import com.okanetransfer.repository.caisse.CaisseOperationRepository;
 import com.okanetransfer.service.converter.caisse.CaisseOperationConverter;
 import com.okanetransfer.service.dto.caisse.response.CaisseOperationResponse;
 import com.okanetransfer.service.facade.caisse.CaisseOperationService;
+import com.okanetransfer.service.facade.user.UtilisateurService;
 import com.okanetransfer.shared.enums.TypeOperation;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CaisseOperationServiceImpl implements CaisseOperationService {
 
     @Override
     public List<CaisseOperationResponse> findByAgentEmail(String email) {
-//        if (agentService.findByEmail(email)) {
-//            throw new EntityNotFoundException("Agent introuvable avec l'email : " + email);
-//        }
+        if (utilisateurService.getAgentByEmail(email) == null) {
+            throw new EntityNotFoundException("Agent introuvable avec l'email : " + email);
+        }
         return converter.toResponses(
                 repository.findByAgentEmail(email)
         );
@@ -46,12 +49,11 @@ public class CaisseOperationServiceImpl implements CaisseOperationService {
 
     @Override
     public CaisseOperationResponse ouvrirCaisse(String agentEmail, BigDecimal montantInitial) {
-//        Agent agent = agentService.findByEmail(agentEmail)
-//                .orElseThrow(() ->
-//                        new EntityNotFoundException(
-//                                "Agent introuvable : " + agentEmail
-//                        ));
-        Agent agent= new Agent();
+        Agent agent = utilisateurService.getAgentByEmail(agentEmail);
+        if (agent == null) {
+            throw new EntityNotFoundException("Agent introuvable : " + agentEmail);
+        }
+
         CaisseOperation operation = new CaisseOperation();
 
         operation.setAgent(agent);
@@ -99,6 +101,7 @@ public class CaisseOperationServiceImpl implements CaisseOperationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CaisseOperationResponse> historiqueOperations(String agentEmail) {
 
         return converter.toResponses(
@@ -107,42 +110,55 @@ public class CaisseOperationServiceImpl implements CaisseOperationService {
     }
 
     @Override
-    public BigDecimal calculerSoldeTheorique(String agentEmail, LocalDateTime debut, LocalDateTime fin) {
-        // 1. Récupération des opérations de la journée depuis la BDD
-        List<CaisseOperation> operations = repository
-                .findByAgentEmailAndDateHeureBetweenOrderByDateHeureAsc(agentEmail, debut, fin);
+    public BigDecimal consulterSoldeDuJour(String agentEmail) {
+        return consulterSoldePourDate(agentEmail, LocalDate.now());
+    }
 
-        BigDecimal solde = BigDecimal.ZERO;
-
-        // 2. Calcul cumulé selon le type d'opération
-        for (CaisseOperation op : operations) {
-            switch (op.getType()) {
-                case OUVERTURE:
-                case ENVOI:
-                case AJUSTEMENT:
-                    solde = solde.add(op.getMontant());
-                    break;
-
-                case RETRAIT:
-                    solde = solde.subtract(op.getMontant());
-                    break;
-
-                case CLOTURE:
-                    // La clôture constate le solde physique, elle n'impacte pas le calcul théorique en soi
-                    break;
-            }
+    @Override
+    public BigDecimal consulterSoldePourDate(String agentEmail, LocalDate date) {
+        Agent agent = (Agent) utilisateurService.getAgentByEmail(agentEmail);
+        if (agent == null) {
+            throw new EntityNotFoundException("Agent introuvable : " + agentEmail);
         }
 
-        return solde;
+        LocalDateTime debut = date.atStartOfDay();
+        LocalDateTime fin   = date.plusDays(1).atStartOfDay().minusNanos(1);
+
+        return repository.calculerSoldeTheorique(agent.getId(), debut, fin);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<CaisseOperationResponse> operationsDuJour(String agentEmail) {
+        LocalDateTime debut = LocalDate.now().atStartOfDay();
+        LocalDateTime fin   = LocalDate.now().atTime(23, 59, 59);
+        return converter.toResponses(
+                repository.findByAgentEmailAndDateHeureBetweenOrderByDateHeureAsc(agentEmail, debut, fin)
+        );
+    }
+
+    @Override
+    public List<CaisseOperationResponse> historiqueFiltre(
+            String email, LocalDate dateDebut, LocalDate dateFin) {
+
+        LocalDateTime from = dateDebut.atStartOfDay();
+        LocalDateTime to   = dateFin.atTime(23, 59, 59);
+
+        return repository.findByAgentEmailAndDateHeureBetweenOrderByDateHeureDesc(email, from, to)
+                .stream()
+                .map(converter::toResponse)
+                .collect(Collectors.toList());
     }
 
 
     private final CaisseOperationRepository repository;
     private final CaisseOperationConverter converter;
+    private final UtilisateurService utilisateurService;
 
     public CaisseOperationServiceImpl(CaisseOperationRepository repository,
-                                      CaisseOperationConverter converter) {
+                                      CaisseOperationConverter converter,
+                                      UtilisateurService utilisateurService) {
         this.repository = repository;
         this.converter = converter;
+        this.utilisateurService=utilisateurService;
     }
 }

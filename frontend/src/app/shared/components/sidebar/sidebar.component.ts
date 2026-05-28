@@ -27,11 +27,11 @@ const NAV_CONFIG: Record<string, NavItem[]> = {
     { id: 'notifications',  label: 'nav.notifications',  icon: 'bell',      route: '/admin/notifications' },
   ],
   [RoleUtilisateur.ROLE_MANAGER]: [
-    { id: 'dashboard',   label: 'nav.dashboard',   icon: 'dashboard', route: '/manager/dashboard' },
-    { id: 'validations', label: 'nav.validations', icon: 'check',     route: '/manager/validations' },
-    { id: 'equipe',      label: 'nav.equipe',      icon: 'users',     route: '/manager/equipe' },
-    { id: 'plafonds',    label: 'nav.plafonds',    icon: 'wallet',    route: '/manager/plafonds' },
-    { id: 'rapports',    label: 'nav.rapports',    icon: 'report',    route: '/manager/rapports' },
+    { id: 'dashboard',       label: 'nav.dashboard', icon: 'dashboard', route: '/manager/dashboard' },
+    { id: 'agents',          label: 'nav.equipe',    icon: 'users',     route: '/manager/agents' },
+    { id: 'caisse',          label: 'nav.caisse',    icon: 'wallet',    route: '/manager/caisse' },
+    { id: 'rapports-agence', label: 'nav.rapports',  icon: 'report',    route: '/manager/rapports-agence' },
+    { id: 'plafond',         label: 'nav.plafonds',  icon: 'percent',   route: '/manager/plafond' },
   ],
   [RoleUtilisateur.ROLE_AGENT]: [
     { id: 'dashboard',  label: 'nav.tableau',    icon: 'dashboard',     route: '/agent/dashboard' },

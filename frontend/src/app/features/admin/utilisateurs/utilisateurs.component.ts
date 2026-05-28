@@ -87,7 +87,7 @@ export class UtilisateursComponent implements OnInit {
       const q = this.search.toLowerCase();
       const matchSearch = !q ||
         `${u.prenom} ${u.nom}`.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q);
+        (u.email ?? '').toLowerCase().includes(q);
       const matchRole = this.roleFilter === 'all' || u.role === this.roleFilter;
       return matchSearch && matchRole;
     });

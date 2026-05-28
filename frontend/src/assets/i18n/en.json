@@ -31,6 +31,68 @@
   "agent": {
     "space": "Agent Space"
   },
+  "manager": {
+    "space": "Manager Space",
+    "dashboard": {
+      "title":             "Dashboard",
+      "subtitle":          "Agency view",
+      "dailyUsage":        "of daily cap used",
+      "requestRevision":   "Request revision",
+      "criticalThreshold": "Critical threshold",
+      "performance": {
+        "label": "PERFORMANCE",
+        "title": "Transfers by agent this week",
+        "total": "transfers total"
+      },
+      "validations": {
+        "label":   "ACTION REQUIRED",
+        "title":   "Pending validations",
+        "by":      "by",
+        "approve": "Approve"
+      },
+      "stats": {
+        "revenue":      "REVENUE THIS MONTH",
+        "commissions":  "COMMISSIONS THIS MONTH",
+        "pending":      "PENDING TRANSFERS",
+        "amlAlerts":    "PENDING AML ALERTS",
+        "amlRules":     "ACTIVE AML RULES",
+        "agentsAgences":"AGENTS & BRANCHES"
+      }
+    },
+    "agents": {
+      "title":    "My team",
+      "subtitle": "Agency agent management",
+      "loading":  "Loading agents…",
+      "noAgents": "No agents available",
+      "topAgent": {
+        "label":       "Top agent · This week",
+        "transfers":   "TRANSFERS",
+        "commission":  "COMMISSION",
+        "performance": "PERFORMANCE"
+      },
+      "others":     "Other agents",
+      "active":     "✓ Active",
+      "inactive":   "✕ Inactive",
+      "activate":   "Activate",
+      "deactivate": "Deactivate",
+      "stats": {
+        "transfersDay": "Transfers (today)",
+        "commissions":  "Commissions",
+        "performance":  "Performance"
+      }
+    },
+    "caisse": {
+      "title":          "History",
+      "subtitle":       "Full transaction history for the agency",
+      "loading":        "Loading data…",
+      "openingBalance": "Opening balance",
+      "currentBalance": "Current balance",
+      "transactions": {
+        "title":  "Transaction history",
+        "noData": "No transactions available"
+      }
+    }
+  },
   "pages": {
     "dashboard":  "Dashboard",
     "envoi":      "Register a transfer",
@@ -511,7 +573,10 @@
     "beneficiaireRecoit":"Beneficiary receives",
     "delai":         "min · Estimated reception time for this corridor",
     "recapTitle":    "Progressive recap",
-    "tranche":       "Bracket 1,500–3,000 MAD"
+    "tranche":       "Bracket 1,500–3,000 MAD",
+    "changeToNewClient": "Change to new client",
+    "requiredField":     "This field is required",
+    "invalidPhoneFormat":"Invalid phone format"
   },
   "dashboard": {
     "mainAction":          "Main action",
@@ -560,21 +625,36 @@
     "printSlip":       "Print slip",
     "confirmPayment":  "Confirm payment"
   },
+
   "caisse": {
+    "closeCaisse":        "Close cash register",
     "currentBalance":     "Current balance",
     "updatedAt":          "Updated at",
-    "openingBalance":     "day opening",
-    "totalEnvois":        "Total sends collected",
-    "totalRetraits":      "Total withdrawals paid",
-    "theoreticalBalance": "Calculated theoretical balance",
-    "operations":         "operations",
+    "openingBalance":     "Opening balance",
+    "totalEnvois":        "Total sent",
+    "totalRetraits":      "Total withdrawals",
+    "theoreticalBalance": "Theoretical balance",
     "matchesReal":        "Matches real balance",
     "movements":          "Movements",
     "todayTimeline":      "Today's operations timeline",
     "movementsCount":     "movements",
-    "send":               "send",
-    "withdrawal":         "withdrawal"
+    "operations":         "operations",
+    "withdrawal":         "Withdrawal",
+    "send":               "Send",
+    "table": {
+      "time":   "Time",
+      "ref":    "Reference",
+      "agent":  "Agent",
+      "type":   "Type",
+      "amount": "Amount"
+    },
+    "type": {
+      "ENVOI":    "Send",
+      "RETRAIT":  "Withdrawal",
+      "OUVERTURE":"Opening"
+    }
   },
+
   "historique": {
     "searchPlaceholder": "Search by name, reference...",
     "allTypes":          "All types",
@@ -599,5 +679,26 @@
     "noResults":         "No operations found",
     "showing":           "Showing",
     "of":                "of"
+  },
+  "cloture": {
+    "gapDetected":        "Gap detected",
+    "title":              "Cash closing",
+    "sends":              "Sends",
+    "withdrawals":        "Withdrawals",
+    "incoming":           "Incoming",
+    "outgoing":           "Outgoing",
+    "theoreticalBalance": "Theoretical balance (calculated)",
+    "realBalance":        "Real balance counted by agent",
+    "noGap":              "No gap — Perfect",
+    "gapFound":           "Gap found",
+    "willBeReported":     "Will be automatically reported to your manager",
+    "note":               "Explanatory note",
+    "notePlaceholder":    "Probable change error on transfer TRF-...",
+    "mandatoryIfGap":     "Required if there is a gap",
+    "warningPrefix":      "A gap of",
+    "warningSuffix":      "will be reported to Karim Benjelloun (Manager).",
+    "cancel":             "Cancel",
+    "validate":           "Validate closing"
   }
+
 }

@@ -1,0 +1,91 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>{{ 'manager.agents.title' | translate }}</h1>
+    <p>{{ 'manager.agents.subtitle' | translate }}</p>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading-state">
+    <p>{{ 'manager.agents.loading' | translate }}</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error && !loading" class="error-state">
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Content -->
+  <ng-container *ngIf="!loading && !error">
+
+    <!-- Top Agent -->
+    <div *ngIf="topAgent" class="top-agent-section">
+      <div class="top-agent-card">
+        <div class="top-agent-left">
+          <div class="top-agent-avatar">{{ topAgent.prenom.charAt(0) }}{{ topAgent.nom.charAt(0) }}</div>
+          <div class="top-agent-info">
+            <h2>{{ topAgent.prenom }} {{ topAgent.nom }}</h2>
+            <span class="top-agent-label">{{ 'manager.agents.topAgent.label' | translate }}</span>
+          </div>
+        </div>
+        <div class="top-agent-stats">
+          <div class="stat-box">
+            <span class="stat-num">{{ topAgent.transferts }}</span>
+            <span class="stat-label">{{ 'manager.agents.topAgent.transfers' | translate }}</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-num">{{ (topAgent.commissionsJour / 1000) | number:'1.0-1' }}k</span>
+            <span class="stat-label">{{ 'manager.agents.topAgent.commission' | translate }}</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-num">{{ topAgent.performance }}%</span>
+            <span class="stat-label">{{ 'manager.agents.topAgent.performance' | translate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other Agents Grid -->
+    <div *ngIf="otherAgents.length > 0" class="agents-section">
+      <h3>{{ 'manager.agents.others' | translate }}</h3>
+      <div class="agents-grid">
+        <div *ngFor="let agent of otherAgents" class="agent-card" [ngClass]="'status-' + agent.status">
+          <div class="agent-header">
+            <h3>{{ agent.prenom }} {{ agent.nom }}</h3>
+            <span class="status-badge" [ngClass]="agent.status">
+              {{ agent.status === 'active' ? ('manager.agents.active' | translate) : ('manager.agents.inactive' | translate) }}
+            </span>
+          </div>
+
+          <div class="agent-stats">
+            <div class="stat">
+              <span class="label">{{ 'manager.agents.stats.transfersDay' | translate }}</span>
+              <span class="value">{{ agent.transferts }}</span>
+            </div>
+            <div class="stat">
+              <span class="label">{{ 'manager.agents.stats.commissions' | translate }}</span>
+              <span class="value">{{ agent.commissionsJour | number:'1.0-2' }} MAD</span>
+            </div>
+            <div class="stat">
+              <span class="label">{{ 'manager.agents.stats.performance' | translate }}</span>
+              <span class="value">{{ agent.performance }}%</span>
+            </div>
+          </div>
+
+          <div class="performance-bar">
+            <div class="bar" [style.width.%]="totalAgentsTransferts > 0 ? (agent.transferts / totalAgentsTransferts) * 100 : 0"></div>
+          </div>
+
+          <button class="action-btn" (click)="toggleAgentStatus(agent)">
+            {{ agent.status === 'active' ? ('manager.agents.deactivate' | translate) : ('manager.agents.activate' | translate) }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fallback if no agents -->
+    <div *ngIf="agents.length === 0" class="no-data">
+      <p>{{ 'manager.agents.noAgents' | translate }}</p>
+    </div>
+
+  </ng-container>
+</div>

@@ -331,4 +331,13 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         utilisateurRepository.save(user);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> searchClients(String query) {
+        if (query == null || query.isBlank()) return List.of();
+        return utilisateurRepository.searchClients(query.trim())
+                .stream()
+                .map(utilisateurConverter::toResponse)
+                .toList();
+    }
 }

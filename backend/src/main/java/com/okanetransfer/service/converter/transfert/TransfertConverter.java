@@ -33,6 +33,7 @@ public class TransfertConverter {
         TransfertResponse r = new TransfertResponse();
 
         // ── Identifiants ──────────────────────────────────────────────────────
+        r.setId(t.getId());
         r.setCodeRetrait(t.getCodeRetrait());
         r.setNumeroReference(t.getNumeroReference());
 
@@ -40,6 +41,7 @@ public class TransfertConverter {
         r.setMontantEnvoye(t.getMontantEnvoye());
         r.setMontantRecu(t.getMontantRecu());
         r.setFrais(t.getFrais());
+        r.setPartAgence(t.getGrilleTarifaire() != null ? t.getGrilleTarifaire().getPartAgence() : java.math.BigDecimal.ZERO);
 
         // ── Statut & Dates ────────────────────────────────────────────────────
         r.setStatut(t.getStatut().name());
@@ -63,6 +65,7 @@ public class TransfertConverter {
             r.setNomExpediteur(client.getNom() + " " + client.getPrenom());
             r.setPaysExpediteur(client.getPays());
             r.setVilleExpediteur(client.getPays());
+            r.setTelephoneExpediteur(client.getTelephone());
         }
 
         // ── Agence d'envoi ────────────────────────────────────────────────────
@@ -86,6 +89,17 @@ public class TransfertConverter {
                 BigDecimal taux = tauxSource.divide(tauxDest, 4, RoundingMode.HALF_UP);
                 r.setTauxChange(taux);
             }
+        }
+
+        r.setPayeLe(t.getPayeLe());
+        if (t.getAgentSaisie() != null) {
+            r.setAgentId(t.getAgentSaisie().getId());
+        }
+        if (t.getAgenceEnvoi() != null) {
+            r.setAgenceEnvoiId(t.getAgenceEnvoi().getId());
+        }
+        if (t.getAgenceRetrait() != null) {
+            r.setAgenceRetraitId(t.getAgenceRetrait().getId());
         }
 
         return r;

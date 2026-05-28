@@ -31,6 +31,68 @@
   "agent": {
     "space": "مساحة الوكيل"
   },
+  "manager": {
+    "space": "مساحة المدير",
+    "dashboard": {
+      "title":             "لوحة التحكم",
+      "subtitle":          "عرض الوكالة",
+      "dailyUsage":        "من الحد اليومي المستخدم",
+      "requestRevision":   "طلب مراجعة",
+      "criticalThreshold": "حد حرج",
+      "performance": {
+        "label": "الأداء",
+        "title": "التحويلات حسب الوكيل هذا الأسبوع",
+        "total": "تحويل إجمالاً"
+      },
+      "validations": {
+        "label":   "إجراء مطلوب",
+        "title":   "التحقق المعلق",
+        "by":      "بواسطة",
+        "approve": "موافقة"
+      },
+      "stats": {
+        "revenue":      "رقم الأعمال هذا الشهر",
+        "commissions":  "العمولات هذا الشهر",
+        "pending":      "تحويلات معلقة",
+        "amlAlerts":    "تنبيهات AML معلقة",
+        "amlRules":     "قواعد AML نشطة",
+        "agentsAgences":"الوكلاء والوكالات"
+      }
+    },
+    "agents": {
+      "title":    "فريقي",
+      "subtitle": "إدارة وكلاء الوكالة",
+      "loading":  "جارٍ تحميل الوكلاء…",
+      "noAgents": "لا يوجد وكلاء",
+      "topAgent": {
+        "label":       "أفضل وكيل · هذا الأسبوع",
+        "transfers":   "تحويلات",
+        "commission":  "عمولة",
+        "performance": "الأداء"
+      },
+      "others":     "وكلاء آخرون",
+      "active":     "✓ نشط",
+      "inactive":   "✕ غير نشط",
+      "activate":   "تفعيل",
+      "deactivate": "تعطيل",
+      "stats": {
+        "transfersDay": "التحويلات (اليوم)",
+        "commissions":  "العمولات",
+        "performance":  "الأداء"
+      }
+    },
+    "caisse": {
+      "title":          "السجل",
+      "subtitle":       "سجل جميع معاملات الوكالة",
+      "loading":        "جارٍ تحميل البيانات…",
+      "openingBalance": "رصيد الافتتاح",
+      "currentBalance": "الرصيد الحالي",
+      "transactions": {
+        "title":  "سجل المعاملات",
+        "noData": "لا توجد معاملات"
+      }
+    }
+  },
   "pages": {
     "dashboard":  "لوحة التحكم",
     "envoi":      "تسجيل إرسال",
@@ -511,7 +573,10 @@
     "beneficiaireRecoit":"يستلم المستفيد",
     "delai":         "دقيقة · وقت الاستلام المقدر لهذا الممر",
     "recapTitle":    "ملخص تدريجي",
-    "tranche":       "الشريحة 1500–3000 درهم"
+    "tranche":       "الشريحة 1500–3000 درهم",
+    "changeToNewClient": "تغيير إلى عميل جديد",
+    "requiredField":     "هذا الحقل مطلوب",
+    "invalidPhoneFormat":"صيغة الهاتف غير صالحة"
   },
   "dashboard": {
     "mainAction":          "الإجراء الرئيسي",
@@ -560,20 +625,34 @@
     "printSlip":       "طباعة الفيشة",
     "confirmPayment":  "تأكيد الدفع"
   },
+
   "caisse": {
+    "closeCaisse":        "إغلاق الصندوق",
     "currentBalance":     "الرصيد الحالي",
-    "updatedAt":          "محدّث في",
-    "openingBalance":     "افتتاح اليوم",
-    "totalEnvois":        "إجمالي التحويلات المحصّلة",
-    "totalRetraits":      "إجمالي المسحوبات المدفوعة",
-    "theoreticalBalance": "الرصيد النظري المحسوب",
-    "operations":         "عمليات",
+    "updatedAt":          "تم التحديث في",
+    "openingBalance":     "رصيد الافتتاح",
+    "totalEnvois":        "إجمالي التحويلات",
+    "totalRetraits":      "إجمالي السحوبات",
+    "theoreticalBalance": "الرصيد النظري",
     "matchesReal":        "يطابق الرصيد الفعلي",
     "movements":          "الحركات",
-    "todayTimeline":      "جدول عمليات اليوم",
+    "todayTimeline":      "حركات اليوم",
     "movementsCount":     "حركة",
-    "send":               "إرسال",
-    "withdrawal":         "سحب"
+    "operations":         "عمليات",
+    "withdrawal":         "سحب",
+    "send":               "تحويل",
+    "table": {
+      "time":   "الوقت",
+      "ref":    "المرجع",
+      "agent":  "الوكيل",
+      "type":   "النوع",
+      "amount": "المبلغ"
+    },
+    "type": {
+      "ENVOI":    "تحويل",
+      "RETRAIT":  "سحب",
+      "OUVERTURE":"افتتاح"
+    }
   },
   "historique": {
     "searchPlaceholder": "بحث بالاسم أو المرجع...",
@@ -599,5 +678,25 @@
     "noResults":         "لا توجد عمليات",
     "showing":           "عرض",
     "of":                "من"
+  },
+  "cloture": {
+    "gapDetected":        "فارق مكتشف",
+    "title":              "إغلاق الصندوق",
+    "sends":              "إرساليات",
+    "withdrawals":        "سحوبات",
+    "incoming":           "مداخيل",
+    "outgoing":           "مصاريف",
+    "theoreticalBalance": "الرصيد النظري (محسوب)",
+    "realBalance":        "الرصيد الفعلي المعدود من طرف الوكيل",
+    "noGap":              "لا يوجد فارق — ممتاز",
+    "gapFound":           "فارق مُلاحَظ",
+    "willBeReported":     "سيُبلَّغ عنه تلقائيًا لمديرك",
+    "note":               "ملاحظة توضيحية",
+    "notePlaceholder":    "خطأ محتمل في الصرف على التحويل TRF-...",
+    "mandatoryIfGap":     "إلزامي في حالة وجود فارق",
+    "warningPrefix":      "سيُبلَّغ عن فارق بقيمة",
+    "warningSuffix":      "إلى كريم بنجلون (المدير).",
+    "cancel":             "إلغاء",
+    "validate":           "تأكيد الإغلاق"
   }
 }

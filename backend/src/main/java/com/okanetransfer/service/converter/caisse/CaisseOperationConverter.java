@@ -32,6 +32,9 @@ public class CaisseOperationConverter {
         response.setType(operation.getType());
         response.setMontant(operation.getMontant());
         response.setDateHeure(operation.getDateHeure());
+        if (operation.getTransfert() != null) {
+            response.setTransfertId(operation.getTransfert().getId());
+        }
         response.setReferenceTransfert(operation.getReferenceTransfert());
         return response;
     }

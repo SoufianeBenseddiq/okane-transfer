@@ -25,19 +25,19 @@ public class AgenceController {
     // ADMIN et MANAGER peuvent chercher une agence
     @GetMapping("nom/{nom}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
-    public ResponseEntity<AgenceResponse> findByNom(@PathVariable String nom) {
+    public ResponseEntity<AgenceResponse> findByNom(@PathVariable("nom") String nom) {
         return ResponseEntity.ok(agenceService.findByNom(nom));
     }
 
     @GetMapping("adresse/{adresse}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
-    public ResponseEntity<AgenceResponse> findByAdresse(@PathVariable String adresse) {
+    public ResponseEntity<AgenceResponse> findByAdresse(@PathVariable("adresse") String adresse) {
         return ResponseEntity.ok(agenceService.findByAdresse(adresse));
     }
 
     @GetMapping("responsable/{email}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
-    public ResponseEntity<AgenceResponse> findByResponsable(@PathVariable String email) {
+    public ResponseEntity<AgenceResponse> findByResponsable(@PathVariable("email") String email) {
         return ResponseEntity.ok(agenceService.findByResponsableEmail(email));
     }
 

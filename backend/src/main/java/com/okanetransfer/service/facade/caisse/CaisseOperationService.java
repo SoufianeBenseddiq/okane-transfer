@@ -20,9 +20,11 @@ public interface CaisseOperationService {
 
     List<CaisseOperationResponse> historiqueOperations(String agentEmail);
 
-//    ClotureCaisseResponse cloturerCaisse(ClotureCaisseRequest request);
+    BigDecimal consulterSoldeDuJour(String agentEmail);
 
-//    ClotureCaisseResponse rapportCloture(String agentEmail, LocalDate date);
+    BigDecimal consulterSoldePourDate(String agentEmail, LocalDate date);
 
-    BigDecimal calculerSoldeTheorique(String agentEmail, LocalDateTime debut, LocalDateTime fin);
+    List<CaisseOperationResponse> operationsDuJour(String agentEmail);
+
+    List<CaisseOperationResponse> historiqueFiltre(String email, LocalDate dateDebut, LocalDate dateFin);
 }

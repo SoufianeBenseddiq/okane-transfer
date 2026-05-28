@@ -90,4 +90,14 @@ public class UtilisateurController {
         utilisateurService.demanderEffacement(current.getId());
         return ResponseEntity.noContent().build();
     }
+
+//    @GetMapping("/search/{q}")
+//    public ResponseEntity<List<UserResponse>> search(
+//            @PathVariable("q") String q) {
+//        return ResponseEntity.ok(utilisateurService.searchClients(q));
+//    }
+@GetMapping("/search/{q}")
+public ResponseEntity<List<UserResponse>> search(@PathVariable(name = "q") String q) {
+    return ResponseEntity.ok(utilisateurService.searchClients(q));
+}
 }

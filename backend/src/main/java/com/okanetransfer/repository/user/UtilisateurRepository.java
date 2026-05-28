@@ -48,6 +48,9 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
     @Query("SELECT a FROM Agent a WHERE a.id = :id AND a.actif = true")
     Optional<Agent> findAgentById(@Param("id") Long id);
 
+    @Query("SELECT a FROM Agent a WHERE a.actif = true ORDER BY a.id ASC")
+    List<Agent> findAllActiveAgentsOrderByIdAsc();
+
     // Fetch a specific Agency agents
     @Query("SELECT a FROM Agent a WHERE a.agence.id = :agenceId")
     List<Agent> findAgentsByAgenceId(@Param("agenceId") Long agenceId);
@@ -72,5 +75,17 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
     @Modifying
     @Query(value = "UPDATE managers SET agence_id = :agenceId WHERE id = :managerId", nativeQuery = true)
     void assignManagerToAgence(@Param("managerId") Long managerId, @Param("agenceId") Long agenceId);
+
+    @Query("""
+    SELECT c FROM Client c
+    WHERE c.actif = true
+    AND (
+        LOWER(c.nom)       LIKE LOWER(CONCAT('%', :q, '%')) OR
+        LOWER(c.prenom)    LIKE LOWER(CONCAT('%', :q, '%')) OR
+        c.telephone        LIKE CONCAT('%', :q, '%')        OR
+        LOWER(c.email)     LIKE LOWER(CONCAT('%', :q, '%'))
+    )
+""")
+    List<Client> searchClients(@Param("q") String q);
 
 }

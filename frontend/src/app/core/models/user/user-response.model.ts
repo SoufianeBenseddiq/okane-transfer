@@ -4,10 +4,11 @@ export interface UserResponse {
   id: number;
   nom: string;
   prenom: string;
-  email: string;
+  email: string | null;
   telephone: string;
   pays: string;
   role: RoleUtilisateur;
   actif: boolean;
+  agenceId?: number;
   creeLe: string;
 }

@@ -25,10 +25,12 @@ public class ClotureCaisseConverter {
     public ClotureCaisseResponse toResponse(ClotureCaisse cloture) {
         ClotureCaisseResponse response = new ClotureCaisseResponse();
         response.setId(cloture.getId());
-        response.setAgentId(cloture.getAgent().getId());
-        response.setAgentNom(
+        if (cloture.getAgent() != null) {
+            response.setAgentId(cloture.getAgent().getId());
+            response.setAgentNom(
                 cloture.getAgent().getPrenom() + " " + cloture.getAgent().getNom()
-        );
+            );
+        }
         response.setDate(cloture.getDate());
         response.setSoldeTheorique(cloture.getSoldeTheorique());
         response.setSoldeSaisi(cloture.getSoldeSaisi());

@@ -78,4 +78,7 @@ export class UserService {
   deletePiece(clientId: number, pieceId: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${clientId}/pieces/${pieceId}`);
   }
+ searchClients(query: string): Observable<UserResponse[]> {
+  return this.http.get<UserResponse[]>(`${this.base}/search/${encodeURIComponent(query)}`);
+}
 }

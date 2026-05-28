@@ -31,6 +31,68 @@
   "agent": {
     "space": "Espace Agent"
   },
+  "manager": {
+    "space": "Espace Manager",
+    "dashboard": {
+      "title":              "Tableau de bord",
+      "subtitle":           "Vue agence",
+      "dailyUsage":         "du plafond journalier consommé",
+      "requestRevision":    "Demander révision",
+      "criticalThreshold":  "Seuil critique",
+      "performance": {
+        "label": "PERFORMANCE",
+        "title": "Transferts par agent cette semaine",
+        "total": "transferts au total"
+      },
+      "validations": {
+        "label":   "ACTION REQUISE",
+        "title":   "Validations en attente",
+        "by":      "par",
+        "approve": "Approuver"
+      },
+      "stats": {
+        "revenue":      "CA CE MOIS",
+        "commissions":  "COMMISSIONS CE MOIS",
+        "pending":      "TRANSFERTS EN ATTENTE",
+        "amlAlerts":    "ALERTES AML EN ATTENTE",
+        "amlRules":     "RÈGLES AML ACTIVES",
+        "agentsAgences":"AGENTS & AGENCES"
+      }
+    },
+    "agents": {
+      "title":    "Mon équipe",
+      "subtitle": "Gestion des agents de l'agence",
+      "loading":  "Chargement des agents…",
+      "noAgents": "Aucun agent disponible",
+      "topAgent": {
+        "label":       "Meilleur agent · Cette semaine",
+        "transfers":   "TRANSFERTS",
+        "commission":  "COMMISSION",
+        "performance": "PERFORMANCE"
+      },
+      "others":     "Autres agents",
+      "active":     "✓ Actif",
+      "inactive":   "✕ Inactif",
+      "activate":   "Activer",
+      "deactivate": "Désactiver",
+      "stats": {
+        "transfersDay": "Transferts (jour)",
+        "commissions":  "Commissions",
+        "performance":  "Performance"
+      }
+    },
+    "caisse": {
+      "title":           "Historique",
+      "subtitle":        "Historique de toutes les transactions de l'agence",
+      "loading":         "Chargement des données…",
+      "openingBalance":  "Solde d'ouverture",
+      "currentBalance":  "Solde actuel",
+      "transactions": {
+        "title":  "Historique des transactions",
+        "noData": "Aucune transaction disponible"
+      }
+    }
+  },
   "pages": {
     "dashboard":  "Dashboard",
     "envoi":      "Enregistrer un envoi",
@@ -511,7 +573,10 @@
     "beneficiaireRecoit":"Bénéficiaire reçoit",
     "delai":         "min · Délai de réception estimé pour ce corridor",
     "recapTitle":    "Récap progressif",
-    "tranche":       "Tranche 1 500–3 000 MAD"
+    "tranche":       "Tranche 1 500–3 000 MAD",
+    "changeToNewClient": "Changer vers un nouveau client",
+    "requiredField":     "Ce champ est requis",
+    "invalidPhoneFormat":"Format de téléphone invalide"
   },
   "dashboard": {
     "mainAction":          "Action principale",
@@ -563,21 +628,38 @@
     "alreadyPaid":     "Ce transfert a déjà été payé",
     "errorGeneric":    "Une erreur est survenue, veuillez réessayer"
   },
+
   "caisse": {
+    "closeCaisse":        "Clôture caisse",
     "currentBalance":     "Solde actuel",
     "updatedAt":          "Mis à jour à",
-    "openingBalance":     "ouverture du jour",
-    "totalEnvois":        "Total envois encaissés",
-    "totalRetraits":      "Total retraits décaissés",
-    "theoreticalBalance": "Solde théorique calculé",
-    "operations":         "opérations",
+    "openingBalance":     "Solde d'ouverture",
+    "totalEnvois":        "Total envois",
+    "totalRetraits":      "Total retraits",
+    "theoreticalBalance": "Solde théorique",
     "matchesReal":        "Correspond au solde réel",
     "movements":          "Mouvements",
     "todayTimeline":      "Timeline des opérations du jour",
     "movementsCount":     "mouvements",
-    "send":               "envoi",
-    "withdrawal":         "retrait"
+    "operations":         "opérations",
+    "withdrawal":         "Retrait",
+    "send":               "Envoi",
+    "table": {
+      "time":    "Heure",
+      "ref":     "Référence",
+      "agent":   "Agent",
+      "type":    "Type",
+      "amount":  "Montant",
+      "showing": "Affichage de",
+      "of":      "sur"
+    },
+    "type": {
+      "ENVOI":    "Envoi",
+      "RETRAIT":  "Retrait",
+      "OUVERTURE":"Ouverture"
+    }
   },
+
   "historique": {
     "searchPlaceholder": "Rechercher par nom, référence...",
     "allTypes":          "Tous les types",
@@ -602,5 +684,25 @@
     "noResults":         "Aucune opération trouvée",
     "showing":           "Affichage de",
     "of":                "sur"
+  },
+  "cloture": {
+    "gapDetected":        "Écart détecté",
+    "title":              "Clôture de caisse",
+    "sends":              "Envois",
+    "withdrawals":        "Retraits",
+    "incoming":           "Entrants",
+    "outgoing":           "Sortants",
+    "theoreticalBalance": "Solde théorique (calculé)",
+    "realBalance":        "Solde réel compté par l'agent",
+    "noGap":              "Aucun écart — Parfait",
+    "gapFound":           "Écart constaté",
+    "willBeReported":     "Sera signalé automatiquement à votre manager",
+    "note":               "Note explicative",
+    "notePlaceholder":    "Probable erreur de rendu de monnaie sur l'envoi TRF-...",
+    "mandatoryIfGap":     "Obligatoire en cas d'écart",
+    "warningPrefix":      "Un écart de",
+    "warningSuffix":      "sera signalé à Karim Benjelloun (Manager).",
+    "cancel":             "Annuler",
+    "validate":           "Valider la clôture"
   }
 }
