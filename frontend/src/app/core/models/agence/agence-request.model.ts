@@ -4,4 +4,6 @@ export interface AgenceRequest {
   pays: string;
   plafondJournalier: number;
   responsableId?: number | null;
+  estCentrale?: boolean;
+  agenceCentraleId?: number | null;
 }

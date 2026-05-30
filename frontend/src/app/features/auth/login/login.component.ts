@@ -26,10 +26,11 @@ export class LoginComponent {
     rememberMe: [true],
   });
 
-  showPwd         = false;
-  loading         = false;
-  loginError:     string | null = null;
-  accountInactive = false;
+  showPwd              = false;
+  loading              = false;
+  loginError:          string | null = null;
+  accountInactive      = false;
+  agenceSuspended      = false;
 
   constructor(
     private fb:          FormBuilder,
@@ -43,6 +44,7 @@ export class LoginComponent {
     this.loading         = true;
     this.loginError      = null;
     this.accountInactive = false;
+    this.agenceSuspended = false;
 
     const { email, motDePasse } = this.form.value;
     this.authService.login({ email: email!, motDePasse: motDePasse! }).subscribe({
@@ -57,7 +59,12 @@ export class LoginComponent {
       error: (err: HttpErrorResponse) => {
         this.loading = false;
         if (err.status === 403) {
-          this.accountInactive = true;
+          const msg: string = err.error?.message ?? '';
+          if (msg.toLowerCase().includes('agence')) {
+            this.agenceSuspended = true;
+          } else {
+            this.accountInactive = true;
+          }
         } else {
           this.loginError = 'Identifiants incorrects. Vérifiez votre email et mot de passe.';
         }

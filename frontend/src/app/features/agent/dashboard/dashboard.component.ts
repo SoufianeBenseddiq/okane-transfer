@@ -10,6 +10,8 @@ import { CaisseService }           from '../../../core/services/caisse.service';
 import { CaisseOperationResponse } from '../../../core/models/caisse';
 import { TypeOperation }           from '../../../core/models/enums';
 import { AuthService }             from '../../../core/services/auth.service';
+import { AgenceService }           from '../../../core/services/agence.service';
+import { AgenceResponse }          from '../../../core/models/agence';
 
 Chart.register(...registerables);
 
@@ -67,13 +69,20 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   readonly TypeOperation = TypeOperation;
 
+  agence: AgenceResponse | null = null;
+
+  get plafondAlert(): boolean { return (this.agence?.pourcentagePlafond ?? 0) >= 90; }
+  get plafondCritical(): boolean { return (this.agence?.pourcentagePlafond ?? 0) >= 100; }
+
   constructor(
     private caisseService: CaisseService,
     private auth: AuthService,
+    private agenceService: AgenceService,
   ) {}
 
   ngOnInit(): void {
     this.loadDashboard();
+    this.agenceService.getMonAgence().subscribe({ next: a => { this.agence = a; } });
   }
 
   ngAfterViewInit(): void {

@@ -137,10 +137,15 @@
       "active":   "● Active",
       "inactive": "○ Suspendue"
     },
+    "centrale":     "Centrale",
+    "childOf":      "Agence de",
     "managerLabel": "MANAGER",
     "plafond":      "Plafond journalier",
     "available":    "MAD disponibles",
     "outOfService": "Agence hors service",
+    "activate":     "Activer l'agence",
+    "deactivate":   "Suspendre l'agence",
+    "deactivateConfirm": "Suspendre l'agence «{{nom}}» ? Ses agents et managers ne pourront plus se connecter.",
     "deleteConfirm":"Supprimer définitivement l'agence",
     "none":         "Aucune agence trouvée.",
     "modal": {
@@ -150,12 +155,20 @@
       "modification": "Modification"
     },
     "fields": {
-      "nom":       "Nom de l'agence",
-      "adresse":   "Adresse",
-      "pays":      "Pays",
-      "plafond":   "Plafond journalier (MAD)",
-      "manager":   "Responsable (manager)",
-      "noManager": "— Aucun —"
+      "nom":            "Nom de l'agence",
+      "adresse":        "Adresse",
+      "pays":           "Pays",
+      "plafond":        "Plafond journalier (MAD)",
+      "manager":        "Responsable (manager)",
+      "noManager":      "— Aucun —",
+      "estCentrale":    "Agence centrale",
+      "agenceCentrale": "Agence centrale parente",
+      "noCentrale":     "— Aucune (agence indépendante) —"
+    },
+    "plafondAlerte": {
+      "alert":    "⚠️ Plafond journalier atteint à {{pct}}% — opérations ralenties",
+      "critical": "🚨 Plafond journalier dépassé — aucun nouveau transfert possible",
+      "usage":    "{{used}} / {{total}} MAD utilisés"
     },
     "error": {
       "create": "Erreur lors de la création de l'agence.",

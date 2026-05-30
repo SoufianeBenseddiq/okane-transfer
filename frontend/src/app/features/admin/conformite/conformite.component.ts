@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { AmlService } from '../../../core/services/aml.service';
+import { ConfirmDialogComponent, ConfirmDialogConfig } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DeclarationResponse, RegleAML } from '../../../core/models/aml';
 import { TopbarComponent } from '../../../shared/components/topbar/topbar.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
@@ -14,7 +15,7 @@ type ModalMode = 'create' | 'edit';
   selector: 'app-conformite',
   standalone: true,
   host: { class: 'flex flex-col flex-1 min-w-0 overflow-hidden' },
-  imports: [TopbarComponent, IconComponent, ReactiveFormsModule, DatePipe, DecimalPipe, TranslatePipe],
+  imports: [TopbarComponent, IconComponent, ReactiveFormsModule, DatePipe, DecimalPipe, TranslatePipe, ConfirmDialogComponent],
   templateUrl: './conformite.component.html',
 })
 export class ConformiteComponent implements OnInit {
@@ -27,6 +28,7 @@ export class ConformiteComponent implements OnInit {
   deleting: number | null = null;
   saving = false;
   error: string | null = null;
+  confirmDialog: (ConfirmDialogConfig & { action: () => void }) | null = null;
 
   showModal = false;
   modalMode: ModalMode = 'create';
@@ -137,11 +139,19 @@ export class ConformiteComponent implements OnInit {
   }
 
   deleteRegle(r: RegleAML): void {
-    if (!confirm(this.translate.instant('conformite.regles.deleteConfirm'))) return;
-    this.deleting = r.id ?? null;
-    this.aml.deleteRegle(r.id!).subscribe({
-      next: () => { this.regles = this.regles.filter(x => x.id !== r.id); this.deleting = null; },
-      error: () => { this.deleting = null; },
-    });
+    this.confirmDialog = {
+      title:        this.translate.instant('conformite.regles.deleteConfirm'),
+      message:      r.nom,
+      confirmLabel: this.translate.instant('common.delete'),
+      danger:       true,
+      action: () => {
+        this.confirmDialog = null;
+        this.deleting = r.id ?? null;
+        this.aml.deleteRegle(r.id!).subscribe({
+          next: () => { this.regles = this.regles.filter(x => x.id !== r.id); this.deleting = null; },
+          error: () => { this.deleting = null; },
+        });
+      },
+    };
   }
 }

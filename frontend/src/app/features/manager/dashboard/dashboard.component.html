@@ -1,5 +1,30 @@
 <div class="dashboard-container">
 
+  <!-- Plafond alert -->
+  @if (plafondAlert) {
+    <div class="flex items-center gap-3 rounded-[10px] px-4 py-3 mb-4"
+         [style.background]="plafondCritical ? 'rgba(255,77,79,0.08)' : 'rgba(250,173,20,0.08)'"
+         [style.border]="'1px solid ' + (plafondCritical ? 'rgba(255,77,79,0.25)' : 'rgba(250,173,20,0.25)')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+           [attr.stroke]="plafondCritical ? '#FF4D4F' : '#FAAD14'"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+        <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>
+        <path d="M12 9v4M12 17h.01"/>
+      </svg>
+      <div>
+        <p style="font-size:13px;font-weight:600;"
+           [style.color]="plafondCritical ? '#FF4D4F' : '#FAAD14'">
+          {{ (plafondCritical ? 'agences.plafondAlerte.critical' : 'agences.plafondAlerte.alert') | translate:{ pct: agence?.pourcentagePlafond } }}
+        </p>
+        @if (agence) {
+          <p style="font-size:11.5px;color:rgba(255,255,255,0.45);margin-top:2px;">
+            {{ 'agences.plafondAlerte.usage' | translate:{ used: agence.montantTraiteAujourdhui, total: agence.plafondJournalier } }}
+          </p>
+        }
+      </div>
+    </div>
+  }
+
   <!-- Header -->
   <div class="dashboard-header">
     <div class="header-left">

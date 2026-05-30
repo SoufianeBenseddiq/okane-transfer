@@ -8,6 +8,7 @@ import { RoleUtilisateur } from '../../../core/models/enums';
 import { TopbarComponent } from '../../../shared/components/topbar/topbar.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+import { ConfirmDialogComponent, ConfirmDialogConfig } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 type RoleFilter = 'all' | RoleUtilisateur;
 type ModalMode  = 'create' | 'edit';
@@ -16,7 +17,7 @@ type ModalMode  = 'create' | 'edit';
   selector: 'app-utilisateurs',
   standalone: true,
   host: { class: 'flex flex-col flex-1 min-w-0 overflow-hidden' },
-  imports: [TopbarComponent, IconComponent, ReactiveFormsModule, FormsModule, DatePipe, TranslatePipe],
+  imports: [TopbarComponent, IconComponent, ReactiveFormsModule, FormsModule, DatePipe, TranslatePipe, ConfirmDialogComponent],
   templateUrl: './utilisateurs.component.html',
 })
 export class UtilisateursComponent implements OnInit {
@@ -25,6 +26,7 @@ export class UtilisateursComponent implements OnInit {
   saving   = false;
   deleting: number | null = null;
   error: string | null = null;
+  confirmDialog: (ConfirmDialogConfig & { action: () => void }) | null = null;
 
   showModal  = false;
   modalMode: ModalMode = 'create';
@@ -162,15 +164,20 @@ export class UtilisateursComponent implements OnInit {
   }
 
   deleteUser(u: UserResponse): void {
-    if (!confirm(`${this.translate.instant('users.deleteConfirm')} ${u.prenom} ${u.nom} ?`)) return;
-    this.deleting = u.id;
-    this.userService.deleteById(u.id).subscribe({
-      next: () => {
-        this.users = this.users.filter(x => x.id !== u.id);
-        this.deleting = null;
+    this.confirmDialog = {
+      title:        this.translate.instant('users.deleteConfirm'),
+      message:      `${u.prenom} ${u.nom} — ${u.email}`,
+      confirmLabel: this.translate.instant('common.delete'),
+      danger:       true,
+      action: () => {
+        this.confirmDialog = null;
+        this.deleting = u.id;
+        this.userService.deleteById(u.id).subscribe({
+          next: () => { this.users = this.users.filter(x => x.id !== u.id); this.deleting = null; },
+          error: () => { this.deleting = null; },
+        });
       },
-      error: () => { this.deleting = null; },
-    });
+    };
   }
 
   roleBadgeBg(role: string): string {

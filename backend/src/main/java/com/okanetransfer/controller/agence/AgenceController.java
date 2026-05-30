@@ -1,6 +1,5 @@
 package com.okanetransfer.controller.agence;
 
-
 import com.okanetransfer.service.dto.agence.request.AgenceRequest;
 import com.okanetransfer.service.dto.agence.response.AgenceResponse;
 import com.okanetransfer.service.facade.agence.AgenceService;
@@ -10,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -22,7 +22,14 @@ public class AgenceController {
         this.agenceService = agenceService;
     }
 
-    // ADMIN et MANAGER peuvent chercher une agence
+    // ── Read ──────────────────────────────────────────────────────────────────
+
+    @GetMapping("id/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_AGENT')")
+    public ResponseEntity<AgenceResponse> findById(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(agenceService.findById(id));
+    }
+
     @GetMapping("nom/{nom}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<AgenceResponse> findByNom(@PathVariable("nom") String nom) {
@@ -41,33 +48,10 @@ public class AgenceController {
         return ResponseEntity.ok(agenceService.findByResponsableEmail(email));
     }
 
-    // ADMIN, MANAGER et AGENT peuvent voir les agences actives
     @GetMapping("actives")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_AGENT')")
     public ResponseEntity<List<AgenceResponse>> findByActiveTrue() {
         return ResponseEntity.ok(agenceService.findByActiveTrue());
-    }
-
-    // ADMIN uniquement pour créer, modifier, supprimer
-    @PostMapping("add-one")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<AgenceResponse> save(@RequestBody @Valid AgenceRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(agenceService.save(request));
-    }
-
-    @PutMapping("id/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<AgenceResponse> update(@PathVariable Long id,
-                                                 @RequestBody @Valid AgenceRequest request) {
-        return ResponseEntity.ok(agenceService.update(id, request));
-    }
-
-    @DeleteMapping("id/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-        agenceService.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("all")
@@ -76,4 +60,48 @@ public class AgenceController {
         return ResponseEntity.ok(agenceService.findAll());
     }
 
+    @GetMapping("centrales")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<List<AgenceResponse>> findCentrales() {
+        return ResponseEntity.ok(agenceService.findCentrales());
+    }
+
+    @GetMapping("mon-agence")
+    @PreAuthorize("hasRole('ROLE_AGENT') or hasRole('ROLE_MANAGER')")
+    public ResponseEntity<AgenceResponse> getMonAgence(Principal principal) {
+        String email = principal.getName();
+        try {
+            return ResponseEntity.ok(agenceService.findByAgentEmail(email));
+        } catch (Exception e) {
+            return ResponseEntity.ok(agenceService.findByResponsableEmail(email));
+        }
+    }
+
+    // ── Write ─────────────────────────────────────────────────────────────────
+
+    @PostMapping("add-one")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<AgenceResponse> save(@RequestBody @Valid AgenceRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(agenceService.save(request));
+    }
+
+    @PutMapping("id/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<AgenceResponse> update(@PathVariable("id") Long id,
+                                                  @RequestBody @Valid AgenceRequest request) {
+        return ResponseEntity.ok(agenceService.update(id, request));
+    }
+
+    @PutMapping("id/{id}/toggle-active")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<AgenceResponse> toggleActive(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(agenceService.toggleActive(id));
+    }
+
+    @DeleteMapping("id/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteById(@PathVariable("id") Long id) {
+        agenceService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }

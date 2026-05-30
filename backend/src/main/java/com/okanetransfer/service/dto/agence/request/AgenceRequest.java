@@ -20,6 +20,10 @@ public class AgenceRequest {
 
     private Long responsableId;
 
+    private Boolean estCentrale = false;
+
+    private Long agenceCentraleId;
+
     public String getNom() { return nom; }
     public void setNom(String nom) { this.nom = nom; }
 
@@ -34,4 +38,10 @@ public class AgenceRequest {
 
     public Long getResponsableId() { return responsableId; }
     public void setResponsableId(Long responsableId) { this.responsableId = responsableId; }
+
+    public Boolean getEstCentrale() { return estCentrale; }
+    public void setEstCentrale(Boolean estCentrale) { this.estCentrale = estCentrale; }
+
+    public Long getAgenceCentraleId() { return agenceCentraleId; }
+    public void setAgenceCentraleId(Long agenceCentraleId) { this.agenceCentraleId = agenceCentraleId; }
 }

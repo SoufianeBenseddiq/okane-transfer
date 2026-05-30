@@ -219,3 +219,10 @@
 
   </div>
 </div>
+
+@if (confirmDialog) {
+  <app-confirm-dialog
+    [config]="confirmDialog"
+    (confirmed)="confirmDialog.action()"
+    (cancelled)="confirmDialog = null" />
+}

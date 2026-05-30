@@ -137,10 +137,15 @@
       "active":   "● Active",
       "inactive": "○ Suspended"
     },
+    "centrale":     "Central",
+    "childOf":      "Branch of",
     "managerLabel": "MANAGER",
     "plafond":      "Daily limit",
     "available":    "MAD available",
     "outOfService": "Branch out of service",
+    "activate":     "Activate agency",
+    "deactivate":   "Suspend agency",
+    "deactivateConfirm": "Suspend agency «{{nom}}»? Its agents and managers will no longer be able to log in.",
     "deleteConfirm":"Permanently delete branch",
     "none":         "No branch found.",
     "modal": {
@@ -152,10 +157,18 @@
     "fields": {
       "nom":       "Branch name",
       "adresse":   "Address",
-      "pays":      "Country",
-      "plafond":   "Daily limit (MAD)",
-      "manager":   "Manager (responsible)",
-      "noManager": "— None —"
+      "pays":           "Country",
+      "plafond":        "Daily limit (MAD)",
+      "manager":        "Manager (responsible)",
+      "noManager":      "— None —",
+      "estCentrale":    "Central agency",
+      "agenceCentrale": "Parent central agency",
+      "noCentrale":     "— None (independent) —"
+    },
+    "plafondAlerte": {
+      "alert":    "⚠️ Daily cap at {{pct}}% — operations slowing",
+      "critical": "🚨 Daily cap reached — no new transfers possible",
+      "usage":    "{{used}} / {{total}} MAD used"
     },
     "error": {
       "create": "Error creating the branch.",

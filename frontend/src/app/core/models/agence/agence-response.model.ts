@@ -8,4 +8,8 @@ export interface AgenceResponse {
   active: boolean;
   responsableNom: string | null;
   responsableId: number | null;
+  estCentrale: boolean;
+  agenceCentraleId: number | null;
+  agenceCentraleNom: string | null;
+  pourcentagePlafond: number;
 }

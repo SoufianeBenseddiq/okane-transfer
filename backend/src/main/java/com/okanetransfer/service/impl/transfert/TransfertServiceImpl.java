@@ -252,6 +252,18 @@ public class TransfertServiceImpl implements ITransfertService {
                 : grilleTarifaireRepository.findById(request.getGrilleTarifaireId())
                 .orElseThrow(() -> new IllegalArgumentException("Grille tarifaire introuvable"));
 
+        // Vérification du plafond journalier de l'agence
+        BigDecimal montantActuel = agenceEnvoi.getMontantTraiteAujourdhui() != null
+                ? agenceEnvoi.getMontantTraiteAujourdhui()
+                : BigDecimal.ZERO;
+        BigDecimal totalApres = montantActuel.add(request.getMontant());
+        if (agenceEnvoi.getPlafondJournalier() != null
+                && totalApres.compareTo(agenceEnvoi.getPlafondJournalier()) > 0) {
+            BigDecimal disponible = agenceEnvoi.getPlafondJournalier().subtract(montantActuel);
+            throw new IllegalArgumentException(
+                "Plafond journalier de l'agence dépassé. Disponible : " + disponible + " MAD");
+        }
+
         // Expéditeur
         Expediteur expediteur = new Expediteur();
         expediteur.setClient(client);
@@ -325,6 +337,10 @@ public class TransfertServiceImpl implements ITransfertService {
         transfert.setGrilleTarifaire(grilleTarifaire);
 
         transfert = transfertRepository.save(transfert);
+
+        // Mise à jour du montant traité de l'agence
+        agenceEnvoi.setMontantTraiteAujourdhui(montantActuel.add(request.getMontant()));
+        agenceRepository.save(agenceEnvoi);
 
         enregistrerOperationCaisse(transfert, agent, TypeOperation.ENVOI, transfert.getMontantEnvoye());
 

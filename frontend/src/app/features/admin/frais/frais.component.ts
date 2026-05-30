@@ -9,12 +9,13 @@ import { GrilleTarifaireResponse } from '../../../core/models/devise/grille-tari
 import { FraisResult } from '../../../core/models/devise/frais-result.model';
 import { TopbarComponent } from '../../../shared/components/topbar/topbar.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { ConfirmDialogComponent, ConfirmDialogConfig } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-frais',
   standalone: true,
   host: { class: 'flex flex-col flex-1 min-w-0 overflow-hidden' },
-  imports: [TopbarComponent, IconComponent, ReactiveFormsModule, FormsModule, TranslatePipe],
+  imports: [TopbarComponent, IconComponent, ReactiveFormsModule, FormsModule, TranslatePipe, ConfirmDialogComponent],
   templateUrl: './frais.component.html',
 })
 export class FraisComponent implements OnInit {
@@ -35,6 +36,7 @@ export class FraisComponent implements OnInit {
   saving = false;
   deleting: number | null = null;
   error: string | null = null;
+  confirmDialog: (ConfirmDialogConfig & { action: () => void }) | null = null;
   form!: FormGroup;
 
   isMobile = window.innerWidth < 768;
@@ -186,15 +188,20 @@ export class FraisComponent implements OnInit {
 
   deleteGrille(g: GrilleTarifaireResponse): void {
     if (this.deleting !== null) return;
-    if (!confirm(this.translate.instant('frais.deleteConfirm'))) return;
-    this.deleting = g.id;
-    this.deviseService.deleteGrille(g.id).subscribe({
-      next: () => {
-        this.grilles = this.grilles.filter(x => x.id !== g.id);
-        this.deleting = null;
+    this.confirmDialog = {
+      title:        this.translate.instant('frais.deleteConfirm'),
+      message:      `${g.montantMin} – ${g.montantMax} MAD`,
+      confirmLabel: this.translate.instant('common.delete'),
+      danger:       true,
+      action: () => {
+        this.confirmDialog = null;
+        this.deleting = g.id;
+        this.deviseService.deleteGrille(g.id).subscribe({
+          next: () => { this.grilles = this.grilles.filter(x => x.id !== g.id); this.deleting = null; },
+          error: () => { this.deleting = null; },
+        });
       },
-      error: () => { this.deleting = null; },
-    });
+    };
   }
 
   simuler(): void {

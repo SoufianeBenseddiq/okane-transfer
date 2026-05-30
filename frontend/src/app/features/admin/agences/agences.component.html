@@ -52,8 +52,21 @@
               <!-- Header -->
               <div class="flex items-start justify-between mb-4">
                 <div class="flex-1 min-w-0 pr-2">
-                  <div class="text-[15px] font-bold tracking-tight truncate" style="color:#fff;">{{ a.nom }}</div>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <div class="text-[15px] font-bold tracking-tight truncate" style="color:#fff;">{{ a.nom }}</div>
+                    @if (a.estCentrale) {
+                      <span class="text-[9.5px] font-bold tracking-[0.08em] uppercase px-1.5 py-0.5 rounded-[4px] flex-shrink-0"
+                            style="background:rgba(245,166,35,0.2);color:#F5A623;">
+                        {{ 'agences.centrale' | translate }}
+                      </span>
+                    }
+                  </div>
                   <div class="text-[12px] mt-0.5 truncate" style="color:rgba(255,255,255,0.55);">{{ a.adresse }}</div>
+                  @if (a.agenceCentraleNom) {
+                    <div class="text-[11px] mt-0.5 truncate font-semibold" style="color:rgba(245,166,35,0.75);">
+                      {{ 'agences.childOf' | translate }} {{ a.agenceCentraleNom }}
+                    </div>
+                  }
                 </div>
                 <span class="text-[10.5px] font-bold tracking-[0.06em] uppercase px-2 py-0.5 rounded-[5px] flex-shrink-0"
                       [style.background]="a.active ? 'rgba(0,196,140,0.18)' : 'rgba(255,77,79,0.18)'"
@@ -61,6 +74,15 @@
                   {{ a.active ? ('agences.status.active' | translate) : ('agences.status.inactive' | translate) }}
                 </span>
               </div>
+              <!-- Plafond alert (≥90%) -->
+              @if (a.pourcentagePlafond >= 90 && a.active) {
+                <div class="flex items-center gap-2 rounded-[8px] px-3 py-2 mb-3 text-[11.5px] font-semibold"
+                     [style.background]="a.pourcentagePlafond >= 100 ? 'rgba(255,77,79,0.1)' : 'rgba(250,173,20,0.1)'"
+                     [style.color]="a.pourcentagePlafond >= 100 ? '#FF4D4F' : '#FAAD14'"
+                     [style.border]="'1px solid ' + (a.pourcentagePlafond >= 100 ? 'rgba(255,77,79,0.3)' : 'rgba(250,173,20,0.3)')">
+                  {{ (a.pourcentagePlafond >= 100 ? 'agences.plafondAlerte.critical' : 'agences.plafondAlerte.alert') | translate:{ pct: a.pourcentagePlafond } }}
+                </div>
+              }
 
               <!-- Manager row -->
               <div class="flex items-center gap-2.5 mb-4 pb-4" style="border-bottom:1px dashed rgba(255,255,255,0.08);">
@@ -98,12 +120,28 @@
               </div>
 
               <!-- Actions -->
-              <div class="flex gap-2 mt-auto">
+              <div class="flex gap-2 mt-auto flex-wrap">
                 <button (click)="goDetail(a.id)"
                         class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[8px] text-[12.5px] font-semibold cursor-pointer border-none outline-none"
                         [style.background]="detailAgence?.id === a.id ? 'rgba(123,176,255,0.15)' : 'rgba(255,255,255,0.06)'"
                         [style.color]="detailAgence?.id === a.id ? '#7BB0FF' : '#F3F4F8'">
                   {{ 'common.view' | translate }} <app-icon name="chevronRight" [size]="13" />
+                </button>
+                <!-- Activate / Suspend toggle -->
+                <button (click)="toggleActive(a)" [disabled]="toggling === a.id"
+                        class="flex items-center justify-center rounded-[8px] cursor-pointer border border-solid outline-none disabled:opacity-40"
+                        style="width:34px;height:34px;background:transparent;"
+                        [style.border-color]="a.active ? 'rgba(250,173,20,0.3)' : 'rgba(0,196,140,0.3)'"
+                        [style.color]="a.active ? '#FAAD14' : '#00C48C'"
+                        [title]="(a.active ? 'agences.deactivate' : 'agences.activate') | translate">
+                  @if (toggling === a.id) {
+                    <span class="w-3 h-3 rounded-full border-2 animate-spin"
+                          [style.border-color]="a.active ? 'rgba(250,173,20,0.3)' : 'rgba(0,196,140,0.3)'"
+                          [style.border-top-color]="a.active ? '#FAAD14' : '#00C48C'"></span>
+                  } @else {
+                    <app-icon [name]="a.active ? 'lock' : 'check'" [size]="14"
+                              [color]="a.active ? '#FAAD14' : '#00C48C'" />
+                  }
                 </button>
                 <button (click)="openEdit(a)"
                         class="flex items-center justify-center rounded-[8px] cursor-pointer border border-solid outline-none"
@@ -196,6 +234,29 @@
           </select>
         </div>
 
+        <!-- Central / Child hierarchy -->
+        <div class="flex items-center gap-2.5 px-3 py-2.5 rounded-[10px]" style="background:rgba(245,166,35,0.05);border:1px solid rgba(245,166,35,0.15);">
+          <input type="checkbox" formControlName="estCentrale" id="estCentrale"
+                 class="w-4 h-4 accent-amber-400 cursor-pointer" />
+          <label for="estCentrale" class="text-[13px] font-semibold cursor-pointer" style="color:#F5A623;">
+            {{ 'agences.fields.estCentrale' | translate }}
+          </label>
+        </div>
+
+        @if (!isCentrale) {
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[12px] font-semibold">{{ 'agences.fields.agenceCentrale' | translate }}</label>
+            <select formControlName="agenceCentraleId"
+                    class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                    style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;">
+              <option [value]="null" style="background:#252B45;">{{ 'agences.fields.noCentrale' | translate }}</option>
+              @for (c of centrales; track c.id) {
+                <option [value]="c.id" style="background:#252B45;">{{ c.nom }}</option>
+              }
+            </select>
+          </div>
+        }
+
         <div class="flex items-center gap-3 mt-2">
           <button (click)="closeModal()" class="px-4 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border outline-none"
                   style="background:transparent;color:rgba(255,255,255,0.55);border-color:rgba(255,255,255,0.08);">{{ 'common.cancel' | translate }}</button>
@@ -253,6 +314,22 @@
           </div>
         </div>
 
+        <!-- Type agence (Centrale / Enfant) -->
+        @if (detailAgence.estCentrale || detailAgence.agenceCentraleNom) {
+          <div class="rounded-[10px] p-3" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+            @if (detailAgence.estCentrale) {
+              <div class="text-[10.5px] font-semibold tracking-[0.06em] uppercase mb-1.5" style="color:rgba(255,255,255,0.4);">Type</div>
+              <span class="text-[12px] font-bold px-2.5 py-1 rounded-[6px]"
+                    style="background:rgba(245,166,35,0.18);color:#F5A623;">
+                ★ {{ 'agences.centrale' | translate }}
+              </span>
+            } @else {
+              <div class="text-[10.5px] font-semibold tracking-[0.06em] uppercase mb-1.5" style="color:rgba(255,255,255,0.4);">{{ 'agences.fields.agenceCentrale' | translate }}</div>
+              <div class="text-[13.5px] font-semibold" style="color:#F5A623;">{{ detailAgence.agenceCentraleNom }}</div>
+            }
+          </div>
+        }
+
         <!-- Manager -->
         <div class="rounded-[10px] p-4 flex items-center gap-3"
              style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
@@ -302,11 +379,20 @@
         </div>
 
         <!-- Actions -->
-        <div class="flex gap-2">
+        <div class="flex gap-2 flex-wrap">
           <button (click)="openEdit(detailAgence)"
                   class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[8px] text-[12.5px] font-semibold cursor-pointer border-none outline-none"
                   style="background:rgba(255,255,255,0.06);color:#F3F4F8;">
             <app-icon name="edit" [size]="13" /> {{ 'common.edit' | translate }}
+          </button>
+          <button (click)="toggleActive(detailAgence)" [disabled]="toggling === detailAgence.id"
+                  class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-[8px] text-[12.5px] font-semibold cursor-pointer border border-solid outline-none disabled:opacity-40"
+                  [style.border-color]="detailAgence.active ? 'rgba(250,173,20,0.25)' : 'rgba(0,196,140,0.25)'"
+                  [style.color]="detailAgence.active ? '#FAAD14' : '#00C48C'"
+                  style="background:transparent;">
+            <app-icon [name]="detailAgence.active ? 'lock' : 'check'" [size]="13"
+                      [color]="detailAgence.active ? '#FAAD14' : '#00C48C'" />
+            {{ (detailAgence.active ? 'agences.deactivate' : 'agences.activate') | translate }}
           </button>
           <button (click)="deleteAgence(detailAgence)" [disabled]="deleting === detailAgence.id"
                   class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-[8px] text-[12.5px] font-semibold cursor-pointer border border-solid outline-none disabled:opacity-40"
@@ -320,3 +406,10 @@
 
   </div>
 </div>
+
+@if (confirmDialog) {
+  <app-confirm-dialog
+    [config]="confirmDialog"
+    (confirmed)="confirmDialog.action()"
+    (cancelled)="confirmDialog = null" />
+}

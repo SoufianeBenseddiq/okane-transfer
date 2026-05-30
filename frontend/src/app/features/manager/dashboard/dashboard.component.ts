@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { DashboardService, StatCard, Transfer, AgentPerformance } from './dashboard.service';
+import { AgenceService } from '../../../core/services/agence.service';
+import { AgenceResponse } from '../../../core/models/agence';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,11 +25,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
   totalTransferts = 0;
 
   private performanceIntervalId: any;
+  agence: AgenceResponse | null = null;
 
-  constructor(private dashboardService: DashboardService) {}
+  get plafondAlert(): boolean { return (this.agence?.pourcentagePlafond ?? 0) >= 90; }
+  get plafondCritical(): boolean { return (this.agence?.pourcentagePlafond ?? 0) >= 100; }
+
+  constructor(
+    private dashboardService: DashboardService,
+    private agenceService: AgenceService,
+  ) {}
 
   ngOnInit() {
     this.loadDashboardData();
+    this.agenceService.getMonAgence().subscribe({ next: a => { this.agence = a; } });
     // Polling toutes les 5 secondes pour METTRE À JOUR LES BARRES en temps réel
     this.performanceIntervalId = setInterval(() => {
       this.loadAgentPerformance();
