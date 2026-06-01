@@ -32,6 +32,13 @@ public class Agence {
     @Column(nullable = false)
     private Boolean active = true;
 
+    @Column(nullable = false)
+    private Boolean estCentrale = false;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "agence_centrale_id")
+    private Agence agenceCentrale;
+
     @OneToOne(mappedBy = "agence")
     private Manager responsable;
 
@@ -109,4 +116,10 @@ public class Agence {
     public void setAgents(List<Agent> agents) {
         this.agents = agents;
     }
+
+    public Boolean getEstCentrale() { return estCentrale; }
+    public void setEstCentrale(Boolean estCentrale) { this.estCentrale = estCentrale; }
+
+    public Agence getAgenceCentrale() { return agenceCentrale; }
+    public void setAgenceCentrale(Agence agenceCentrale) { this.agenceCentrale = agenceCentrale; }
 }

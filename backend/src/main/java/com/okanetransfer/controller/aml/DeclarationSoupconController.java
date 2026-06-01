@@ -37,7 +37,7 @@ public class DeclarationSoupconController {
     }
 
     @GetMapping("/{id}")
-    public DeclarationResponse getById(@PathVariable Long id) {
+    public DeclarationResponse getById(@PathVariable("id") Long id) {
         return amlConverter.toDeclarationResponse(declarationService.getById(id));
     }
 
@@ -47,12 +47,12 @@ public class DeclarationSoupconController {
     }
 
     @PutMapping("/{id}")
-    public DeclarationResponse update(@PathVariable Long id, @RequestBody DeclarationSoupcon declaration) {
+    public DeclarationResponse update(@PathVariable("id") Long id, @RequestBody DeclarationSoupcon declaration) {
         return amlConverter.toDeclarationResponse(declarationService.update(id, declaration));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable("id") Long id) {
         declarationService.delete(id);
     }
 }

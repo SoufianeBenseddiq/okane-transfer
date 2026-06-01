@@ -41,6 +41,12 @@
       <artifactId>spring-security-config</artifactId>
       <version>${spring.security.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context-support</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    
 
     <!-- Spring Data JPA -->
     <dependency>
@@ -105,23 +111,18 @@
       <version>2.17.0</version>
     </dependency>
 
+    <!-- Mail -->
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>jakarta.mail</artifactId>
+      <version>2.0.1</version>
+    </dependency>
+
     <!-- Swagger / OpenAPI -->
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
       <version>2.5.0</version>
-    </dependency>
-
-    <!-- Jakarta Validation -->
-    <dependency>
-      <groupId>jakarta.validation</groupId>
-      <artifactId>jakarta.validation-api</artifactId>
-      <version>3.0.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.hibernate.validator</groupId>
-      <artifactId>hibernate-validator</artifactId>
-      <version>8.0.1.Final</version>
     </dependency>
 
     <!-- Servlet API -->
@@ -175,10 +176,30 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <version>3.4.0</version>
         <configuration>
           <failOnMissingWebXml>false</failOnMissingWebXml>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.jetty.ee10</groupId>
+        <artifactId>jetty-ee10-maven-plugin</artifactId>
+        <version>12.0.20</version>
+        <configuration>
+          <webApp>
+            <contextPath>/okane_transfer_war</contextPath>
+          </webApp>
         </configuration>
       </plugin>
     </plugins>

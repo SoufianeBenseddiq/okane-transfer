@@ -1,6 +1,9 @@
 package com.okanetransfer.shared.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,6 +17,8 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // ── 400 Bad Request ───────────────────────────────────────────────────────
 
@@ -71,6 +76,14 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse(400, ex.getMessage()));
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex) {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponse(400, "Contrainte base de données violée : " + mostSpecificMessage(ex)));
+    }
+
     // ── 403 Forbidden ─────────────────────────────────────────────────────────
 
     @ExceptionHandler(AccesRefuseException.class)
@@ -111,11 +124,19 @@ public class GlobalExceptionHandler {
     // ── 500 Internal Server Error ─────────────────────────────────────────────
 
     // capture toutes les exceptions non gérées
-    // évite d'exposer des stack traces en production
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
+        log.error("[500] {} : {}", ex.getClass().getSimpleName(), ex.getMessage(), ex);
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new ErrorResponse(500, "Erreur interne du serveur"));
+    }
+
+    private String mostSpecificMessage(Throwable ex) {
+        Throwable current = ex;
+        while (current.getCause() != null) {
+            current = current.getCause();
+        }
+        return current.getMessage();
     }
 }

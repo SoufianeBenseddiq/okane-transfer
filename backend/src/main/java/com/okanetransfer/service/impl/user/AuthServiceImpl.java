@@ -1,5 +1,8 @@
 package com.okanetransfer.service.impl.user;
 
+import com.okanetransfer.entity.agence.Agence;
+import com.okanetransfer.entity.user.Agent;
+import com.okanetransfer.entity.user.Manager;
 import com.okanetransfer.entity.user.Utilisateur;
 import com.okanetransfer.repository.user.UtilisateurRepository;
 import com.okanetransfer.service.dto.user.request.LoginRequest;
@@ -42,6 +45,19 @@ public class AuthServiceImpl implements AuthService {
         // 2. vérifier que le compte est actif
         if (!user.getActif()) {
             throw new AccesRefuseException("Compte désactivé");
+        }
+
+        // 2b. vérifier que l'agence est active (Agent et Manager uniquement)
+        if (user instanceof Agent agent) {
+            Agence agence = agent.getAgence();
+            if (agence != null && !Boolean.TRUE.equals(agence.getActive())) {
+                throw new AccesRefuseException("Agence suspendue. Contactez l'administration.");
+            }
+        } else if (user instanceof Manager manager) {
+            Agence agence = manager.getAgence();
+            if (agence != null && !Boolean.TRUE.equals(agence.getActive())) {
+                throw new AccesRefuseException("Agence suspendue. Contactez l'administration.");
+            }
         }
 
         // 3. vérifier le mot de passe

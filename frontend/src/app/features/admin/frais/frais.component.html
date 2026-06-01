@@ -1,0 +1,319 @@
+<app-topbar [breadcrumb]="'frais.breadcrumb' | translate"
+            [title]="'frais.title' | translate"
+            [subtitle]="pageSubtitle">
+  <button (click)="openCreate()"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-[12.5px] font-semibold cursor-pointer border-none outline-none"
+          style="background:#F5A623;color:#1A1F36;">
+    <app-icon name="plus" [size]="13" color="#1A1F36" /> {{ 'frais.newTranche' | translate }}
+  </button>
+</app-topbar>
+
+<div class="flex-1 overflow-y-auto p-4 sm:p-7 flex flex-col gap-5">
+
+  <!-- Corridor tabs -->
+  <div class="flex rounded-[10px] p-0.5 flex-wrap gap-0.5 overflow-x-auto"
+       style="background:rgba(255,255,255,0.05);">
+    @if (loadingCorridors) {
+      <span class="px-4 py-[7px] text-[12.5px]" style="color:rgba(255,255,255,0.4);">{{ 'frais.loading' | translate }}</span>
+    } @else {
+      @for (c of corridors; track c.id) {
+        <button (click)="selectCorridor(c.id)"
+                class="px-[14px] py-[7px] rounded-[7px] text-[12.5px] font-semibold cursor-pointer border-none outline-none whitespace-nowrap"
+                [style.background]="activeCorridorId === c.id ? '#F5A623' : 'transparent'"
+                [style.color]="activeCorridorId === c.id ? '#1A1F36' : 'rgba(255,255,255,0.55)'">
+          {{ c.deviseSource }} → {{ c.deviseDestination }}
+        </button>
+      }
+    }
+  </div>
+
+  <!-- Layout: table (left) + simulator or form (right) -->
+  <div class="grid gap-5 items-start"
+       [style.grid-template-columns]="isMobile ? '1fr' : '1.5fr 1fr'">
+
+    <!-- Left: grille table -->
+    <div class="rounded-[12px] overflow-hidden" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="flex items-center justify-between px-6 py-4"
+           style="border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div>
+          <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:#F5A623;">
+            {{ 'frais.grille.label' | translate }}
+          </div>
+          <div class="text-[16px] font-bold mt-1">
+            {{ 'frais.grille.title' | translate }}
+            @if (activeCorridor) {
+              <span style="color:rgba(255,255,255,0.55);font-weight:400;font-size:14px;">
+                — {{ activeCorridor.deviseSource }} → {{ activeCorridor.deviseDestination }}
+              </span>
+            }
+          </div>
+        </div>
+        <button (click)="openCreate()"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold cursor-pointer border-none outline-none"
+                style="background:rgba(255,255,255,0.06);color:#F3F4F8;">
+          <app-icon name="plus" [size]="13" /> {{ 'frais.newTranche' | translate }}
+        </button>
+      </div>
+
+      @if (loadingGrilles) {
+        <div class="flex justify-center py-12">
+          <div class="w-7 h-7 rounded-full border-2 animate-spin"
+               style="border-color:rgba(255,255,255,0.12);border-top-color:#F5A623;"></div>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full" style="border-collapse:collapse;font-size:13px;min-width:560px;">
+            <thead>
+              <tr style="color:rgba(255,255,255,0.55);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;">
+                @for (h of ['frais.col.tranche','frais.col.fixe','frais.col.pct','frais.col.agence','frais.col.centrale','']; track h; let i = $index) {
+                  <th class="px-5 py-3 font-semibold"
+                      [style.text-align]="i === 0 ? 'left' : i === 5 ? 'right' : 'right'"
+                      style="border-bottom:1px solid rgba(255,255,255,0.08);">{{ h | translate }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (g of grilles; track g.id; let i = $index; let last = $last) {
+                <tr [style.background]="i%2===1 ? 'rgba(255,255,255,0.02)' : 'transparent'"
+                    [style.border-bottom]="!last ? '1px solid rgba(255,255,255,0.06)' : 'none'">
+                  <td class="px-5 py-3 font-semibold" style="color:#fff;font-variant-numeric:tabular-nums;">
+                    {{ g.montantMin }} — {{ g.montantMax }} MAD
+                  </td>
+                  <td class="px-5 py-3 text-right font-semibold" style="color:#F5A623;font-variant-numeric:tabular-nums;">
+                    {{ g.fraisFixe }} MAD
+                  </td>
+                  <td class="px-5 py-3 text-right font-semibold" style="color:#F5A623;">{{ g.fraisPourcentage }}%</td>
+                  <td class="px-5 py-3 text-right" style="color:#F3F4F8;">{{ g.partAgence }} MAD</td>
+                  <td class="px-5 py-3 text-right" style="color:#F3F4F8;">{{ g.partCentrale }} MAD</td>
+                  <td class="px-5 py-3 text-right">
+                    <span class="inline-flex gap-1">
+                      <button (click)="openEdit(g)"
+                              class="cursor-pointer border-none bg-transparent p-1 rounded-[6px] outline-none"
+                              style="color:rgba(255,255,255,0.55);" [title]="'common.edit' | translate">
+                        <app-icon name="edit" [size]="14" />
+                      </button>
+                      <button (click)="deleteGrille(g)" [disabled]="deleting === g.id"
+                              class="cursor-pointer border-none bg-transparent p-1 rounded-[6px] outline-none disabled:opacity-40"
+                              style="color:rgba(255,77,79,0.7);" [title]="'common.delete' | translate">
+                        <app-icon name="trash" [size]="14" color="rgba(255,77,79,0.8)" />
+                      </button>
+                    </span>
+                  </td>
+                </tr>
+              }
+              @if (grilles.length === 0) {
+                <tr>
+                  <td colspan="6" class="px-5 py-12 text-center" style="color:rgba(255,255,255,0.55);">
+                    {{ 'frais.grille.none' | translate }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="flex items-center gap-3 px-6 py-[14px] text-[12.5px]"
+             style="border-top:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.55);">
+          <app-icon name="alert" [size]="14" color="#FAAD14" />
+          <span>{{ 'frais.grille.warn' | translate }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Right: create/edit form or simulator -->
+    @if (showModal) {
+      <div class="rounded-[12px] p-5 sm:p-6 flex flex-col gap-4"
+           style="background:#252B45;border:1px solid rgba(255,255,255,0.08);box-shadow:0 24px 64px rgba(0,0,0,0.5);"
+           [formGroup]="form">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase"
+                 [style.color]="modalMode === 'edit' ? '#7BB0FF' : '#F5A623'">
+              {{ (modalMode === 'edit' ? 'frais.modal.modification' : 'frais.modal.creation') | translate }}
+            </div>
+            <div class="text-[16px] font-bold mt-1">
+              {{ (modalMode === 'edit' ? 'frais.modal.editTitle' : 'frais.modal.createTitle') | translate }}
+            </div>
+          </div>
+          <button (click)="closeModal()" class="cursor-pointer border-none bg-transparent p-1 outline-none"
+                  style="color:rgba(255,255,255,0.55);">
+            <app-icon name="x" [size]="16" />
+          </button>
+        </div>
+
+        @if (error) {
+          <div class="flex items-center gap-2 px-3 py-2 rounded-[8px] text-[12.5px]"
+               style="background:rgba(255,77,79,0.12);color:#FF4D4F;border:1px solid rgba(255,77,79,0.24);">
+            <app-icon name="alert" [size]="14" color="#FF4D4F" /> {{ error }}
+          </div>
+        }
+
+        @if (activeCorridor) {
+          <div class="flex items-center gap-2 px-3 py-2 rounded-[8px] text-[12px]"
+               style="background:rgba(245,166,35,0.08);color:#F5A623;border:1px solid rgba(245,166,35,0.15);">
+            <app-icon name="arrowRight" [size]="13" color="#F5A623" />
+            {{ activeCorridor.deviseSource }} → {{ activeCorridor.deviseDestination }}
+          </div>
+        }
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[12px] font-semibold">{{ 'frais.fields.montantMin' | translate }} <span style="color:#FF4D4F;">*</span></label>
+            <input formControlName="montantMin" type="number" min="0"
+                   class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[12px] font-semibold">{{ 'frais.fields.montantMax' | translate }} <span style="color:#FF4D4F;">*</span></label>
+            <input formControlName="montantMax" type="number" min="0"
+                   class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[12px] font-semibold">{{ 'frais.fields.fraisFixe' | translate }} <span style="color:#FF4D4F;">*</span></label>
+            <input formControlName="fraisFixe" type="number" min="0"
+                   class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[12px] font-semibold">{{ 'frais.fields.fraisPct' | translate }}</label>
+            <input formControlName="fraisPourcentage" type="number" min="0" step="0.01"
+                   class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[12px] font-semibold">{{ 'frais.fields.partAgence' | translate }} <span style="color:#FF4D4F;">*</span></label>
+            <input formControlName="partAgence" type="number" min="0"
+                   class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[12px] font-semibold">{{ 'frais.fields.partCentrale' | translate }}</label>
+            <input formControlName="partCentrale" type="number" readonly
+                   class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                   [style.border-color]="partCentraleNegative ? 'rgba(255,77,79,0.5)' : 'rgba(255,255,255,0.05)'"
+                   style="background:rgba(255,255,255,0.02);border:1px solid;color:rgba(255,255,255,0.45);cursor:not-allowed;" />
+            <span class="text-[10.5px]" style="color:rgba(255,255,255,0.35);">{{ 'frais.fields.partCentraleHint' | translate }}</span>
+          </div>
+        </div>
+
+        @if (partCentraleNegative) {
+          <div class="flex items-center gap-2 px-3 py-2 rounded-[8px] text-[12px]"
+               style="background:rgba(255,77,79,0.08);color:#FF4D4F;border:1px solid rgba(255,77,79,0.2);">
+            <app-icon name="alert" [size]="13" color="#FF4D4F" />
+            {{ 'frais.validation.partNegative' | translate }}
+          </div>
+        }
+
+        <div class="flex items-center gap-3 mt-1">
+          <button (click)="closeModal()"
+                  class="px-4 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border outline-none"
+                  style="background:transparent;color:rgba(255,255,255,0.55);border-color:rgba(255,255,255,0.08);">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <span class="flex-1"></span>
+          <button (click)="submit()" [disabled]="saving || form.invalid"
+                  class="flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border-none outline-none disabled:opacity-50"
+                  style="background:#F5A623;color:#1A1F36;">
+            @if (saving) {
+              <span class="w-4 h-4 rounded-full border-2 animate-spin"
+                    style="border-color:rgba(26,31,54,0.3);border-top-color:#1A1F36;"></span>
+              {{ (modalMode === 'edit' ? 'common.updating' : 'common.creating') | translate }}
+            } @else {
+              <app-icon name="check" [size]="14" color="#1A1F36" />
+              {{ (modalMode === 'edit' ? 'common.save' : 'frais.newTranche') | translate }}
+            }
+          </button>
+        </div>
+      </div>
+    } @else {
+      <!-- Simulator -->
+      <div class="rounded-[12px] p-6 flex flex-col gap-4"
+           style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+        <div>
+          <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:#F5A623;">
+            {{ 'frais.sim.label' | translate }}
+          </div>
+          <div class="text-[16px] font-bold mt-1">{{ 'frais.sim.title' | translate }}</div>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <div>
+            <label class="text-[12px] font-semibold block mb-1.5">{{ 'frais.sim.amount' | translate }}</label>
+            <div class="flex items-baseline gap-2 px-[14px] py-3 rounded-[10px]"
+                 style="background:rgba(245,166,35,0.08);border:1.5px solid #F5A623;">
+              <input [(ngModel)]="simulatorAmount" type="number" min="1"
+                     class="text-[26px] font-bold flex-1 bg-transparent border-none outline-none"
+                     style="color:#fff;font-variant-numeric:tabular-nums;" />
+              <span class="text-[13px] font-semibold" style="color:#F5A623;">MAD</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-[12px] font-semibold block mb-1.5">{{ 'frais.sim.corridor' | translate }}</label>
+            <div class="flex items-center gap-2 px-3 py-[9px] rounded-[10px] text-[13px]"
+                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#fff;">
+              @if (activeCorridor) {
+                <span class="flex-1">{{ activeCorridor.deviseSource }} → {{ activeCorridor.deviseDestination }}</span>
+              } @else {
+                <span class="flex-1" style="color:rgba(255,255,255,0.4);">{{ 'common.choose' | translate }}</span>
+              }
+            </div>
+          </div>
+
+          <button (click)="simuler()" [disabled]="calculating || !activeCorridorId"
+                  class="flex items-center justify-center gap-2 w-full px-3 py-2 rounded-[8px] text-[13px] font-semibold cursor-pointer border-none outline-none disabled:opacity-50"
+                  style="background:rgba(245,166,35,0.12);color:#F5A623;">
+            @if (calculating) {
+              <span class="w-4 h-4 rounded-full border-2 animate-spin"
+                    style="border-color:rgba(245,166,35,0.3);border-top-color:#F5A623;"></span>
+              {{ 'frais.sim.calcing' | translate }}
+            } @else {
+              <app-icon name="sparkle" [size]="14" color="#F5A623" /> {{ 'frais.sim.calc' | translate }}
+            }
+          </button>
+        </div>
+
+        @if (fraisResult) {
+          <div class="flex flex-col gap-2 pt-4" style="border-top:1px dashed rgba(255,255,255,0.08);">
+            <div class="flex justify-between items-baseline">
+              <span class="text-[12px]" style="color:rgba(255,255,255,0.55);">{{ 'frais.sim.totalFees' | translate }}</span>
+              <span class="text-[13px] font-semibold font-mono" style="color:#fff;">− {{ fraisResult.montantFrais }} MAD</span>
+            </div>
+            <div class="flex justify-between items-baseline">
+              <span class="text-[12px]" style="color:rgba(255,255,255,0.55);">{{ 'frais.sim.agencePart' | translate }}</span>
+              <span class="text-[13px] font-semibold" style="color:#F3F4F8;">{{ fraisResult.partAgence }} MAD</span>
+            </div>
+            <div class="flex justify-between items-baseline">
+              <span class="text-[12px]" style="color:rgba(255,255,255,0.55);">{{ 'frais.sim.centralePart' | translate }}</span>
+              <span class="text-[13px] font-semibold" style="color:#F3F4F8;">{{ fraisResult.partCentrale }} MAD</span>
+            </div>
+            <div class="my-1" style="height:1px;background:rgba(255,255,255,0.08);"></div>
+            <div class="flex justify-between items-baseline mt-1">
+              <span class="text-[12px]" style="color:rgba(255,255,255,0.55);">{{ 'frais.sim.received' | translate }}</span>
+              <span class="text-[20px] font-bold font-mono" style="color:#F5A623;">{{ fraisResult.montantRecu }} MAD</span>
+            </div>
+          </div>
+        } @else if (!calculating && activeCorridorId) {
+          <div class="pt-4 text-center text-[12.5px]"
+               style="border-top:1px dashed rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);">
+            {{ 'frais.sim.noResult' | translate }}
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>
+
+@if (confirmDialog) {
+  <app-confirm-dialog
+    [config]="confirmDialog"
+    (confirmed)="confirmDialog.action()"
+    (cancelled)="confirmDialog = null" />
+}

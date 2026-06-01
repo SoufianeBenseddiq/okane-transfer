@@ -1,0 +1,353 @@
+<app-topbar [breadcrumb]="'devises.breadcrumb' | translate"
+            [title]="'devises.title' | translate"
+            [subtitle]="pageSubtitle">
+  <div class="flex gap-2">
+    <button (click)="openCreateCorridor()"
+            class="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-[12.5px] font-semibold cursor-pointer border-none outline-none"
+            style="background:rgba(255,255,255,0.06);color:#F3F4F8;">
+      <app-icon name="plus" [size]="13" /> {{ 'devises.newCorridor' | translate }}
+    </button>
+    <button (click)="openCreateDevise()"
+            class="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-[12.5px] font-semibold cursor-pointer border-none outline-none"
+            style="background:#F5A623;color:#1A1F36;">
+      <app-icon name="plus" [size]="13" color="#1A1F36" /> {{ 'devises.newDevise' | translate }}
+    </button>
+  </div>
+</app-topbar>
+
+<div class="flex-1 overflow-y-auto p-7 flex flex-col gap-5">
+
+  @if (loading) {
+    <div class="flex justify-center py-20">
+      <div class="w-8 h-8 rounded-full border-2 animate-spin"
+           style="border-color:rgba(255,255,255,0.12);border-top-color:#F5A623;"></div>
+    </div>
+  } @else {
+
+  <!-- Main layout: content + optional side panel -->
+  <div class="grid gap-5 items-start"
+       [style.grid-template-columns]="(!isMobile && showPanel) ? '1.5fr 1fr' : '1fr'">
+
+    <!-- Left: tables + corridors -->
+    <div class="flex flex-col gap-5">
+
+      <!-- Currencies + Corridors -->
+      <div class="grid gap-5"
+           [style.grid-template-columns]="(isMobile || showPanel) ? '1fr' : '1.4fr 1fr'">
+
+        <!-- Currencies table -->
+        <div class="rounded-[12px] overflow-hidden" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+          <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+            <div>
+              <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:#F5A623;">{{ 'devises.table.label' | translate }}</div>
+              <div class="text-[16px] font-bold mt-1">{{ 'devises.table.title' | translate }}</div>
+            </div>
+            <div class="flex rounded-[10px] p-0.5" style="background:rgba(255,255,255,0.05);">
+              @for (tab of [{id:'all',key:'devises.tab.all'},{id:'api',key:'devises.tab.api'},{id:'man',key:'devises.tab.manual'}]; track tab.id) {
+                <button (click)="activeTab = tab.id"
+                        class="px-3 py-1.5 rounded-[7px] text-[12px] font-semibold cursor-pointer border-none outline-none"
+                        [style.background]="activeTab === tab.id ? '#F5A623' : 'transparent'"
+                        [style.color]="activeTab === tab.id ? '#1A1F36' : 'rgba(255,255,255,0.55)'">
+                  {{ tab.key | translate }}
+                </button>
+              }
+            </div>
+          </div>
+          <table class="w-full" style="border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="color:rgba(255,255,255,0.55);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;">
+                <th class="px-5 py-3 text-left font-semibold" style="border-bottom:1px solid rgba(255,255,255,0.08);">{{ 'devises.col.code' | translate }}</th>
+                <th class="px-5 py-3 text-left font-semibold" style="border-bottom:1px solid rgba(255,255,255,0.08);">{{ 'devises.col.nom' | translate }}</th>
+                <th class="px-5 py-3 text-center font-semibold" style="border-bottom:1px solid rgba(255,255,255,0.08);">{{ 'devises.col.symbol' | translate }}</th>
+                <th class="px-5 py-3 text-right font-semibold" style="border-bottom:1px solid rgba(255,255,255,0.08);">{{ 'devises.col.rate' | translate }}</th>
+                <th class="px-5 py-3 text-left font-semibold" style="border-bottom:1px solid rgba(255,255,255,0.08);">{{ 'devises.col.source' | translate }}</th>
+                <th class="px-5 py-3 text-center font-semibold" style="border-bottom:1px solid rgba(255,255,255,0.08);">{{ 'devises.col.active' | translate }}</th>
+                <th class="px-5 py-3" style="border-bottom:1px solid rgba(255,255,255,0.08);"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of filteredDevises; track d.id; let i = $index; let last = $last) {
+                <tr [style.background]="i%2===1 ? 'rgba(255,255,255,0.02)' : 'transparent'"
+                    [style.border-bottom]="!last ? '1px solid rgba(255,255,255,0.06)' : 'none'">
+                  <td class="px-5 py-[9px]">
+                    <span class="inline-flex px-2 py-0.5 rounded-[5px] text-[11.5px] font-bold font-mono"
+                          style="background:rgba(245,166,35,0.14);color:#F5A623;">{{ d.code }}</span>
+                  </td>
+                  <td class="px-5 py-[9px]" style="color:#F3F4F8;">{{ d.nom }}</td>
+                  <td class="px-5 py-[9px] text-center" style="color:rgba(255,255,255,0.55);">{{ d.symbole }}</td>
+                  <td class="px-5 py-[9px] text-right font-semibold" style="color:#fff;font-variant-numeric:tabular-nums;">{{ d.tauxVersEuro }}</td>
+                  <td class="px-5 py-[9px]">
+                    <span class="inline-flex px-1.5 py-0.5 rounded-[5px] text-[10.5px] font-bold tracking-[0.04em]"
+                          [style.background]="d.sourceTaux === 'API' ? 'rgba(0,196,140,0.18)' : 'rgba(255,255,255,0.06)'"
+                          [style.color]="d.sourceTaux === 'API' ? '#00C48C' : 'rgba(255,255,255,0.55)'">{{ d.sourceTaux }}</span>
+                  </td>
+                  <td class="px-5 py-[9px] text-center">
+                    <button (click)="toggleDevise(d)"
+                            class="inline-block relative rounded-full cursor-pointer border-none p-0 outline-none"
+                            style="width:34px;height:20px;"
+                            [style.background]="d.active ? '#00C48C' : 'rgba(255,255,255,0.12)'">
+                      <span class="absolute rounded-full bg-white"
+                            style="top:2px;width:16px;height:16px;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:left .15s;"
+                            [style.left]="d.active ? '16px' : '2px'"></span>
+                    </button>
+                  </td>
+                  <td class="px-5 py-[9px] text-right">
+                    <span class="inline-flex gap-1">
+                      <button (click)="openEditDevise(d)"
+                              class="cursor-pointer border-none bg-transparent p-1 outline-none" style="color:rgba(255,255,255,0.55);">
+                        <app-icon name="edit" [size]="14" />
+                      </button>
+                      <!-- ⚠️ TODO (équipe Devise): brancher sur DELETE /api/admin/devises/{id} -->
+                      <button class="cursor-pointer border-none bg-transparent p-1 outline-none" style="color:rgba(255,77,79,0.6);"
+                              [title]="'common.delete' | translate">
+                        <app-icon name="trash" [size]="14" color="rgba(255,77,79,0.6)" />
+                      </button>
+                    </span>
+                  </td>
+                </tr>
+              }
+              @if (filteredDevises.length === 0) {
+                <tr><td colspan="7" class="px-5 py-10 text-center" style="color:rgba(255,255,255,0.55);">{{ 'devises.none' | translate }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Corridors grid (hidden when panel open to save space) -->
+        @if (!showPanel) {
+          <div class="rounded-[12px] p-5" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+            <div class="flex items-end justify-between mb-4">
+              <div>
+                <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:#F5A623;">{{ 'devises.corridors.label' | translate }}</div>
+                <div class="text-[16px] font-bold mt-1">{{ 'devises.corridors.title' | translate }}</div>
+              </div>
+              <button (click)="openCreateCorridor()" class="cursor-pointer border-none bg-transparent p-1 outline-none" style="color:#F5A623;">
+                <app-icon name="plus" [size]="18" color="#F5A623" />
+              </button>
+            </div>
+            <div class="grid grid-cols-2 gap-2.5">
+              @for (c of corridors; track c.id) {
+                <div class="rounded-[10px] p-[14px]"
+                     [style.background]="c.actif ? 'rgba(245,166,35,0.06)' : 'rgba(255,77,79,0.05)'"
+                     [style.border]="'1px solid ' + (c.actif ? 'rgba(245,166,35,0.24)' : 'rgba(255,77,79,0.20)')">
+                  <div class="flex items-center gap-1.5 mb-2">
+                    <span class="text-[11px] font-bold" style="color:#F5A623;">{{ c.deviseSource }}</span>
+                    <app-icon name="arrowRight" [size]="11" color="rgba(255,255,255,0.55)" />
+                    <span class="text-[11px] font-bold" style="color:#F5A623;">{{ c.deviseDestination }}</span>
+                    <span class="flex-1"></span>
+                    <button (click)="toggleCorridor(c)"
+                            class="inline-block relative rounded-full cursor-pointer border-none p-0 outline-none"
+                            style="width:28px;height:16px;"
+                            [style.background]="c.actif ? '#00C48C' : 'rgba(255,255,255,0.12)'">
+                      <span class="absolute rounded-full bg-white"
+                            style="top:2px;width:12px;height:12px;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:left .15s;"
+                            [style.left]="c.actif ? '14px' : '2px'"></span>
+                    </button>
+                  </div>
+                  <div class="text-[13.5px] font-bold mb-1" style="color:#fff;">{{ c.deviseSource }} → {{ c.deviseDestination }}</div>
+                  <div class="flex justify-between text-[11px]" style="color:rgba(255,255,255,0.55);">
+                    <span>{{ 'devises.corridors.since' | translate }} <strong style="color:#fff;">{{ c.dateActivation | date:'MM/yyyy' }}</strong></span>
+                    <!-- ⚠️ TODO (équipe Corridor): DELETE /api/admin/corridors/{id} -->
+                    <span class="inline-flex px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold"
+                          [style.background]="c.actif ? 'rgba(0,196,140,0.15)' : 'rgba(255,77,79,0.15)'"
+                          [style.color]="c.actif ? '#00C48C' : '#FF4D4F'">
+                      {{ c.actif ? ('devises.corridors.active' | translate) : ('devises.corridors.inactive' | translate) }}
+                    </span>
+                  </div>
+                </div>
+              }
+              @if (corridors.length === 0) {
+                <div class="col-span-2 py-8 text-center text-[13px]" style="color:rgba(255,255,255,0.55);">{{ 'devises.corridors.none' | translate }}</div>
+              }
+            </div>
+          </div>
+        }
+
+      </div>
+
+      <!-- History table -->
+      <div class="rounded-[12px] overflow-hidden" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+        <div class="flex items-center gap-2 px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+          <div class="flex-1">
+            <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:#F5A623;">{{ 'devises.history.label' | translate }}</div>
+            <div class="text-[16px] font-bold mt-1">{{ 'devises.history.title' | translate }}</div>
+          </div>
+          <span class="px-2 py-1 rounded-[6px] text-[11px] font-bold"
+                style="background:rgba(250,173,20,0.14);color:#FAAD14;">Statique — TODO GET /api/admin/devises/historique</span>
+        </div>
+        <table class="w-full" style="border-collapse:collapse;font-size:13px;">
+          <thead>
+            <tr style="color:rgba(255,255,255,0.55);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;">
+              @for (h of ['devises.history.col.date','devises.history.col.devise','devises.history.col.old','devises.history.col.new','devises.history.col.var','devises.history.col.source']; track h; let i = $index) {
+                <th class="px-5 py-3 font-semibold" [style.text-align]="i>=2 ? 'right' : 'left'"
+                    style="border-bottom:1px solid rgba(255,255,255,0.08);">{{ h | translate }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (h of history; track h.date; let i = $index; let last = $last) {
+              <tr [style.background]="i%2===1 ? 'rgba(255,255,255,0.02)' : 'transparent'"
+                  [style.border-bottom]="!last ? '1px solid rgba(255,255,255,0.06)' : 'none'">
+                <td class="px-5 py-[9px]" style="color:rgba(255,255,255,0.55);">{{ h.date }}</td>
+                <td class="px-5 py-[9px] font-semibold font-mono">{{ h.dev }}</td>
+                <td class="px-5 py-[9px] text-right" style="color:rgba(255,255,255,0.55);">{{ h.old }}</td>
+                <td class="px-5 py-[9px] text-right font-semibold" style="color:#fff;">{{ h.neu }}</td>
+                <td class="px-5 py-[9px] text-right">
+                  <span class="inline-flex items-center gap-1 font-bold text-[12px]" [style.color]="h.up ? '#00C48C' : '#FF4D4F'">
+                    <app-icon [name]="h.up ? 'arrowUp' : 'arrowDown'" [size]="10" [color]="h.up ? '#00C48C' : '#FF4D4F'" [stroke]="2.6" />
+                    {{ h.up ? '+' : '−' }}
+                  </span>
+                </td>
+                <td class="px-5 py-[9px] text-right text-[11px] font-semibold"
+                    [style.color]="h.src==='API' ? '#00C48C' : 'rgba(255,255,255,0.55)'">{{ h.src }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right: side panel -->
+    @if (showPanel) {
+      <div class="rounded-[12px] p-6 flex flex-col gap-4 sticky top-0"
+           style="background:#252B45;border:1px solid rgba(255,255,255,0.08);box-shadow:0 24px 64px rgba(0,0,0,0.5);">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase"
+                 [style.color]="panelMode === 'devise-edit' ? '#7BB0FF' : '#F5A623'">
+              @if (panelMode === 'devise-create')   { {{ 'devises.panel.newDevise' | translate }} }
+              @if (panelMode === 'devise-edit')     { {{ 'devises.panel.editDevise' | translate }} }
+              @if (panelMode === 'corridor-create') { {{ 'devises.panel.newCorridor' | translate }} }
+            </div>
+            <div class="text-[16px] font-bold mt-1">
+              @if (panelMode === 'devise-create')   { {{ 'devises.panel.addDevise' | translate }} }
+              @if (panelMode === 'devise-edit')     { {{ editingDevise?.code }} — {{ editingDevise?.nom }} }
+              @if (panelMode === 'corridor-create') { {{ 'devises.panel.createLink' | translate }} }
+            </div>
+          </div>
+          <button (click)="closePanel()" class="cursor-pointer border-none bg-transparent p-1 outline-none" style="color:rgba(255,255,255,0.55);">
+            <app-icon name="x" [size]="16" />
+          </button>
+        </div>
+
+        @if (error) {
+          <div class="flex items-center gap-2 px-3 py-2 rounded-[8px] text-[12.5px]"
+               style="background:rgba(255,77,79,0.12);color:#FF4D4F;border:1px solid rgba(255,77,79,0.24);">
+            <app-icon name="alert" [size]="14" color="#FF4D4F" /> {{ error }}
+          </div>
+        }
+
+        <!-- Devise form -->
+        @if (panelMode === 'devise-create' || panelMode === 'devise-edit') {
+          <div class="flex flex-col gap-3" [formGroup]="deviseForm">
+            <div class="grid grid-cols-2 gap-3">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[12px] font-semibold">{{ 'devises.fields.code' | translate }} <span style="color:#FF4D4F;">*</span></label>
+                <input formControlName="code" placeholder="EUR" maxlength="3"
+                       class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none font-mono uppercase"
+                       style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F5A623;" />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[12px] font-semibold">{{ 'devises.fields.symbol' | translate }} <span style="color:#FF4D4F;">*</span></label>
+                <input formControlName="symbole" placeholder="€"
+                       class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                       style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+              </div>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[12px] font-semibold">{{ 'devises.fields.nom' | translate }} <span style="color:#FF4D4F;">*</span></label>
+              <input formControlName="nom" placeholder="Euro"
+                     class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                     style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[12px] font-semibold">{{ 'devises.fields.rate' | translate }} <span style="color:#FF4D4F;">*</span></label>
+              <input formControlName="tauxVersEuro" type="number" step="0.0001" placeholder="1.0000"
+                     class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                     style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[12px] font-semibold">{{ 'devises.fields.source' | translate }}</label>
+              <div class="flex gap-2">
+                @for (s of sourceTauxOptions; track s) {
+                  <button type="button" (click)="deviseForm.patchValue({sourceTaux: s})"
+                          class="flex-1 py-2 rounded-[8px] text-[12px] font-bold cursor-pointer border outline-none"
+                          [style.background]="deviseForm.value.sourceTaux === s ? '#F5A623' : 'rgba(255,255,255,0.04)'"
+                          [style.color]="deviseForm.value.sourceTaux === s ? '#1A1F36' : 'rgba(255,255,255,0.55)'"
+                          [style.border-color]="deviseForm.value.sourceTaux === s ? '#F5A623' : 'rgba(255,255,255,0.08)'">
+                    {{ s }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-3 mt-2">
+            <button (click)="closePanel()" class="px-4 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border outline-none"
+                    style="background:transparent;color:rgba(255,255,255,0.55);border-color:rgba(255,255,255,0.08);">{{ 'common.cancel' | translate }}</button>
+            <button (click)="submitDevise()" [disabled]="saving"
+                    class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border-none outline-none disabled:opacity-50"
+                    style="background:#F5A623;color:#1A1F36;">
+              @if (saving) {
+                <span class="w-4 h-4 rounded-full border-2 animate-spin" style="border-color:rgba(26,31,54,0.3);border-top-color:#1A1F36;"></span>
+              } @else {
+                <app-icon name="check" [size]="14" color="#1A1F36" />
+              }
+              {{ (panelMode === 'devise-edit' ? 'common.save' : 'devises.btn.createDevise') | translate }}
+            </button>
+          </div>
+        }
+
+        <!-- Corridor form -->
+        @if (panelMode === 'corridor-create') {
+          <p class="text-[12px]" style="color:rgba(255,255,255,0.55);">
+            {{ 'devises.corridor.hint' | translate }}
+          </p>
+          <div class="flex flex-col gap-3" [formGroup]="corridorForm">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[12px] font-semibold">{{ 'devises.fields.sourceDevise' | translate }} <span style="color:#FF4D4F;">*</span></label>
+              <select formControlName="deviseSourceId"
+                      class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                      style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;">
+                <option [ngValue]="null" style="background:#252B45;">{{ 'common.choose' | translate }}</option>
+                @for (d of devises; track d.id) {
+                  <option [ngValue]="d.id" style="background:#252B45;">{{ d.code }} — {{ d.nom }}</option>
+                }
+              </select>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[12px] font-semibold">{{ 'devises.fields.destDevise' | translate }} <span style="color:#FF4D4F;">*</span></label>
+              <select formControlName="deviseDestinationId"
+                      class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                      style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;">
+                <option [ngValue]="null" style="background:#252B45;">{{ 'common.choose' | translate }}</option>
+                @for (d of devises; track d.id) {
+                  <option [ngValue]="d.id" style="background:#252B45;">{{ d.code }} — {{ d.nom }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="flex gap-3 mt-2">
+            <button (click)="closePanel()" class="px-4 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border outline-none"
+                    style="background:transparent;color:rgba(255,255,255,0.55);border-color:rgba(255,255,255,0.08);">{{ 'common.cancel' | translate }}</button>
+            <button (click)="submitCorridor()" [disabled]="saving"
+                    class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border-none outline-none disabled:opacity-50"
+                    style="background:#F5A623;color:#1A1F36;">
+              @if (saving) {
+                <span class="w-4 h-4 rounded-full border-2 animate-spin" style="border-color:rgba(26,31,54,0.3);border-top-color:#1A1F36;"></span>
+              } @else {
+                <app-icon name="check" [size]="14" color="#1A1F36" />
+              }
+              {{ 'devises.btn.createCorridor' | translate }}
+            </button>
+          </div>
+        }
+
+      </div>
+    }
+
+  </div>
+
+  } <!-- end @else -->
+</div>

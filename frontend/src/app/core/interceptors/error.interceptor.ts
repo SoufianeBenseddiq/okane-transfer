@@ -30,10 +30,12 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         }
         auth.clearSession();
         router.navigate(['/auth/login']);
+        return throwError(() => error);
       }
 
-      if (error.status === 403) {
-        router.navigate(['/auth/login']);
+      if (error.status === 403 && !req.url.includes('/api/auth')) {
+        router.navigate(['/unauthorized']);
+        return throwError(() => error);
       }
 
       return throwError(() => error);

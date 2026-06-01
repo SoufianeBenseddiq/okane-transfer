@@ -13,7 +13,11 @@ public class AgenceResponse {
     private BigDecimal montantTraiteAujourdhui;
     private Boolean active;
     private String responsableNom;
-
+    private Long responsableId;
+    private Boolean estCentrale;
+    private Long agenceCentraleId;
+    private String agenceCentraleNom;
+    private Integer pourcentagePlafond;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -38,4 +42,19 @@ public class AgenceResponse {
 
     public String getResponsableNom() { return responsableNom; }
     public void setResponsableNom(String responsableNom) { this.responsableNom = responsableNom; }
+
+    public Long getResponsableId() { return responsableId; }
+    public void setResponsableId(Long responsableId) { this.responsableId = responsableId; }
+
+    public Boolean getEstCentrale() { return estCentrale; }
+    public void setEstCentrale(Boolean estCentrale) { this.estCentrale = estCentrale; }
+
+    public Long getAgenceCentraleId() { return agenceCentraleId; }
+    public void setAgenceCentraleId(Long agenceCentraleId) { this.agenceCentraleId = agenceCentraleId; }
+
+    public String getAgenceCentraleNom() { return agenceCentraleNom; }
+    public void setAgenceCentraleNom(String agenceCentraleNom) { this.agenceCentraleNom = agenceCentraleNom; }
+
+    public Integer getPourcentagePlafond() { return pourcentagePlafond; }
+    public void setPourcentagePlafond(Integer pourcentagePlafond) { this.pourcentagePlafond = pourcentagePlafond; }
 }

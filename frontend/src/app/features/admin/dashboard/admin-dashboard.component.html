@@ -1,0 +1,194 @@
+<app-topbar breadcrumb="Administration" title="Vue d'ensemble"
+            subtitle="Synthèse temps réel">
+  <button class="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border-none"
+          style="background:#F5A623;color:#1A1F36;">
+    <app-icon name="plus" [size]="14" color="#1A1F36" />
+    Nouveau corridor
+  </button>
+</app-topbar>
+
+<div class="flex-1 overflow-y-auto p-7 flex flex-col gap-5">
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-4 gap-4">
+    <!-- Transferts -->
+    <div class="rounded-[12px] p-5 flex flex-col gap-1.5" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="flex items-center gap-2 text-[10.5px] font-semibold tracking-[0.06em] uppercase" style="color:rgba(255,255,255,0.55);">
+        <span class="flex items-center justify-center rounded-[7px]" style="width:26px;height:26px;background:rgba(245,166,35,0.12);color:#F5A623;">
+          <app-icon name="send" [size]="13" color="#F5A623" [stroke]="2.2" />
+        </span>
+        Transferts du jour
+      </div>
+      <div class="text-[26px] font-bold tracking-tight" style="font-variant-numeric:tabular-nums;">1 248</div>
+      <div class="flex items-center gap-2 text-[12px]" style="color:rgba(255,255,255,0.55);">
+        <span class="flex items-center gap-1 font-semibold" style="color:#00C48C;">
+          <app-icon name="arrowUp" [size]="11" color="#00C48C" [stroke]="2.6" /> +12.4%
+        </span>
+        ≈ 4.82M MAD volume
+      </div>
+    </div>
+
+    <!-- Commissions -->
+    <div class="rounded-[12px] p-5 flex flex-col gap-1.5" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="flex items-center gap-2 text-[10.5px] font-semibold tracking-[0.06em] uppercase" style="color:rgba(255,255,255,0.55);">
+        <span class="flex items-center justify-center rounded-[7px]" style="width:26px;height:26px;background:rgba(245,166,35,0.12);color:#F5A623;">
+          <app-icon name="currency" [size]="13" color="#F5A623" [stroke]="2.2" />
+        </span>
+        Commissions ce mois
+      </div>
+      <div class="text-[22px] font-bold tracking-tight" style="font-variant-numeric:tabular-nums;">218 940 MAD</div>
+      <div class="flex items-center gap-2 text-[12px]" style="color:rgba(255,255,255,0.55);">
+        <span class="flex items-center gap-1 font-semibold" style="color:#00C48C;">
+          <app-icon name="arrowUp" [size]="11" color="#00C48C" [stroke]="2.6" /> +13.9%
+        </span>
+        vs 192k mois -1
+      </div>
+    </div>
+
+    <!-- Agences -->
+    <div class="rounded-[12px] p-5 flex flex-col gap-1.5" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="flex items-center gap-2 text-[10.5px] font-semibold tracking-[0.06em] uppercase" style="color:rgba(255,255,255,0.55);">
+        <span class="flex items-center justify-center rounded-[7px]" style="width:26px;height:26px;background:rgba(245,166,35,0.12);color:#F5A623;">
+          <app-icon name="building" [size]="13" color="#F5A623" [stroke]="2.2" />
+        </span>
+        Agences actives
+      </div>
+      <div class="text-[26px] font-bold tracking-tight" style="font-variant-numeric:tabular-nums;">178 / 184</div>
+      <div class="text-[12px]" style="color:rgba(255,255,255,0.55);">6 suspendues</div>
+    </div>
+
+    <!-- AML Alerts -->
+    <div class="rounded-[12px] p-5 flex flex-col gap-1.5" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="flex items-center gap-2 text-[10.5px] font-semibold tracking-[0.06em] uppercase" style="color:rgba(255,255,255,0.55);">
+        <span class="flex items-center justify-center rounded-[7px]" style="width:26px;height:26px;background:rgba(255,77,79,0.14);color:#FF4D4F;">
+          <app-icon name="alert" [size]="13" color="#FF4D4F" [stroke]="2.2" />
+        </span>
+        Alertes AML
+      </div>
+      <div class="text-[26px] font-bold tracking-tight" style="font-variant-numeric:tabular-nums;">7</div>
+      <div class="flex items-center gap-2 text-[12px]" style="color:rgba(255,255,255,0.55);">
+        <span class="flex items-center gap-1 font-semibold" style="color:#FF4D4F;">
+          <app-icon name="arrowUp" [size]="11" color="#FF4D4F" [stroke]="2.6" /> +2
+        </span>
+        3 critiques · 4 à traiter
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div class="grid gap-4" style="grid-template-columns:1.4fr 1fr;">
+
+    <!-- Bar chart — volume par corridor -->
+    <div class="rounded-[12px] p-5" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <div class="text-[15px] font-bold tracking-tight">Volume par corridor</div>
+          <div class="text-[11.5px] mt-0.5" style="color:rgba(255,255,255,0.55);">7 derniers jours · k MAD</div>
+        </div>
+        <div class="flex rounded-[8px] p-0.5" style="background:rgba(255,255,255,0.05);">
+          @for (seg of ['7j','30j','90j']; track seg) {
+            <span class="px-[10px] py-1 rounded-[6px] text-[11.5px] font-semibold cursor-pointer"
+                  [style.background]="seg==='7j' ? '#F5A623' : 'transparent'"
+                  [style.color]="seg==='7j' ? '#1A1F36' : 'rgba(255,255,255,0.55)'">{{ seg }}</span>
+          }
+        </div>
+      </div>
+      <!-- CSS bar chart -->
+      <div class="flex items-end gap-2" style="height:130px;">
+        @for (bar of bars; track bar.label) {
+          <div class="flex-1 flex flex-col items-center gap-1 min-w-0">
+            <div class="w-full rounded-t-[4px]" style="background:#F5A623;"
+                 [style.height.px]="bar.height"></div>
+            <span class="text-[9px] w-full text-center truncate" style="color:rgba(255,255,255,0.55);">{{ bar.label }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Commissions trend -->
+    <div class="rounded-[12px] p-5" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <div class="text-[15px] font-bold tracking-tight">Évolution des commissions</div>
+          <div class="text-[11.5px] mt-0.5" style="color:rgba(255,255,255,0.55);">30 derniers jours · MAD</div>
+        </div>
+        <div class="flex items-center gap-2 text-[12px]">
+          <span class="font-bold text-[18px]" style="color:#00C48C;">+13.9%</span>
+          <span style="color:rgba(255,255,255,0.55);">vs précédente</span>
+        </div>
+      </div>
+      <!-- Simple SVG line trend -->
+      <svg viewBox="0 0 400 130" class="w-full block" style="margin-top:8px;">
+        <defs>
+          <linearGradient id="grd" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#F5A623" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#F5A623" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <line x1="0" x2="400" y1="100" y2="100" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <line x1="0" x2="400" y1="70"  y2="70"  stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="3 5"/>
+        <line x1="0" x2="400" y1="40"  y2="40"  stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="3 5"/>
+        <path d="M0,90 C40,85 80,75 120,70 C160,65 180,72 220,58 C260,44 300,48 340,32 L380,25"
+              fill="none" stroke="#F5A623" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M0,90 C40,85 80,75 120,70 C160,65 180,72 220,58 C260,44 300,48 340,32 L380,25 L380,110 L0,110 Z"
+              fill="url(#grd)"/>
+        <circle cx="380" cy="25" r="4" fill="#F5A623" stroke="#252B45" stroke-width="2"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- AML Alerts table -->
+  <div class="rounded-[12px] overflow-hidden" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+    <div class="flex items-center justify-between px-6 py-[18px]" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div>
+        <div class="text-[10.5px] font-semibold tracking-[0.08em] uppercase" style="color:rgba(255,255,255,0.55);">Conformité</div>
+        <div class="text-[16px] font-bold mt-0.5">5 dernières alertes AML</div>
+      </div>
+      <div class="flex gap-2">
+        <button class="px-3 py-1.5 rounded-[8px] text-[12.5px] font-semibold cursor-pointer border outline-none"
+                style="background:transparent;color:rgba(255,255,255,0.55);border-color:rgba(255,255,255,0.08);">Voir tout</button>
+        <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12.5px] font-semibold cursor-pointer border-none outline-none"
+                style="background:rgba(255,255,255,0.06);color:#F3F4F8;">
+          <app-icon name="report" [size]="13" /> Exporter
+        </button>
+      </div>
+    </div>
+    <table class="w-full" style="border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="color:rgba(255,255,255,0.55);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;">
+          @for (h of ['Date / heure','Client','Montant','Règle déclenchée','Statut','']; track h; let i = $index) {
+            <th class="px-6 py-3 font-semibold"
+                [style.text-align]="i===2 ? 'right' : 'left'"
+                style="border-bottom:1px solid rgba(255,255,255,0.08);">{{ h }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (a of alerts; track a.date; let last = $last) {
+          <tr [style.border-bottom]="!last ? '1px solid rgba(255,255,255,0.08)' : 'none'">
+            <td class="px-6 py-[14px]" style="color:rgba(255,255,255,0.55);font-variant-numeric:tabular-nums;">{{ a.date }}</td>
+            <td class="px-6 py-[14px] font-semibold">{{ a.client }}</td>
+            <td class="px-6 py-[14px] text-right font-semibold" style="font-variant-numeric:tabular-nums;">{{ a.montant }}</td>
+            <td class="px-6 py-[14px]">{{ a.regle }}</td>
+            <td class="px-6 py-[14px]">
+              @if (a.pending) {
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11.5px] font-semibold"
+                      style="background:rgba(255,77,79,0.14);color:#FF4D4F;">● À traiter</span>
+              } @else {
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11.5px] font-semibold"
+                      style="background:rgba(0,196,140,0.14);color:#00C48C;">✓ Traitée</span>
+              }
+            </td>
+            <td class="px-6 py-[14px] text-right">
+              <button class="cursor-pointer border-none bg-transparent p-1 outline-none"
+                      style="color:rgba(255,255,255,0.55);">
+                <app-icon name="chevronRight" [size]="16" />
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+</div>

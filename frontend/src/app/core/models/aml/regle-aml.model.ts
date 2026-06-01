@@ -1,8 +1,9 @@
 export interface RegleAML {
   id?: number;
   nom: string;
+  description: string;
   seuilMontant: number | null;
-  nbTransactionsMax: number | null;
-  fenetreHeures: number | null;
+  seuilNbTransactions: number | null;
+  fenetreTempsMinutes: number | null;
   active: boolean;
 }

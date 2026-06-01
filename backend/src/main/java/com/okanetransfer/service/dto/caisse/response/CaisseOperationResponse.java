@@ -13,6 +13,7 @@ public class CaisseOperationResponse {
     private TypeOperation type;
     private BigDecimal montant;
     private LocalDateTime dateHeure;
+    private Long transfertId;
     private String referenceTransfert;
 
 
@@ -33,6 +34,9 @@ public class CaisseOperationResponse {
 
     public LocalDateTime getDateHeure() { return dateHeure; }
     public void setDateHeure(LocalDateTime dateHeure) { this.dateHeure = dateHeure; }
+
+    public Long getTransfertId() { return transfertId; }
+    public void setTransfertId(Long transfertId) { this.transfertId = transfertId; }
 
     public String getReferenceTransfert() { return referenceTransfert; }
     public void setReferenceTransfert(String referenceTransfert) { this.referenceTransfert = referenceTransfert; }

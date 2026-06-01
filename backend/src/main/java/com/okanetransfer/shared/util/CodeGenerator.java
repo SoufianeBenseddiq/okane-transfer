@@ -9,8 +9,8 @@ import java.time.format.DateTimeFormatter;
 @Component
 public class CodeGenerator {
 
-    // code retrait : 8 chars alphanumériques en majuscules
-    // ex: "K7X2M9QA"
+    // code retrait formaté en 4-4
+    // ex: "K7X2-M9QA"
     public String generateCodeRetrait() {
         String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         // retire les caractères ambigus : I, O, 0, 1
@@ -19,7 +19,28 @@ public class CodeGenerator {
         for (int i = 0; i < 8; i++) {
             sb.append(chars.charAt(random.nextInt(chars.length())));
         }
-        return sb.toString();
+        return formatCodeRetrait(sb.toString());
+    }
+
+    public String formatCodeRetrait(String codeRetrait) {
+        if (codeRetrait == null) {
+            return null;
+        }
+
+        String normalise = codeRetrait.replace("-", "").toUpperCase();
+        if (normalise.length() != 8) {
+            return normalise;
+        }
+
+        return normalise.substring(0, 4) + "-" + normalise.substring(4);
+    }
+
+    public String normaliseCodeRetrait(String codeRetrait) {
+        if (codeRetrait == null) {
+            return null;
+        }
+
+        return codeRetrait.replace("-", "").toUpperCase();
     }
 
     // référence : préfixe + date + séquence

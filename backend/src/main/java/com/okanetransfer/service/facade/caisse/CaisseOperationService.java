@@ -22,6 +22,8 @@ public interface CaisseOperationService {
 
     BigDecimal consulterSoldeDuJour(String agentEmail);
 
+    BigDecimal consulterSoldePourDate(String agentEmail, LocalDate date);
+
     List<CaisseOperationResponse> operationsDuJour(String agentEmail);
 
     List<CaisseOperationResponse> historiqueFiltre(String email, LocalDate dateDebut, LocalDate dateFin);

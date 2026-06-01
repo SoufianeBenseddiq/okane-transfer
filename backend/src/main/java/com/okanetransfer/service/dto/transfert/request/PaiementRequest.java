@@ -5,11 +5,9 @@ import com.okanetransfer.shared.enums.TypePiece;
 public class PaiementRequest {
 
     private String codeRetrait;
-
     private Long agenceRetraitId;
-
+    private Long agentId;
     private TypePiece typePieceBeneficiaire;
-
     private String numeroPieceBeneficiaire;
 
     public PaiementRequest() {
@@ -31,11 +29,27 @@ public class PaiementRequest {
         this.agenceRetraitId = agenceRetraitId;
     }
 
-    public TypePiece getTypePieceBeneficiaire() { return typePieceBeneficiaire; }
+    public Long getAgentId() {
+        return agentId;
+    }
 
-    public void setTypePieceBeneficiaire(TypePiece typePieceBeneficiaire) { this.typePieceBeneficiaire = typePieceBeneficiaire; }
+    public void setAgentId(Long agentId) {
+        this.agentId = agentId;
+    }
 
-    public String getNumeroPieceBeneficiaire() { return numeroPieceBeneficiaire; }
+    public TypePiece getTypePieceBeneficiaire() {
+        return typePieceBeneficiaire;
+    }
 
-    public void setNumeroPieceBeneficiaire(String numeroPieceBeneficiaire) { this.numeroPieceBeneficiaire = numeroPieceBeneficiaire; }
+    public void setTypePieceBeneficiaire(TypePiece typePieceBeneficiaire) {
+        this.typePieceBeneficiaire = typePieceBeneficiaire;
+    }
+
+    public String getNumeroPieceBeneficiaire() {
+        return numeroPieceBeneficiaire;
+    }
+
+    public void setNumeroPieceBeneficiaire(String numeroPieceBeneficiaire) {
+        this.numeroPieceBeneficiaire = numeroPieceBeneficiaire;
+    }
 }

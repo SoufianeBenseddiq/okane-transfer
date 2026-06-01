@@ -5,6 +5,8 @@ import { environment } from '../../../environments/environment';
 import {
   TransfertResponse,
   CreateTransfertRequest,
+  CreateTransfertAvecNouveauClientRequest,
+  SendTransfertReceiptEmailRequest,
   UpdateTransfertRequest,
   PaiementRequest,
 } from '../models/transfert';
@@ -32,6 +34,14 @@ export class TransfertService {
 
   create(request: CreateTransfertRequest): Observable<TransfertResponse> {
     return this.http.post<TransfertResponse>(this.baseTransferts, request);
+  }
+
+  createAvecNouveauClient(request: CreateTransfertAvecNouveauClientRequest): Observable<TransfertResponse> {
+    return this.http.post<TransfertResponse>(`${this.baseTransferts}/avec-nouveau-client`, request);
+  }
+
+  envoyerRecuParEmail(request: SendTransfertReceiptEmailRequest): Observable<void> {
+    return this.http.post<void>(`${this.baseTransferts}/email-recu`, request);
   }
 
   update(id: number, request: UpdateTransfertRequest): Observable<TransfertResponse> {

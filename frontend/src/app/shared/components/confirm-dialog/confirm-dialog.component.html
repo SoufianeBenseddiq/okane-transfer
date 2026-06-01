@@ -1,0 +1,71 @@
+<!-- Backdrop -->
+<div class="fixed inset-0 flex items-center justify-center z-50 px-4"
+     style="background:rgba(0,0,0,0.65);backdrop-filter:blur(3px);"
+     (click)="cancelled.emit()">
+
+  <!-- Card — stop click from closing -->
+  <div class="flex flex-col gap-5 rounded-[16px] w-full"
+       style="max-width:420px;background:#1E2540;
+              border:1px solid rgba(255,255,255,0.1);
+              box-shadow:0 32px 80px rgba(0,0,0,0.6);"
+       (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="flex items-start gap-4 px-6 pt-6">
+      <!-- Icon -->
+      <div class="flex items-center justify-center rounded-[12px] flex-shrink-0"
+           style="width:44px;height:44px;"
+           [style.background]="config.danger ? 'rgba(255,77,79,0.12)' : 'rgba(245,166,35,0.12)'">
+        @if (config.danger) {
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+               stroke="#FF4D4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>
+            <path d="M12 9v4M12 17h.01"/>
+          </svg>
+        } @else {
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+               stroke="#F5A623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v4M12 16h.01"/>
+          </svg>
+        }
+      </div>
+
+      <!-- Title + message -->
+      <div class="flex-1 min-w-0">
+        <h3 class="text-[15px] font-bold leading-snug" style="color:#F3F4F8;">
+          {{ config.title }}
+        </h3>
+        <p class="text-[13px] mt-1.5 leading-relaxed" style="color:rgba(255,255,255,0.55);">
+          {{ config.message }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div style="height:1px;background:rgba(255,255,255,0.07);margin:0 24px;"></div>
+
+    <!-- Actions -->
+    <div class="flex items-center justify-end gap-2.5 px-6 pb-5">
+      <button (click)="cancelled.emit()"
+              class="px-4 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border outline-none"
+              style="background:transparent;
+                     border-color:rgba(255,255,255,0.1);
+                     color:rgba(255,255,255,0.55);"
+              onmouseover="this.style.background='rgba(255,255,255,0.05)'"
+              onmouseout="this.style.background='transparent'">
+        Annuler
+      </button>
+      <button (click)="confirmed.emit()"
+              class="px-4 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border-none outline-none"
+              [style.background]="config.danger ? '#FF4D4F' : '#F5A623'"
+              [style.color]="config.danger ? '#fff' : '#1A1F36'"
+              [style.boxShadow]="config.danger
+                ? '0 4px 16px rgba(255,77,79,0.35)'
+                : '0 4px 16px rgba(245,166,35,0.35)'">
+        {{ config.confirmLabel ?? 'Confirmer' }}
+      </button>
+    </div>
+
+  </div>
+</div>

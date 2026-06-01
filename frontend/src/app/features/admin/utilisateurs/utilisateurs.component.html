@@ -1,0 +1,228 @@
+<app-topbar [breadcrumb]="'users.breadcrumb' | translate"
+            [title]="'users.title' | translate"
+            [subtitle]="pageSubtitle">
+  <button (click)="openCreate()"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-[12.5px] font-semibold cursor-pointer border-none outline-none"
+          style="background:#F5A623;color:#1A1F36;">
+    <app-icon name="plus" [size]="13" color="#1A1F36" /> {{ 'users.createBtn' | translate }}
+  </button>
+</app-topbar>
+
+<div class="flex-1 overflow-y-auto p-4 sm:p-7 flex flex-col gap-5">
+
+  <!-- Filters -->
+  <div class="flex flex-wrap items-center gap-3">
+    <div class="relative" style="max-width:320px;flex:1;">
+      <div class="absolute left-3 top-1/2 -translate-y-1/2" style="color:rgba(255,255,255,0.55);">
+        <app-icon name="search" [size]="15" />
+      </div>
+      <input [(ngModel)]="search" [placeholder]="'users.search' | translate"
+             class="w-full pl-9 pr-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+             style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+    </div>
+
+    <div class="flex rounded-[10px] p-0.5" style="background:rgba(255,255,255,0.05);">
+      @for (tab of roleFilterTabs; track tab.id) {
+        <button (click)="roleFilter = $any(tab.id)"
+                class="px-[14px] py-[7px] rounded-[7px] text-[12px] font-semibold cursor-pointer border-none outline-none"
+                [style.background]="roleFilter === tab.id ? '#F5A623' : 'transparent'"
+                [style.color]="roleFilter === tab.id ? '#1A1F36' : 'rgba(255,255,255,0.55)'">
+          {{ tab.label | translate }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Layout: table + modal side by side -->
+  <div class="grid gap-5 items-start"
+       [style.grid-template-columns]="(!isMobile && showModal) ? '1.5fr 1fr' : '1fr'">
+
+    <!-- Users table -->
+    <div class="rounded-[12px] overflow-hidden min-w-0" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      @if (loading) {
+        <div class="flex justify-center py-16">
+          <div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color:rgba(255,255,255,0.12);border-top-color:#F5A623;"></div>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+        <table class="w-full" style="border-collapse:collapse;font-size:13px;min-width:600px;">
+          <thead>
+            <tr style="color:rgba(255,255,255,0.55);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;">
+              @for (h of ['users.col.user','users.col.role','users.col.country','users.col.created','users.col.active','']; track h; let i = $index) {
+                <th class="px-5 py-3 font-semibold"
+                    [style.text-align]="i===4 ? 'center' : i===5 ? 'right' : 'left'"
+                    style="border-bottom:1px solid rgba(255,255,255,0.08);">{{ h | translate }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of filtered; track u.id; let i = $index; let last = $last) {
+              <tr [style.background]="i%2===1 ? 'rgba(255,255,255,0.02)' : 'transparent'"
+                  [style.border-bottom]="!last ? '1px solid rgba(255,255,255,0.06)' : 'none'">
+                <td class="px-5 py-[9px]">
+                  <span class="inline-flex items-center gap-2.5">
+                    <span class="flex items-center justify-center rounded-[9px] text-[11px] font-bold flex-shrink-0"
+                          style="width:30px;height:30px;"
+                          [style.background]="avatarBg(u) + '24'"
+                          [style.color]="avatarBg(u)">{{ initials(u) }}</span>
+                    <span>
+                      <div class="text-[13px] font-semibold" style="color:#fff;">{{ u.prenom }} {{ u.nom }}</div>
+                      <div class="text-[11px]" style="color:rgba(255,255,255,0.55);">{{ u.email }}</div>
+                    </span>
+                  </span>
+                </td>
+                <td class="px-5 py-[9px]">
+                  <span class="inline-flex px-2 py-0.5 rounded-[5px] text-[11px] font-bold tracking-[0.06em] uppercase"
+                        [style.background]="roleBadgeBg(u.role)"
+                        [style.color]="roleBadgeFg(u.role)">{{ roleName(u.role) }}</span>
+                </td>
+                <td class="px-5 py-[9px]" style="color:rgba(255,255,255,0.55);">{{ u.pays }}</td>
+                <td class="px-5 py-[9px]" style="color:rgba(255,255,255,0.55);font-variant-numeric:tabular-nums;">
+                  {{ u.creeLe | date:'dd/MM/yyyy' }}
+                </td>
+                <td class="px-5 py-[9px] text-center">
+                  <button (click)="toggleUser(u)"
+                          class="inline-block relative rounded-full cursor-pointer border-none p-0 outline-none"
+                          style="width:34px;height:20px;"
+                          [style.background]="u.actif ? '#00C48C' : 'rgba(255,255,255,0.12)'">
+                    <span class="absolute rounded-full bg-white" style="top:2px;width:16px;height:16px;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:left .15s;"
+                          [style.left]="u.actif ? '16px' : '2px'"></span>
+                  </button>
+                </td>
+                <td class="px-5 py-[9px] text-right">
+                  <span class="inline-flex gap-1">
+                    <button (click)="openEdit(u)"
+                            class="cursor-pointer border-none bg-transparent p-1 rounded-[6px] outline-none"
+                            style="color:rgba(255,255,255,0.55);" [title]="'common.edit' | translate">
+                      <app-icon name="edit" [size]="14" />
+                    </button>
+                    <button (click)="deleteUser(u)" [disabled]="deleting === u.id"
+                            class="cursor-pointer border-none bg-transparent p-1 rounded-[6px] outline-none disabled:opacity-40"
+                            style="color:rgba(255,77,79,0.7);" [title]="'common.delete' | translate">
+                      <app-icon name="trash" [size]="14" color="rgba(255,77,79,0.8)" />
+                    </button>
+                  </span>
+                </td>
+              </tr>
+            }
+            @if (filtered.length === 0) {
+              <tr><td colspan="6" class="px-5 py-12 text-center" style="color:rgba(255,255,255,0.55);">{{ 'users.none' | translate }}</td></tr>
+            }
+          </tbody>
+        </table>
+        </div>
+        <div class="flex items-center justify-between px-6 py-3 text-[12px]"
+             style="border-top:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.55);">
+          <span>{{ 'users.display' | translate }} 1–{{ filtered.length }} {{ 'users.on' | translate }} {{ users.length }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Create / Edit modal (inline panel) -->
+    @if (showModal) {
+      <div class="rounded-[12px] p-5 sm:p-6 flex flex-col gap-4"
+           style="background:#252B45;border:1px solid rgba(255,255,255,0.08);box-shadow:0 24px 64px rgba(0,0,0,0.5);"
+           [formGroup]="form">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase"
+                 [style.color]="modalMode === 'edit' ? '#7BB0FF' : '#F5A623'">
+              {{ (modalMode === 'edit' ? 'users.modal.modification' : 'users.modal.creation') | translate }}
+            </div>
+            <div class="text-[16px] font-bold mt-1">
+              {{ (modalMode === 'edit' ? 'users.modal.editTitle' : 'users.modal.createTitle') | translate }}
+            </div>
+          </div>
+          <button (click)="closeModal()" class="cursor-pointer border-none bg-transparent p-1 outline-none" style="color:rgba(255,255,255,0.55);">
+            <app-icon name="x" [size]="16" />
+          </button>
+        </div>
+
+        @if (error) {
+          <div class="flex items-center gap-2 px-3 py-2 rounded-[8px] text-[12.5px]"
+               style="background:rgba(255,77,79,0.12);color:#FF4D4F;border:1px solid rgba(255,77,79,0.24);">
+            <app-icon name="alert" [size]="14" color="#FF4D4F" /> {{ error }}
+          </div>
+        }
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[12px] font-semibold">{{ 'users.fields.nom' | translate }} <span style="color:#FF4D4F;">*</span></label>
+            <input formControlName="nom" class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[12px] font-semibold">{{ 'users.fields.prenom' | translate }} <span style="color:#FF4D4F;">*</span></label>
+            <input formControlName="prenom" class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[12px] font-semibold">{{ 'users.fields.email' | translate }} <span style="color:#FF4D4F;">*</span></label>
+          <input formControlName="email" type="email" class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[12px] font-semibold">{{ 'users.fields.telephone' | translate }}</label>
+          <input formControlName="telephone" class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                 placeholder="+212 6 00 00 00 00"
+                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+        </div>
+
+        @if (modalMode === 'create') {
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[12px] font-semibold">{{ 'users.fields.password' | translate }} <span style="color:#FF4D4F;">*</span></label>
+            <input formControlName="motDePasse" type="password" class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+          </div>
+        }
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[12px] font-semibold">{{ 'users.fields.role' | translate }} <span style="color:#FF4D4F;">*</span></label>
+          <div class="grid grid-cols-2 gap-1.5">
+            @for (r of roleOptions; track r) {
+              <button type="button" (click)="form.patchValue({role: r})"
+                      class="py-2 rounded-[8px] text-[11.5px] font-bold tracking-[0.06em] uppercase cursor-pointer border outline-none"
+                      [style.background]="form.value.role === r ? '#F5A623' : 'rgba(255,255,255,0.04)'"
+                      [style.color]="form.value.role === r ? '#1A1F36' : 'rgba(255,255,255,0.55)'"
+                      [style.border-color]="form.value.role === r ? '#F5A623' : 'rgba(255,255,255,0.08)'"
+                      [disabled]="modalMode === 'edit'">
+                {{ roleName(r) }}
+              </button>
+            }
+          </div>
+          @if (modalMode === 'edit') {
+            <p class="text-[11px]" style="color:rgba(255,255,255,0.4);">{{ 'users.roleReadonly' | translate }}</p>
+          }
+        </div>
+
+        <div class="flex items-center gap-3 mt-2">
+          <button (click)="closeModal()" class="px-4 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border outline-none"
+                  style="background:transparent;color:rgba(255,255,255,0.55);border-color:rgba(255,255,255,0.08);">{{ 'common.cancel' | translate }}</button>
+          <span class="flex-1"></span>
+          <button (click)="submit()" [disabled]="saving"
+                  class="flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer border-none outline-none disabled:opacity-50"
+                  style="background:#F5A623;color:#1A1F36;">
+            @if (saving) {
+              <span class="w-4 h-4 rounded-full border-2 animate-spin" style="border-color:rgba(26,31,54,0.3);border-top-color:#1A1F36;"></span>
+              {{ (modalMode === 'edit' ? 'common.updating' : 'common.creating') | translate }}
+            } @else {
+              <app-icon name="check" [size]="14" color="#1A1F36" />
+              {{ (modalMode === 'edit' ? 'common.save' : 'users.createBtn') | translate }}
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>
+
+@if (confirmDialog) {
+  <app-confirm-dialog
+    [config]="confirmDialog"
+    (confirmed)="confirmDialog.action()"
+    (cancelled)="confirmDialog = null" />
+}

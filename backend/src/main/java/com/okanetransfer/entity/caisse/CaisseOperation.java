@@ -1,6 +1,7 @@
 package com.okanetransfer.entity.caisse;
 
 import com.okanetransfer.entity.user.Agent;
+import com.okanetransfer.entity.transfert.Transfert;
 import com.okanetransfer.shared.enums.TypeOperation;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -29,6 +30,10 @@ public class CaisseOperation {
     private LocalDateTime dateHeure;
 
     // référence vers le transfert lié (null si OUVERTURE/AJUSTEMENT)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "transfert_id")
+    private Transfert transfert;
+
     private String referenceTransfert;
 
     @PrePersist
@@ -75,6 +80,14 @@ public class CaisseOperation {
 
     public void setDateHeure(LocalDateTime dateHeure) {
         this.dateHeure = dateHeure;
+    }
+
+    public Transfert getTransfert() {
+        return transfert;
+    }
+
+    public void setTransfert(Transfert transfert) {
+        this.transfert = transfert;
     }
 
     public String getReferenceTransfert() {

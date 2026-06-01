@@ -12,5 +12,6 @@ public class Manager extends Utilisateur {
     @JoinColumn(name = "agence_id")
     private Agence agence;
 
-    // getters / setters
+    public Agence getAgence() { return agence; }
+    public void setAgence(Agence agence) { this.agence = agence; }
 }

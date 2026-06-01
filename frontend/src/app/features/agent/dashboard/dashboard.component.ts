@@ -2,14 +2,16 @@ import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } fr
 import { CommonModule }      from '@angular/common';
 import { RouterModule }      from '@angular/router';
 import { TranslateModule }   from '@ngx-translate/core';
-import { forkJoin }          from 'rxjs';
+import { forkJoin, of }      from 'rxjs';
+import { catchError }        from 'rxjs/operators';
 import { Chart, registerables } from 'chart.js';
 
 import { CaisseService }           from '../../../core/services/caisse.service';
 import { CaisseOperationResponse } from '../../../core/models/caisse';
 import { TypeOperation }           from '../../../core/models/enums';
-import { TransfertService }        from '../../../core/services/transfert.service'; // adjust path as needed
-import { StatutTransfert }         from '../../../core/models/enums';               // adjust path as needed
+import { AuthService }             from '../../../core/services/auth.service';
+import { AgenceService }           from '../../../core/services/agence.service';
+import { AgenceResponse }          from '../../../core/models/agence';
 
 Chart.register(...registerables);
 
@@ -24,8 +26,8 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('activityChart') activityChartRef!: ElementRef<HTMLCanvasElement>;
   private chartInstance: Chart | null = null;
 
-  // ─── Agent (statique en attendant l'auth) ─────────────────────────────────
-  private agentEmail = 'agent.test@okanetransfer.com';
+  // ─── Agent connecté ───────────────────────────────────────────────────────
+  private get agentEmail(): string { return this.auth.currentUser?.email ?? ''; }
 
   // ─── État ─────────────────────────────────────────────────────────────────
   loading = true;
@@ -67,13 +69,20 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   readonly TypeOperation = TypeOperation;
 
+  agence: AgenceResponse | null = null;
+
+  get plafondAlert(): boolean { return (this.agence?.pourcentagePlafond ?? 0) >= 90; }
+  get plafondCritical(): boolean { return (this.agence?.pourcentagePlafond ?? 0) >= 100; }
+
   constructor(
     private caisseService: CaisseService,
-    // private transfertService: TransfertService, // décommenter quand disponible
+    private auth: AuthService,
+    private agenceService: AgenceService,
   ) {}
 
   ngOnInit(): void {
     this.loadDashboard();
+    this.agenceService.getMonAgence().subscribe({ next: a => { this.agence = a; } });
   }
 
   ngAfterViewInit(): void {
@@ -91,11 +100,11 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.error   = '';
 
     forkJoin({
-      opsJour  : this.caisseService.operationsDuJour(this.agentEmail),
-      solde    : this.caisseService.consulterSolde(this.agentEmail),
-      // opsWeek : this.caisseService.operationsSemaine(this.agentEmail), // décommenter si endpoint dispo
+      opsJour : this.caisseService.operationsDuJour(this.agentEmail).pipe(catchError(() => of<CaisseOperationResponse[]>([])) ),
+      solde   : this.caisseService.consulterSolde(this.agentEmail).pipe(catchError(() => of(0))),
     }).subscribe({
-      next: ({ opsJour, solde }) => {
+      next: ({ opsJour: rawOps, solde }) => {
+        const opsJour = rawOps ?? [];
 
         // ── Stats de base ──────────────────────────────────────────────────
         const envois   = opsJour.filter(o => o.type === TypeOperation.ENVOI);
@@ -199,7 +208,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         ],
       },
       options: {
-        responsive: true,
+        responsive: false,
         maintainAspectRatio: false,
         plugins: {
           legend: { display: false },

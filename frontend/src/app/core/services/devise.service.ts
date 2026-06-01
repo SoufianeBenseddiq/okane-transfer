@@ -7,6 +7,7 @@ import { DeviseRequest } from '../models/devise/devise-request.model';
 import { CorridorResponse } from '../models/devise/corridor-response.model';
 import { CorridorRequest } from '../models/devise/corridor-request.model';
 import { GrilleTarifaireRequest } from '../models/devise/grille-tarifaire-request.model';
+import { GrilleTarifaireResponse } from '../models/devise/grille-tarifaire-response.model';
 import { FraisResult } from '../models/devise/frais-result.model';
 
 @Injectable({ providedIn: 'root' })
@@ -76,5 +77,17 @@ export class DeviseService {
 
   createGrille(request: GrilleTarifaireRequest): Observable<void> {
     return this.http.post<void>(`${this.baseCorridors}/grilles`, request);
+  }
+
+  getGrillesByCorridor(corridorId: number): Observable<GrilleTarifaireResponse[]> {
+    return this.http.get<GrilleTarifaireResponse[]>(`${this.baseCorridors}/${corridorId}/grilles`);
+  }
+
+  updateGrille(id: number, request: GrilleTarifaireRequest): Observable<GrilleTarifaireResponse> {
+    return this.http.put<GrilleTarifaireResponse>(`${this.baseCorridors}/grilles/${id}`, request);
+  }
+
+  deleteGrille(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseCorridors}/grilles/${id}`);
   }
 }

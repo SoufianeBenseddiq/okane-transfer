@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { CaisseService } from '../../../core/services/caisse.service';
 import { CaisseOperationResponse } from '../../../core/models/caisse';
 import { TypeOperation } from '../../../core/models/enums';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-caisse',
@@ -14,7 +16,7 @@ import { TypeOperation } from '../../../core/models/enums';
 })
 export class CaisseComponent implements OnInit {
 
-  private readonly agentEmail = 'agent.test@okanetransfer.com';
+  private readonly fallbackAgentEmail = 'agent.test@okanetransfer.com';
 
   TypeOperation = TypeOperation;
 
@@ -24,6 +26,8 @@ export class CaisseComponent implements OnInit {
   loading = true;
   error: string | null = null;
   soldeJour: number = 0;
+  isCaisseClosed = false;
+  closingDate = this.formatLocalDate(new Date());
 
   cashStats = {
     envoiOps: 0,
@@ -57,11 +61,19 @@ export class CaisseComponent implements OnInit {
     }
   }
 
-  constructor(private caisseService: CaisseService) {}
+  constructor(
+    private caisseService: CaisseService,
+    private authService: AuthService,
+  ) {}
 
   ngOnInit(): void {
+    this.loadClosureStatus();
     this.loadSoldeJour();
     this.loadOperations();
+  }
+
+  get agentEmail(): string {
+    return this.authService.currentUser?.email ?? this.fallbackAgentEmail;
   }
 
   // private loadSolde(): void {
@@ -75,6 +87,23 @@ export class CaisseComponent implements OnInit {
     this.caisseService.consulterSoldeDuJour(this.agentEmail).subscribe({
       next: (s) => (this.soldeJour = s),
       error: (e) => console.error('Erreur solde jour', e),
+    });
+  }
+
+  private loadClosureStatus(): void {
+    this.caisseService.findCloture(this.agentEmail, this.closingDate).pipe(
+      finalize(() => {
+        if (!this.isCaisseClosed) {
+          this.isCaisseClosed = false;
+        }
+      })
+    ).subscribe({
+      next: () => {
+        this.isCaisseClosed = true;
+      },
+      error: () => {
+        this.isCaisseClosed = false;
+      },
     });
   }
 
@@ -126,5 +155,12 @@ export class CaisseComponent implements OnInit {
 
   getPageEnd(): number {
     return Math.min(this.currentPage * this.pageSize, this.operations.length);
+  }
+
+  private formatLocalDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

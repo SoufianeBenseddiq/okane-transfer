@@ -19,6 +19,19 @@ export class AgenceService {
     return this.http.get<AgenceResponse[]>(`${this.base}/actives`);
   }
 
+  findById(id: number): Observable<AgenceResponse> {
+    return this.http.get<AgenceResponse>(`${this.base}/id/${id}`);
+  }
+
+  findCentrales(): Observable<AgenceResponse[]> {
+    return this.http.get<AgenceResponse[]>(`${this.base}/centrales`);
+  }
+
+  /** Returns the agence of the authenticated agent or manager. */
+  getMonAgence(): Observable<AgenceResponse> {
+    return this.http.get<AgenceResponse>(`${this.base}/mon-agence`);
+  }
+
   findByNom(nom: string): Observable<AgenceResponse> {
     return this.http.get<AgenceResponse>(`${this.base}/nom/${nom}`);
   }
@@ -37,6 +50,10 @@ export class AgenceService {
 
   update(id: number, request: AgenceRequest): Observable<AgenceResponse> {
     return this.http.put<AgenceResponse>(`${this.base}/id/${id}`, request);
+  }
+
+  toggleActive(id: number): Observable<AgenceResponse> {
+    return this.http.put<AgenceResponse>(`${this.base}/id/${id}/toggle-active`, {});
   }
 
   delete(id: number): Observable<void> {

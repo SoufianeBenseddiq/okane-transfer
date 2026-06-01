@@ -7,7 +7,6 @@ import java.time.LocalDate;
 
 public class ClotureCaisseRequest {
 
-    @NotNull(message = "L'ID de l'agent est obligatoire")
     private String agentEmail;
 
     @NotNull(message = "La date est obligatoire")

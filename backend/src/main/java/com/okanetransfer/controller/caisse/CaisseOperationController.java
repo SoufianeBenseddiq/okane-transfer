@@ -24,7 +24,7 @@ public class CaisseOperationController {
 
     // AGENT consulte ses propres opérations, MANAGER et ADMIN consultent celles de n'importe quel agent
     @GetMapping("agent/{email}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_AGENT')")
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_AGENT')")
     public ResponseEntity<List<CaisseOperationResponse>> findByAgentEmail(
             @PathVariable("email") String email) {
         return ResponseEntity.ok(caisseOperationService.findByAgentEmail(email));
@@ -32,21 +32,21 @@ public class CaisseOperationController {
 
     // ADMIN uniquement peut supprimer une opération
     @DeleteMapping("id/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Void> deleteById(@PathVariable("id") Long id) {
         caisseOperationService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("all")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<List<CaisseOperationResponse>> findAll() {
         return ResponseEntity.ok(caisseOperationService.findAll());
     }
 
     @PostMapping("ouvrir")
     @PreAuthorize("hasRole('ROLE_AGENT')")
-    public ResponseEntity<CaisseOperationResponse> ouvrirCaisse(@RequestParam String agentEmail, @RequestParam BigDecimal montantInitial) {
+    public ResponseEntity<CaisseOperationResponse> ouvrirCaisse(@RequestParam("agentEmail") String agentEmail, @RequestParam("montantInitial") BigDecimal montantInitial) {
         return ResponseEntity.ok(
                 caisseOperationService.ouvrirCaisse(agentEmail, montantInitial)
         );

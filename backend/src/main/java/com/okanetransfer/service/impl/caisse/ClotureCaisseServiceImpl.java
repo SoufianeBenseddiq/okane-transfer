@@ -4,6 +4,7 @@ import com.okanetransfer.entity.caisse.ClotureCaisse;
 import com.okanetransfer.entity.user.Agent;
 import com.okanetransfer.repository.caisse.CaisseOperationRepository;
 import com.okanetransfer.repository.caisse.ClotureCaisseRepository;
+import com.okanetransfer.repository.user.UtilisateurRepository;
 //import com.okanetransfer.repository.user.AgentRepository;
 import com.okanetransfer.service.converter.caisse.ClotureCaisseConverter;
 import com.okanetransfer.service.dto.caisse.request.ClotureCaisseRequest;
@@ -14,6 +15,7 @@ import com.okanetransfer.service.facade.caisse.ClotureCaisseService;
 import com.okanetransfer.service.facade.user.UtilisateurService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional
 public class ClotureCaisseServiceImpl implements ClotureCaisseService {
 
     @Override
@@ -52,23 +55,19 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
 
     @Override
     public ClotureCaisseResponse save(ClotureCaisseRequest request) {
-        if (repository.findByAgentEmailAndDate(request.getAgentEmail(), request.getDate()) != null) {
+        Agent agent = resolveAgent(request.getAgentEmail());
+
+        if (repository.findByAgentEmailAndDate(agent.getEmail(), request.getDate()) != null) {
             throw new IllegalArgumentException(
                     "Une clôture existe déjà pour cet agent à la date : " + request.getDate());
         }
 
-
-        Agent agent = utilisateurService.getAgentByEmail(request.getAgentEmail());
-        if (agent == null) {
-            throw new EntityNotFoundException("Agent introuvable : " + request.getAgentEmail());
-        }
-
-
         ClotureCaisse cloture = converter.toEntity(request);
+        cloture.setAgent(agent);
 
         // calcul solde théorique sur la journée
         BigDecimal soldeTheorique = caisseOperationService
-                .consulterSoldeDuJour(agent.getEmail());
+            .consulterSoldePourDate(agent.getEmail(), request.getDate());
 
         cloture.setSoldeTheorique(soldeTheorique);
         cloture.setEcart(request.getSoldeSaisi().subtract(soldeTheorique));
@@ -131,21 +130,16 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
     @Override
     public ClotureCaisseResponse cloturerCaisse(ClotureCaisseRequest request) {
 
-//        Agent agent = agentService.findByEmail(request.getAgentEmail())
-//                .orElseThrow(() ->
-//                        new EntityNotFoundException(
-//                                "Agent introuvable : "
-//                                        + request.getAgentEmail()
-//                        ));
-        Agent agent= new Agent();
+        Agent agent = resolveAgent(request.getAgentEmail());
 
-        if (repository.findByAgentEmailAndDate(request.getAgentEmail(), request.getDate()) != null) {
+        if (repository.findByAgentEmailAndDate(agent.getEmail(), request.getDate()) != null) {
             throw new IllegalArgumentException(
                     "Une clôture existe déjà pour cette date"
             );
         }
 
-        BigDecimal soldeTheorique = caisseOperationService.consulterSolde(request.getAgentEmail());
+        BigDecimal soldeTheorique = caisseOperationService
+            .consulterSoldePourDate(agent.getEmail(), request.getDate());
 
         ClotureCaisse cloture = new ClotureCaisse();
 
@@ -166,18 +160,34 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
         return converter.toResponse(repository.save(cloture));
     }
 
+    private Agent resolveAgent(String agentEmail) {
+        if (agentEmail != null && !agentEmail.isBlank()) {
+            return utilisateurService.getAgentByEmail(agentEmail);
+        }
+
+        return utilisateurRepository.findAllActiveAgentsOrderByIdAsc()
+            .stream()
+            .findFirst()
+            .orElseThrow(() -> new EntityNotFoundException(
+                "Aucun agent actif trouvé pour servir de fallback"
+            ));
+    }
+
     private final ClotureCaisseRepository repository;
     private final ClotureCaisseConverter converter;
     private final UtilisateurService utilisateurService;
     private final CaisseOperationService caisseOperationService;
+    private final UtilisateurRepository utilisateurRepository;
 
     public ClotureCaisseServiceImpl(ClotureCaisseRepository repository,
                                     ClotureCaisseConverter converter,
                                     CaisseOperationService caisseOperationService,
-                                    UtilisateurService utilisateurService) {
+                                    UtilisateurService utilisateurService,
+                                    UtilisateurRepository utilisateurRepository) {
         this.repository = repository;
         this.converter = converter;
         this.caisseOperationService = caisseOperationService;
         this.utilisateurService = utilisateurService;
+        this.utilisateurRepository = utilisateurRepository;
     }
 }

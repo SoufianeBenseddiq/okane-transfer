@@ -1,0 +1,148 @@
+<div class="dashboard-container">
+
+  <!-- Plafond alert -->
+  @if (plafondAlert) {
+    <div class="flex items-center gap-3 rounded-[10px] px-4 py-3 mb-4"
+         [style.background]="plafondCritical ? 'rgba(255,77,79,0.08)' : 'rgba(250,173,20,0.08)'"
+         [style.border]="'1px solid ' + (plafondCritical ? 'rgba(255,77,79,0.25)' : 'rgba(250,173,20,0.25)')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+           [attr.stroke]="plafondCritical ? '#FF4D4F' : '#FAAD14'"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+        <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>
+        <path d="M12 9v4M12 17h.01"/>
+      </svg>
+      <div>
+        <p style="font-size:13px;font-weight:600;"
+           [style.color]="plafondCritical ? '#FF4D4F' : '#FAAD14'">
+          {{ (plafondCritical ? 'agences.plafondAlerte.critical' : 'agences.plafondAlerte.alert') | translate:{ pct: agence?.pourcentagePlafond } }}
+        </p>
+        @if (agence) {
+          <p style="font-size:11.5px;color:rgba(255,255,255,0.45);margin-top:2px;">
+            {{ 'agences.plafondAlerte.usage' | translate:{ used: agence.montantTraiteAujourdhui, total: agence.plafondJournalier } }}
+          </p>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-left">
+      <h1 class="dashboard-title">{{ 'manager.dashboard.title' | translate }}</h1>
+      <p class="header-subtitle">{{ currentDate | date:'EEEE d MMMM yyyy' }} · {{ 'manager.dashboard.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  <!-- Alert -->
+  <div class="alert alert-warning" *ngIf="false">
+    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+    <div class="alert-content">
+      <span class="alert-text">
+        <strong>{{ dailyUsagePercent }}%</strong> {{ 'manager.dashboard.dailyUsage' | translate }} ·
+        {{ dailyUsed | number }} / {{ dailyLimit | number }} MAD
+      </span>
+    </div>
+    <button class="alert-action">{{ 'manager.dashboard.requestRevision' | translate }}</button>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div *ngFor="let stat of stats; trackBy: trackByStatId" class="stat-card" [ngClass]="'status-' + stat.status">
+      <div class="stat-header">
+        <span class="stat-label">{{ stat.label | translate }}</span>
+      </div>
+      <div class="stat-value">{{ stat.value }}</div>
+      <div class="stat-subtext" *ngIf="stat.subtext">{{ stat.subtext }}</div>
+      <div class="stat-progress" *ngIf="stat.progress">
+        <div class="stat-progress-fill" [class.critical]="stat.status === 'critical'" [style.width.%]="stat.progress"></div>
+      </div>
+      <div class="stat-trend" *ngIf="stat.trend" [class.negative]="stat.trendDown">{{ stat.trend }}</div>
+      <div class="stat-critical-label" *ngIf="stat.status === 'critical'">
+        <span class="dot-pulse"></span> {{ 'manager.dashboard.criticalThreshold' | translate }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="dashboard-content">
+
+    <!-- Performance Chart -->
+    <div class="performance-section">
+      <div class="section-header">
+        <span class="section-label">{{ 'manager.dashboard.performance.label' | translate }}</span>
+        <h2 class="section-title">{{ 'manager.dashboard.performance.title' | translate }}</h2>
+      </div>
+
+      <div class="chart-container">
+        <div class="chart-legend">
+          <span class="legend-total">{{ totalTransferts }} {{ 'manager.dashboard.performance.total' | translate }}</span>
+        </div>
+        <div class="bars">
+          <div *ngFor="let agent of agentPerformance; trackBy: trackByAgentId"
+               class="bar"
+               [title]="agent.prenom + ' ' + agent.nom + ' — ' + agent.count + ' transferts'">
+
+            <div class="bar-percent">
+              {{ totalTransferts > 0 ? ((agent.count / totalTransferts) * 100 | number:'1.0-0') : 0 }}%
+            </div>
+
+            <div class="bar-height"
+                 [style.height.%]="totalTransferts > 0 ? (agent.count / totalTransferts) * 100 : 0"
+                 [class.bar-zero]="agent.count === 0">
+            </div>
+
+            <div class="bar-label-group">
+              <span class="bar-label">{{ agent.prenom }}</span>
+              <span class="bar-sublabel">{{ agent.nom }}</span>
+              <span class="bar-count">{{ agent.count }} tr.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Validations -->
+    <div class="actions-section">
+      <div class="section-header">
+        <span class="section-label">{{ 'manager.dashboard.validations.label' | translate }}</span>
+        <h2 class="section-title">
+          {{ 'manager.dashboard.validations.title' | translate }}
+          <span class="badge">{{ pendingValidations.length }}</span>
+        </h2>
+      </div>
+      <div class="validations-list">
+        <div *ngFor="let transfer of pendingValidations; trackBy: trackByTransferId" class="validation-item">
+          <div class="validation-info">
+            <div class="transfer-id">{{ transfer.id }} <span class="transfer-agent">{{ 'manager.dashboard.validations.by' | translate }} {{ transfer.agent }}</span></div>
+            <div class="transfer-parties">{{ transfer.sender }} → <strong>{{ transfer.receiver }}</strong></div>
+            <div class="transfer-remark">
+              <svg class="remark-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              {{ transfer.remark }}
+            </div>
+          </div>
+          <div class="validation-amount">{{ transfer.amount | number:'1.0-0' }} MAD</div>
+          <div class="validation-actions">
+            <button class="btn-approve" (click)="approvePending(transfer)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              {{ 'manager.dashboard.validations.approve' | translate }}
+            </button>
+            <button class="btn-reject" (click)="rejectPending(transfer)" [title]="'common.delete' | translate">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

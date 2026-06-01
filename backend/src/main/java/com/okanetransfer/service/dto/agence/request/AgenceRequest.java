@@ -18,6 +18,11 @@ public class AgenceRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "Le plafond doit être positif")
     private BigDecimal plafondJournalier;
 
+    private Long responsableId;
+
+    private Boolean estCentrale = false;
+
+    private Long agenceCentraleId;
 
     public String getNom() { return nom; }
     public void setNom(String nom) { this.nom = nom; }
@@ -30,4 +35,13 @@ public class AgenceRequest {
 
     public BigDecimal getPlafondJournalier() { return plafondJournalier; }
     public void setPlafondJournalier(BigDecimal plafondJournalier) { this.plafondJournalier = plafondJournalier; }
+
+    public Long getResponsableId() { return responsableId; }
+    public void setResponsableId(Long responsableId) { this.responsableId = responsableId; }
+
+    public Boolean getEstCentrale() { return estCentrale; }
+    public void setEstCentrale(Boolean estCentrale) { this.estCentrale = estCentrale; }
+
+    public Long getAgenceCentraleId() { return agenceCentraleId; }
+    public void setAgenceCentraleId(Long agenceCentraleId) { this.agenceCentraleId = agenceCentraleId; }
 }

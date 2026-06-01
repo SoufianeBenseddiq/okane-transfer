@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -20,6 +22,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebMvc
+@PropertySource("classpath:application.properties")
 @ComponentScan(
         basePackages = "com.okanetransfer",
         excludeFilters = @ComponentScan.Filter(
@@ -28,6 +31,11 @@ import java.util.List;
         )
 )
 public class AppConfig implements WebMvcConfigurer {
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+        return new PropertySourcesPlaceholderConfigurer();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -51,11 +59,16 @@ public class AppConfig implements WebMvcConfigurer {
     }
 
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:4200")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true);
-    }
+public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping("/api/**")
+            .allowedOrigins(
+                "http://localhost:4200",
+                "http://13.60.74.176",
+                "http://13.60.74.176:80",
+                "http://13.60.74.176:4200"
+            )
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .allowedHeaders("*")
+            .allowCredentials(true);
+}
 }

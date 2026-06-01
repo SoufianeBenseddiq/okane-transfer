@@ -1,0 +1,184 @@
+<app-topbar breadcrumb="Agences · Casablanca Maârif" title="Casablanca Maârif"
+            subtitle="Boulevard Zerktouni · agence créée le 03/2022 · ID AGN-0021">
+  <div class="flex gap-2">
+    <!-- ⚠️ TODO: ouvrir modal d'édition -->
+    <button class="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-[12.5px] font-semibold cursor-pointer border-none outline-none"
+            style="background:rgba(255,255,255,0.06);color:#F3F4F8;">
+      <app-icon name="edit" [size]="13" /> Modifier
+    </button>
+    <!-- ⚠️ TODO: suspendre agence -->
+    <button class="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-[12.5px] font-semibold cursor-pointer outline-none"
+            style="background:transparent;color:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.08);">
+      <app-icon name="lock" [size]="13" /> Suspendre l'agence
+    </button>
+  </div>
+</app-topbar>
+
+<div class="flex-1 overflow-y-auto p-7 flex flex-col gap-5">
+
+  <!-- KPI cards -->
+  <div class="grid grid-cols-4 gap-4">
+    @for (kpi of [
+      {icon:'send',     label:'Transferts ce mois', value:'450',          sub:'objectif 500',    delta:'+8.4%',  pos:true,  accent:''},
+      {icon:'currency', label:'CA traité',           value:'1 240k MAD',   sub:'vs 1.08M -1',     delta:'+14.8%', pos:true,  accent:''},
+      {icon:'percent',  label:'Commissions agence',  value:'32 000 MAD',   sub:'part de 40%',     delta:'',       pos:true,  accent:''},
+      {icon:'users',    label:'Agents actifs',        value:'4 / 5',        sub:'1 en congé',      delta:'',       pos:true,  accent:''}
+    ]; track kpi.label) {
+      <div class="rounded-[12px] p-5 flex flex-col gap-1.5" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+        <div class="flex items-center gap-2 text-[10.5px] font-semibold tracking-[0.06em] uppercase" style="color:rgba(255,255,255,0.55);">
+          <span class="flex items-center justify-center rounded-[7px]" style="width:26px;height:26px;background:rgba(245,166,35,0.12);color:#F5A623;">
+            <app-icon [name]="kpi.icon" [size]="13" color="#F5A623" [stroke]="2.2" />
+          </span>
+          {{ kpi.label }}
+        </div>
+        <div class="text-[22px] font-bold tracking-tight" style="font-variant-numeric:tabular-nums;">{{ kpi.value }}</div>
+        <div class="flex items-center gap-2 text-[12px]" style="color:rgba(255,255,255,0.55);">
+          @if (kpi.delta) {
+            <span class="flex items-center gap-1 font-semibold" [style.color]="kpi.pos ? '#00C48C' : '#FF4D4F'">
+              <app-icon [name]="kpi.pos ? 'arrowUp' : 'arrowDown'" [size]="11" [color]="kpi.pos ? '#00C48C' : '#FF4D4F'" [stroke]="2.6" />
+              {{ kpi.delta }}
+            </span>
+          }
+          {{ kpi.sub }}
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Capacity banner -->
+  <div class="rounded-[12px] p-[18px]" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:#F5A623;">Plafond du jour</div>
+        <div class="text-[16px] font-bold mt-1">92% — limite proche</div>
+      </div>
+      <span class="text-[13px] font-bold" style="color:#FF4D4F;font-variant-numeric:tabular-nums;">15 000 MAD disponibles</span>
+    </div>
+    <div class="w-full rounded-full overflow-hidden" style="height:10px;background:rgba(255,255,255,0.06);">
+      <div class="h-full rounded-full" style="width:92%;background:#FF4D4F;"></div>
+    </div>
+    <div class="flex justify-between mt-2 text-[11.5px]" style="color:rgba(255,255,255,0.55);font-variant-numeric:tabular-nums;">
+      <span>0</span><span>50k</span><span>100k</span><span>150k</span>
+      <span class="font-bold" style="color:#FF4D4F;">200 000 MAD</span>
+    </div>
+  </div>
+
+  <!-- Agents + chart -->
+  <div class="grid gap-5" style="grid-template-columns:1.5fr 1fr;">
+    <!-- Agents table -->
+    <div class="rounded-[12px] overflow-hidden" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:#F5A623;">Équipe</div>
+        <div class="text-[16px] font-bold mt-1">5 agents · Activité du jour</div>
+      </div>
+      <table class="w-full" style="border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="color:rgba(255,255,255,0.55);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;">
+            @for (h of ['Agent','Trf. auj.','Montant traité','Solde caisse','Statut']; track h; let i = $index) {
+              <th class="px-5 py-3 font-semibold"
+                  [style.text-align]="i>0 ? 'right' : 'left'"
+                  style="border-bottom:1px solid rgba(255,255,255,0.08);">{{ h }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (ag of agents; track ag.name; let i = $index; let last = $last) {
+            <tr [style.background]="i%2===1 ? 'rgba(255,255,255,0.02)' : 'transparent'"
+                [style.border-bottom]="!last ? '1px solid rgba(255,255,255,0.06)' : 'none'">
+              <td class="px-5 py-[9px]">
+                <span class="inline-flex items-center gap-2.5">
+                  <span class="flex items-center justify-center rounded-[9px] text-[11px] font-bold flex-shrink-0"
+                        style="width:28px;height:28px;background:rgba(245,166,35,0.18);color:#F5A623;">{{ initials(ag.name) }}</span>
+                  <span class="font-semibold" style="color:#fff;">{{ ag.name }}</span>
+                </span>
+              </td>
+              <td class="px-5 py-[9px] text-right" style="color:#F3F4F8;font-variant-numeric:tabular-nums;">{{ ag.trf || '—' }}</td>
+              <td class="px-5 py-[9px] text-right" style="color:#F3F4F8;font-variant-numeric:tabular-nums;">{{ ag.mt }}</td>
+              <td class="px-5 py-[9px] text-right font-semibold" style="color:#F5A623;font-variant-numeric:tabular-nums;">{{ ag.solde }}</td>
+              <td class="px-5 py-[9px] text-right">
+                <div class="inline-block relative rounded-full cursor-pointer" style="width:34px;height:20px;"
+                     [style.background]="ag.active ? '#00C48C' : 'rgba(255,255,255,0.12)'">
+                  <span class="absolute rounded-full bg-white" style="top:2px;width:16px;height:16px;box-shadow:0 1px 3px rgba(0,0,0,0.3);"
+                        [style.right]="ag.active ? '2px' : 'auto'"
+                        [style.left]="ag.active ? 'auto' : '2px'"></span>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Bar chart -->
+    <div class="rounded-[12px] p-5" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div>
+        <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:#F5A623;">Volume</div>
+        <div class="text-[16px] font-bold mt-1">7 derniers jours</div>
+      </div>
+      <div class="flex items-end gap-1.5 mt-4" style="height:140px;">
+        @for (bar of bars; track bar.label) {
+          <div class="flex-1 flex flex-col items-center gap-1 min-w-0">
+            <div class="w-full rounded-t-[4px]" style="background:#F5A623;" [style.height.px]="bar.height"></div>
+            <span class="text-[10px]" style="color:rgba(255,255,255,0.55);">{{ bar.label }}</span>
+          </div>
+        }
+      </div>
+      <div class="flex justify-between mt-4 pt-4 text-[12.5px]" style="border-top:1px dashed rgba(255,255,255,0.08);">
+        <div>
+          <div class="text-[11px]" style="color:rgba(255,255,255,0.55);">Moy. quotidienne</div>
+          <div class="text-[16px] font-bold mt-0.5" style="color:#fff;font-variant-numeric:tabular-nums;">69k MAD</div>
+        </div>
+        <div class="text-right">
+          <div class="text-[11px]" style="color:rgba(255,255,255,0.55);">Pic semaine</div>
+          <div class="text-[16px] font-bold mt-0.5" style="color:#F5A623;font-variant-numeric:tabular-nums;">91k · Mer</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent transfers -->
+  <div class="rounded-[12px] overflow-hidden" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+    <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div>
+        <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:#F5A623;">Activité</div>
+        <div class="text-[16px] font-bold mt-1">Derniers transferts</div>
+      </div>
+      <!-- ⚠️ TODO: naviguer vers la liste complète des transferts de cette agence -->
+      <button class="flex items-center gap-1 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold cursor-pointer border outline-none"
+              style="background:transparent;color:rgba(255,255,255,0.55);border-color:rgba(255,255,255,0.08);">
+        Voir tout <app-icon name="chevronRight" [size]="13" />
+      </button>
+    </div>
+    <table class="w-full" style="border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="color:rgba(255,255,255,0.55);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;">
+          @for (h of ['Heure','Référence','Expéditeur','Bénéficiaire','Montant','Statut']; track h; let i = $index) {
+            <th class="px-5 py-3 font-semibold"
+                [style.text-align]="i===4 ? 'right' : 'left'"
+                style="border-bottom:1px solid rgba(255,255,255,0.08);">{{ h }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of recent; track t.ref; let i = $index; let last = $last) {
+          <tr [style.background]="i%2===1 ? 'rgba(255,255,255,0.02)' : 'transparent'"
+              [style.border-bottom]="!last ? '1px solid rgba(255,255,255,0.06)' : 'none'">
+            <td class="px-5 py-[9px]" style="color:rgba(255,255,255,0.55);font-variant-numeric:tabular-nums;">{{ t.time }}</td>
+            <td class="px-5 py-[9px] font-mono text-[12px]" style="color:#fff;">{{ t.ref }}</td>
+            <td class="px-5 py-[9px]" style="color:#F3F4F8;">{{ t.exp }}</td>
+            <td class="px-5 py-[9px]" style="color:#F3F4F8;">{{ t.ben }}</td>
+            <td class="px-5 py-[9px] text-right font-semibold" style="color:#fff;font-variant-numeric:tabular-nums;">{{ t.amt }}</td>
+            <td class="px-5 py-[9px]">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11.5px] font-semibold"
+                    [style.background]="statusBg(t.status)"
+                    [style.color]="statusColor(t.status)">
+                {{ statusLabel(t.status) }}
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+</div>

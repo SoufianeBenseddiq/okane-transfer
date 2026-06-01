@@ -28,8 +28,8 @@ public class ClotureCaisseController {
     @GetMapping("agent/{email}/date/{date}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_AGENT')")
     public ResponseEntity<ClotureCaisseResponse> findByAgentEmailAndDate(
-            @PathVariable String email,
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @PathVariable("email") String email,
+            @PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(clotureCaisseService.findByAgentEmailAndDate(email, date));
     }
 
@@ -43,7 +43,7 @@ public class ClotureCaisseController {
     @GetMapping("agent/{email}/ecarts")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<List<ClotureCaisseResponse>> findByAgentEmailAndEcartSignaleTrue(
-            @PathVariable String email) {
+            @PathVariable("email") String email) {
         return ResponseEntity.ok(clotureCaisseService.findByAgentEmailAndEcartSignaleTrue(email));
     }
 
@@ -80,7 +80,7 @@ public class ClotureCaisseController {
 
     @GetMapping("/{email}/rapport")
     @PreAuthorize("hasRole('ROLE_AGENT')")
-    public ResponseEntity<ClotureCaisseResponse> rapportCloture(@PathVariable String email, @RequestParam String date) {
+    public ResponseEntity<ClotureCaisseResponse> rapportCloture(@PathVariable("email") String email, @RequestParam("date") String date) {
         return ResponseEntity.ok(
                 clotureCaisseService.rapportCloture(email, LocalDate.parse(date))
         );
@@ -88,7 +88,7 @@ public class ClotureCaisseController {
 
     @PostMapping("/{email}/cloturer")
     @PreAuthorize("hasRole('ROLE_AGENT')")
-    public ResponseEntity<ClotureCaisseResponse> cloturerCaisse(@PathVariable String email, @RequestBody ClotureCaisseRequest request) {
+    public ResponseEntity<ClotureCaisseResponse> cloturerCaisse(@PathVariable("email") String email, @RequestBody ClotureCaisseRequest request) {
         request.setAgentEmail(email);
 
         return ResponseEntity.ok(
