@@ -1,0 +1,46 @@
+name: Deploy to EC2
+
+on:
+  workflow_run:
+    workflows: ["Build & Push Images"]
+    types:
+      - completed
+    branches: [ main ]
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/okane
+
+            # Update .env file
+            cat > .env << EOF
+            DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            AES_SECRET_KEY=${{ secrets.AES_SECRET_KEY }}
+            AES_IV=${{ secrets.AES_IV }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            EOF
+
+            # Pull latest images
+            docker compose pull
+
+            # Restart containers
+            docker compose up -d --force-recreate
+
+            # Clean old images
+            docker image prune -f
+
+            echo "✅ Deployment successful!"
