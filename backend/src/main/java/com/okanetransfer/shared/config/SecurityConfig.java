@@ -34,11 +34,16 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
             "http://localhost:4200",
             "http://13.60.74.176",
-            "http://13.60.74.176:80"
+            "http://13.60.74.176:80",
+            "http://okanetransfer.app",
+            "https://okanetransfer.app",
+            "http://www.okanetransfer.app",
+            "https://www.okanetransfer.app"
         ));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
