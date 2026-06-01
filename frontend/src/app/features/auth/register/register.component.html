@@ -1,36 +1,36 @@
-<div class="flex h-screen w-full overflow-hidden bg-cream font-sans">
+<div class="flex h-screen w-full overflow-hidden font-sans" style="background:#F7F6F2;">
 
-  <!-- ── Left: brand panel ─────────────────────────────────────────────── -->
-  <div class="relative flex flex-col justify-between overflow-hidden bg-navy px-14 py-12 text-white"
-       style="width: 46%;">
+  <!-- ── Left: brand panel — hidden below lg ──────────────────────────── -->
+  <div class="relative hidden lg:flex flex-col justify-between overflow-hidden px-14 py-12 text-white flex-shrink-0"
+       style="width:46%;background:#1A1F36;">
 
     <!-- Decorative circles -->
     <div class="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full"
-         style="border: 1px solid rgba(245,166,35,0.18);"></div>
+         style="border:1px solid rgba(245,166,35,0.18);"></div>
     <div class="pointer-events-none absolute right-10 top-10 h-48 w-48 rounded-full"
-         style="border: 1px solid rgba(245,166,35,0.12);"></div>
+         style="border:1px solid rgba(245,166,35,0.12);"></div>
     <div class="pointer-events-none absolute -bottom-24 -left-16 h-72 w-72 rounded-full"
-         style="background: radial-gradient(circle, rgba(245,166,35,0.10), transparent 70%);"></div>
+         style="background:radial-gradient(circle,rgba(245,166,35,0.10),transparent 70%);"></div>
 
     <!-- Logo -->
     <div class="relative z-10 flex items-center gap-2.5">
       <div class="flex h-9 w-9 items-center justify-center rounded-[11px]"
-           style="background: rgba(255,255,255,0.10);">
+           style="background:rgba(255,255,255,0.10);">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path d="M5 10h11" stroke="#F5A623" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M5 10h11"  stroke="#F5A623" stroke-width="2.2" stroke-linecap="round"/>
           <path d="M10 4c0 6-3 10-5 12" stroke="#F5A623" stroke-width="2.2" stroke-linecap="round"/>
           <path d="M14 7c2 2 4 5 4 9 0 2-1 4-3 4" stroke="#F5A623" stroke-width="2.2" stroke-linecap="round"/>
           <circle cx="18.5" cy="6" r="1.4" fill="#F5A623"/>
         </svg>
       </div>
       <span class="text-xl font-bold tracking-tight">
-        Okane<span class="text-gold">Transfer</span>
+        Okane<span style="color:#F5A623;">Transfer</span>
       </span>
     </div>
 
     <!-- Headline -->
     <div class="relative z-10">
-      <div class="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">
+      <div class="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.16em]" style="color:#F5A623;">
         はじめまして · Bienvenue
       </div>
       <h1 class="mb-4 text-[38px] font-bold leading-[1.12] tracking-tight">
@@ -51,8 +51,8 @@
         'Conformité Bank Al-Maghrib et UEMOA'
       ]; track item) {
         <div class="flex items-center gap-2.5">
-          <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full text-gold"
-                style="background: rgba(245,166,35,0.18);">
+          <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full"
+                style="background:rgba(245,166,35,0.18);color:#F5A623;">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
               <path d="M4 12l5 5L20 6"/>
@@ -65,30 +65,49 @@
   </div>
 
   <!-- ── Right: multi-step form ────────────────────────────────────────── -->
-  <div class="relative flex flex-1 items-center justify-center overflow-y-auto px-14 py-10">
+  <div class="relative flex flex-1 flex-col items-center justify-center overflow-y-auto px-5 py-8 sm:px-10"
+       style="background:#F7F6F2;">
 
-    <div class="flex w-full max-w-[440px] flex-col gap-[22px]">
+    <!-- Mobile-only logo -->
+    <div class="mb-7 flex items-center gap-2.5 lg:hidden">
+      <div class="flex h-9 w-9 items-center justify-center rounded-[11px]"
+           style="background:#1A1F36;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M5 10h11"  stroke="#F5A623" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M10 4c0 6-3 10-5 12" stroke="#F5A623" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M14 7c2 2 4 5 4 9 0 2-1 4-3 4" stroke="#F5A623" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="18.5" cy="6" r="1.4" fill="#F5A623"/>
+        </svg>
+      </div>
+      <span class="text-xl font-bold tracking-tight" style="color:#1A1F36;">
+        Okane<span style="color:#F5A623;">Transfer</span>
+      </span>
+    </div>
+
+    <!-- Form card -->
+    <div class="w-full max-w-[440px] flex flex-col gap-[22px]">
 
       <!-- Progress bar -->
       <div>
-        <div class="mb-2 flex items-center justify-between text-[11.5px] font-semibold text-ink-dim">
-          <span class="text-[11px] uppercase tracking-[0.08em] text-gold">
+        <div class="mb-2 flex items-center justify-between text-[11.5px] font-semibold" style="color:#64748B;">
+          <span class="text-[11px] uppercase tracking-[0.08em]" style="color:#F5A623;">
             Étape {{ step }} sur 2
           </span>
           <span>{{ step === 1 ? '50' : '100' }}%</span>
         </div>
-        <div class="h-1 overflow-hidden rounded-full bg-cream-line">
-          <div class="h-full rounded-full bg-gold transition-all duration-500"
+        <div class="h-1 overflow-hidden rounded-full" style="background:#E8E2D4;">
+          <div class="h-full rounded-full transition-all duration-500"
+               style="background:#F5A623;"
                [style.width]="step === 1 ? '50%' : '100%'"></div>
         </div>
       </div>
 
       <!-- Titles -->
       <div>
-        <h2 class="mb-1.5 text-[26px] font-bold tracking-tight text-navy">
+        <h2 class="mb-1.5 text-[26px] font-bold tracking-tight" style="color:#1A1F36;">
           {{ step === 1 ? 'Créer votre compte' : 'Choisir un mot de passe' }}
         </h2>
-        <p class="text-[13.5px] text-ink-dim">
+        <p class="text-[13.5px]" style="color:#64748B;">
           @if (step === 1) {
             Rejoignez des milliers de clients à travers le Maroc, l'Afrique de l'Ouest et l'Europe.
           } @else {
@@ -99,8 +118,8 @@
 
       <!-- Error banner -->
       @if (error) {
-        <div class="flex items-center gap-2 rounded-[9px] px-3 py-2.5 text-[12.5px] text-ok-danger"
-             style="background:rgba(255,77,79,0.08);">
+        <div class="flex items-center gap-2 rounded-[9px] px-3 py-2.5 text-[12.5px]"
+             style="background:rgba(255,77,79,0.08);color:#FF4D4F;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
             <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>
@@ -119,42 +138,44 @@
             <!-- Nom + Prénom -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="mb-1.5 block text-[12.5px] font-semibold text-navy">
-                  Nom <span class="text-gold">*</span>
+                <label class="mb-1.5 block text-[12.5px] font-semibold" style="color:#1A1F36;">
+                  Nom <span style="color:#F5A623;">*</span>
                 </label>
                 <div class="flex items-center rounded-[10px] border bg-white px-3 py-[11px] transition-all
-                            focus-within:border-gold focus-within:shadow-[0_0_0_4px_rgba(245,166,35,0.10)]"
+                            focus-within:shadow-[0_0_0_4px_rgba(245,166,35,0.10)]"
                      [style.border-color]="form.get('nom')?.invalid && form.get('nom')?.touched ? '#FF4D4F' : '#E8E2D4'">
                   <input formControlName="nom" type="text" placeholder="Alaoui"
-                         class="w-full bg-transparent text-sm text-navy outline-none placeholder:text-ink-mute">
+                         class="w-full bg-transparent text-sm outline-none"
+                         style="color:#1A1F36;">
                 </div>
                 @if (form.get('nom')?.invalid && form.get('nom')?.touched) {
-                  <p class="mt-1 text-[11px] text-ok-danger">Nom requis.</p>
+                  <p class="mt-1 text-[11px]" style="color:#FF4D4F;">Nom requis.</p>
                 }
               </div>
               <div>
-                <label class="mb-1.5 block text-[12.5px] font-semibold text-navy">
-                  Prénom <span class="text-gold">*</span>
+                <label class="mb-1.5 block text-[12.5px] font-semibold" style="color:#1A1F36;">
+                  Prénom <span style="color:#F5A623;">*</span>
                 </label>
                 <div class="flex items-center rounded-[10px] border bg-white px-3 py-[11px] transition-all
-                            focus-within:border-gold focus-within:shadow-[0_0_0_4px_rgba(245,166,35,0.10)]"
+                            focus-within:shadow-[0_0_0_4px_rgba(245,166,35,0.10)]"
                      [style.border-color]="form.get('prenom')?.invalid && form.get('prenom')?.touched ? '#FF4D4F' : '#E8E2D4'">
                   <input formControlName="prenom" type="text" placeholder="Mohamed"
-                         class="w-full bg-transparent text-sm text-navy outline-none placeholder:text-ink-mute">
+                         class="w-full bg-transparent text-sm outline-none"
+                         style="color:#1A1F36;">
                 </div>
                 @if (form.get('prenom')?.invalid && form.get('prenom')?.touched) {
-                  <p class="mt-1 text-[11px] text-ok-danger">Prénom requis.</p>
+                  <p class="mt-1 text-[11px]" style="color:#FF4D4F;">Prénom requis.</p>
                 }
               </div>
             </div>
 
             <!-- Email -->
             <div>
-              <label class="mb-1.5 block text-[12.5px] font-semibold text-navy">
-                Adresse email <span class="text-gold">*</span>
+              <label class="mb-1.5 block text-[12.5px] font-semibold" style="color:#1A1F36;">
+                Adresse email <span style="color:#F5A623;">*</span>
               </label>
               <div class="flex items-center gap-2 rounded-[10px] border bg-white px-3 py-[11px] transition-all
-                          focus-within:border-gold focus-within:shadow-[0_0_0_4px_rgba(245,166,35,0.10)]"
+                          focus-within:shadow-[0_0_0_4px_rgba(245,166,35,0.10)]"
                    [style.border-color]="form.get('email')?.invalid && form.get('email')?.touched ? '#FF4D4F' : '#E8E2D4'">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8FA3" stroke-width="1.8"
                      stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
@@ -162,42 +183,47 @@
                   <path d="M3 7l9 6 9-6"/>
                 </svg>
                 <input formControlName="email" type="email" placeholder="vous@exemple.com"
-                       class="flex-1 bg-transparent text-sm text-navy outline-none placeholder:text-ink-mute">
+                       class="flex-1 bg-transparent text-sm outline-none"
+                       style="color:#1A1F36;">
               </div>
               @if (form.get('email')?.invalid && form.get('email')?.touched) {
-                <p class="mt-1 text-[11px] text-ok-danger">Adresse email valide requise.</p>
+                <p class="mt-1 text-[11px]" style="color:#FF4D4F;">Adresse email valide requise.</p>
               }
             </div>
 
             <!-- Téléphone -->
             <div>
-              <label class="mb-1.5 block text-[12.5px] font-semibold text-navy">
-                Téléphone <span class="text-gold">*</span>
+              <label class="mb-1.5 block text-[12.5px] font-semibold" style="color:#1A1F36;">
+                Téléphone <span style="color:#F5A623;">*</span>
               </label>
-              <p class="mb-1.5 text-[11px] text-ink-mute">Recevra le code de vérification 2FA</p>
+              <p class="mb-1.5 text-[11px]" style="color:#B0B4C0;">Recevra le code de vérification 2FA</p>
               <div class="flex items-center gap-2 rounded-[10px] border bg-white px-3 py-[11px] transition-all
-                          focus-within:border-gold focus-within:shadow-[0_0_0_4px_rgba(245,166,35,0.10)]"
-                   style="border-color: #E8E2D4;">
-                <span class="flex shrink-0 items-center gap-1.5 border-r border-cream-line pr-2.5 text-[13px] font-semibold font-mono text-navy">
+                          focus-within:shadow-[0_0_0_4px_rgba(245,166,35,0.10)]"
+                   style="border-color:#E8E2D4;">
+                <span class="flex shrink-0 items-center gap-1.5 pr-2.5 text-[13px] font-semibold font-mono"
+                      style="color:#1A1F36;border-right:1px solid #E8E2D4;">
                   🇲🇦 +212
                 </span>
                 <input formControlName="telephone" type="tel" placeholder="6 12 34 56 67"
-                       class="flex-1 bg-transparent text-sm text-navy outline-none placeholder:text-ink-mute tabular-nums">
+                       class="flex-1 bg-transparent text-sm outline-none tabular-nums"
+                       style="color:#1A1F36;">
               </div>
               @if (form.get('telephone')?.invalid && form.get('telephone')?.touched) {
-                <p class="mt-1 text-[11px] text-ok-danger">Téléphone requis.</p>
+                <p class="mt-1 text-[11px]" style="color:#FF4D4F;">Téléphone requis.</p>
               }
             </div>
 
             <!-- Pays -->
             <div>
-              <label class="mb-1.5 block text-[12.5px] font-semibold text-navy">
-                Pays de résidence <span class="text-gold">*</span>
+              <label class="mb-1.5 block text-[12.5px] font-semibold" style="color:#1A1F36;">
+                Pays de résidence <span style="color:#F5A623;">*</span>
               </label>
-              <div class="flex items-center gap-2 rounded-[10px] border border-cream-line bg-white px-3 py-[11px]">
+              <div class="flex items-center gap-2 rounded-[10px] border bg-white px-3 py-[11px]"
+                   style="border-color:#E8E2D4;">
                 <span class="text-base">🇲🇦</span>
                 <select formControlName="pays"
-                        class="flex-1 bg-transparent text-sm text-navy outline-none">
+                        class="flex-1 bg-transparent text-sm outline-none"
+                        style="color:#1A1F36;">
                   <option value="MA">Maroc</option>
                   <option value="SN">Sénégal</option>
                   <option value="CI">Côte d'Ivoire</option>
@@ -216,8 +242,9 @@
 
             <!-- Next step -->
             <button type="button" (click)="nextStep()"
-                    class="mt-1 flex w-full items-center justify-center gap-2 rounded-[10px] bg-gold px-4 py-3
-                           text-sm font-semibold text-white transition-colors hover:bg-gold-deep">
+                    class="mt-1 flex w-full items-center justify-center gap-2 rounded-[10px] px-4 py-3
+                           text-sm font-semibold text-white transition-colors"
+                    style="background:#F5A623;">
               Continuer
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -234,11 +261,12 @@
 
             <!-- Password -->
             <div>
-              <label class="mb-1.5 block text-[12.5px] font-semibold text-navy">
-                Mot de passe <span class="text-gold">*</span>
+              <label class="mb-1.5 block text-[12.5px] font-semibold" style="color:#1A1F36;">
+                Mot de passe <span style="color:#F5A623;">*</span>
               </label>
-              <div class="flex items-center gap-2 rounded-[10px] border border-cream-line bg-white px-3 py-[11px]
-                          transition-all focus-within:border-gold focus-within:shadow-[0_0_0_4px_rgba(245,166,35,0.10)]">
+              <div class="flex items-center gap-2 rounded-[10px] border bg-white px-3 py-[11px] transition-all
+                          focus-within:shadow-[0_0_0_4px_rgba(245,166,35,0.10)]"
+                   style="border-color:#E8E2D4;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8FA3" stroke-width="1.8"
                      stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
                   <rect x="4" y="11" width="16" height="10" rx="2"/>
@@ -246,9 +274,10 @@
                 </svg>
                 <input formControlName="motDePasse" [type]="showPwd ? 'text' : 'password'"
                        placeholder="Minimum 8 caractères"
-                       class="flex-1 bg-transparent text-sm text-navy outline-none placeholder:text-ink-mute">
+                       class="flex-1 bg-transparent text-sm outline-none"
+                       style="color:#1A1F36;">
                 <button type="button" (click)="showPwd = !showPwd"
-                        class="shrink-0 text-ink-mute hover:text-ink-dim transition-colors">
+                        class="shrink-0 transition-colors" style="color:#B0B4C0;">
                   @if (!showPwd) {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>
@@ -261,17 +290,18 @@
                 </button>
               </div>
               @if (form.get('motDePasse')?.invalid && form.get('motDePasse')?.touched) {
-                <p class="mt-1 text-[11px] text-ok-danger">Minimum 8 caractères requis.</p>
+                <p class="mt-1 text-[11px]" style="color:#FF4D4F;">Minimum 8 caractères requis.</p>
               }
             </div>
 
             <!-- Confirm Password -->
             <div>
-              <label class="mb-1.5 block text-[12.5px] font-semibold text-navy">
-                Confirmer le mot de passe <span class="text-gold">*</span>
+              <label class="mb-1.5 block text-[12.5px] font-semibold" style="color:#1A1F36;">
+                Confirmer le mot de passe <span style="color:#F5A623;">*</span>
               </label>
-              <div class="flex items-center gap-2 rounded-[10px] border border-cream-line bg-white px-3 py-[11px]
-                          transition-all focus-within:border-gold focus-within:shadow-[0_0_0_4px_rgba(245,166,35,0.10)]">
+              <div class="flex items-center gap-2 rounded-[10px] border bg-white px-3 py-[11px] transition-all
+                          focus-within:shadow-[0_0_0_4px_rgba(245,166,35,0.10)]"
+                   style="border-color:#E8E2D4;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8FA3" stroke-width="1.8"
                      stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
                   <rect x="4" y="11" width="16" height="10" rx="2"/>
@@ -279,9 +309,10 @@
                 </svg>
                 <input formControlName="confirmPassword" [type]="showConfirmPwd ? 'text' : 'password'"
                        placeholder="Répétez le mot de passe"
-                       class="flex-1 bg-transparent text-sm text-navy outline-none placeholder:text-ink-mute">
+                       class="flex-1 bg-transparent text-sm outline-none"
+                       style="color:#1A1F36;">
                 <button type="button" (click)="showConfirmPwd = !showConfirmPwd"
-                        class="shrink-0 text-ink-mute hover:text-ink-dim transition-colors">
+                        class="shrink-0 transition-colors" style="color:#B0B4C0;">
                   @if (!showConfirmPwd) {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>
@@ -294,16 +325,16 @@
                 </button>
               </div>
               @if (form.errors?.['passwordsMismatch'] && form.get('confirmPassword')?.touched) {
-                <p class="mt-1 text-[11px] text-ok-danger">Les mots de passe ne correspondent pas.</p>
+                <p class="mt-1 text-[11px]" style="color:#FF4D4F;">Les mots de passe ne correspondent pas.</p>
               }
             </div>
 
             <!-- Buttons -->
             <div class="flex gap-3 mt-1">
               <button type="button" (click)="prevStep()"
-                      class="flex items-center justify-center gap-1.5 rounded-[10px] border border-cream-line
-                             bg-white px-5 py-3 text-sm font-semibold text-ink-dim
-                             transition-colors hover:border-navy hover:text-navy">
+                      class="flex items-center justify-center gap-1.5 rounded-[10px] border bg-white px-5 py-3
+                             text-sm font-semibold transition-colors"
+                      style="border-color:#E8E2D4;color:#64748B;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M15 6l-9 6 9 6"/>
@@ -311,10 +342,12 @@
                 Retour
               </button>
               <button type="submit" [disabled]="loading"
-                      class="flex flex-1 items-center justify-center gap-2 rounded-[10px] bg-gold px-4 py-3
-                             text-sm font-semibold text-white transition-colors hover:bg-gold-deep disabled:opacity-60">
+                      class="flex flex-1 items-center justify-center gap-2 rounded-[10px] px-4 py-3
+                             text-sm font-semibold text-white transition-colors disabled:opacity-60"
+                      style="background:#F5A623;">
                 @if (loading) {
-                  <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
+                  <span class="h-4 w-4 animate-spin rounded-full border-2"
+                        style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;"></span>
                   Création...
                 } @else {
                   Créer mon compte
@@ -332,20 +365,21 @@
       </form>
 
       <!-- Login link -->
-      <div class="border-t border-dashed border-cream-line pt-2 text-center text-[13px] text-ink-dim">
+      <div class="border-t border-dashed pt-4 text-center text-[13px]"
+           style="border-color:#E8E2D4;color:#64748B;">
         Déjà client ?
         <a routerLink="/auth/login"
-           class="cursor-pointer font-semibold text-navy transition-colors hover:text-gold">
+           class="cursor-pointer font-semibold transition-colors" style="color:#1A1F36;">
           Se connecter
         </a>
       </div>
 
       <!-- Legal -->
-      <p class="text-center text-[11px] leading-relaxed text-ink-mute">
+      <p class="text-center text-[11px] leading-relaxed" style="color:#B0B4C0;">
         En continuant, vous acceptez nos
-        <a class="cursor-pointer font-semibold text-gold">conditions d'utilisation</a>
+        <a class="cursor-pointer font-semibold" style="color:#F5A623;">conditions d'utilisation</a>
         et notre
-        <a class="cursor-pointer font-semibold text-gold">politique de confidentialité</a>.
+        <a class="cursor-pointer font-semibold" style="color:#F5A623;">politique de confidentialité</a>.
       </p>
 
     </div>
