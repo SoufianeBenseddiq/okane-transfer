@@ -22,6 +22,7 @@ export class FraisComponent implements OnInit {
   corridors: CorridorResponse[] = [];
   activeCorridorId: number | null = null;
   loadingCorridors = true;
+  corridorSearch = '';
 
   grilles: GrilleTarifaireResponse[] = [];
   loadingGrilles = false;
@@ -62,10 +63,11 @@ export class FraisComponent implements OnInit {
 
     this.deviseService.getAllCorridors().subscribe({
       next: corridors => {
-        this.corridors = corridors;
-        if (corridors.length) {
-          this.activeCorridorId = corridors[0].id;
-          this.loadGrilles(corridors[0].id);
+        // keep only corridors that have pays data (consistent naming)
+        this.corridors = corridors.filter(c => c.paysSource && c.paysDestination);
+        if (this.corridors.length) {
+          this.activeCorridorId = this.corridors[0].id;
+          this.loadGrilles(this.corridors[0].id);
           this.simuler();
         }
         this.loadingCorridors = false;
@@ -76,6 +78,19 @@ export class FraisComponent implements OnInit {
 
   get activeCorridor(): CorridorResponse | undefined {
     return this.corridors.find(c => c.id === this.activeCorridorId);
+  }
+
+  get filteredCorridors(): CorridorResponse[] {
+    const q = this.corridorSearch.trim().toLowerCase();
+    if (!q) return this.corridors;
+    return this.corridors.filter(c => {
+      const tokens = [
+        c.paysSource?.nom, c.paysDestination?.nom,
+        c.paysSource?.codeIso, c.paysDestination?.codeIso,
+        c.deviseSource, c.deviseDestination,
+      ];
+      return tokens.some(t => t?.toLowerCase().includes(q));
+    });
   }
 
   get pageSubtitle(): string {

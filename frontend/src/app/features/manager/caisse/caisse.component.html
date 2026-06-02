@@ -1,48 +1,153 @@
-<div class="page-container">
-  <div class="page-header">
-    <h1>{{ 'manager.caisse.title' | translate }}</h1>
-    <p>{{ 'manager.caisse.subtitle' | translate }}</p>
-  </div>
+<div class="flex-1 overflow-y-auto p-4 sm:p-7 flex flex-col gap-5">
 
-  <!-- Loading state -->
-  <div *ngIf="loading" class="loading-state">
-    <p>{{ 'manager.caisse.loading' | translate }}</p>
-  </div>
+  @if (loading) {
+    <div class="flex justify-center py-20">
+      <div class="w-8 h-8 rounded-full border-2 animate-spin"
+           style="border-color:rgba(255,255,255,0.12);border-top-color:#F5A623;"></div>
+    </div>
+  } @else {
 
-  <!-- Error state -->
-  <div *ngIf="error && !loading" class="error-state">
-    <p>{{ error }}</p>
-  </div>
-
-  <!-- Content -->
-  <ng-container *ngIf="!loading && !error">
-    <div class="balance-section">
-      <div class="balance-card opening">
-        <span class="label">{{ 'manager.caisse.openingBalance' | translate }}</span>
-        <span class="amount">{{ openingBalance | number: '1.0-0' }} MAD</span>
+  <!-- Pool agence -->
+  <div class="grid grid-cols-3 gap-4">
+    <div class="rounded-[12px] p-5 flex flex-col gap-1"
+         style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:#F5A623;">Caisse agence</div>
+      <div class="text-[28px] font-black" style="color:#fff;">
+        {{ formatMontant(poolDisponible) }}
+        <span class="text-[14px] font-semibold" style="color:#F5A623;">MAD</span>
       </div>
-      <div class="balance-card current">
-        <span class="label">{{ 'manager.caisse.currentBalance' | translate }}</span>
-        <span class="amount">{{ currentBalance | number: '1.0-0' }} MAD</span>
-      </div>
+      <div class="text-[11.5px]" style="color:rgba(255,255,255,0.45);">Disponible pour distribution aux agents</div>
     </div>
 
-    <div class="transactions-section">
-      <h2>{{ 'manager.caisse.transactions.title' | translate }}</h2>
-      <div class="transactions-list">
-        <div *ngFor="let tx of transactions" class="transaction-item" [ngClass]="'type-' + tx.type">
-          <div class="transaction-info">
-            <span class="transaction-id">{{ tx.id }}</span>
-            <span class="description">{{ tx.description }}</span>
-            <span class="time">{{ tx.time }}</span>
-          </div>
-          <span class="amount" [ngClass]="tx.type">{{ (tx.type === 'in' ? '+' : '-') }} {{ tx.amount | number: '1.0-0' }} MAD</span>
-        </div>
+    <div class="rounded-[12px] p-5 flex flex-col gap-1"
+         style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:rgba(255,255,255,0.55);">Total distribué</div>
+      <div class="text-[28px] font-black" style="color:#fff;">
+        {{ formatMontant(totalSoldeAgents) }}
+        <span class="text-[14px] font-semibold" style="color:rgba(255,255,255,0.55);">MAD</span>
+      </div>
+      <div class="text-[11.5px]" style="color:rgba(255,255,255,0.45);">Somme des caisses ouvertes</div>
+    </div>
 
-        <div *ngIf="transactions.length === 0" class="no-data">
-          <p>{{ 'manager.caisse.transactions.noData' | translate }}</p>
-        </div>
+    <div class="rounded-[12px] p-5 flex flex-col gap-1"
+         style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+      <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:rgba(255,255,255,0.55);">Plafond journalier</div>
+      <div class="text-[28px] font-black" style="color:#fff;">
+        {{ formatMontant(agence?.plafondJournalier ?? 0) }}
+        <span class="text-[14px] font-semibold" style="color:rgba(255,255,255,0.55);">MAD</span>
+      </div>
+      <div class="text-[11.5px]" style="color:rgba(255,255,255,0.45);">
+        {{ formatMontant(agence?.montantTraiteAujourdhui ?? 0) }} MAD traités aujourd'hui
       </div>
     </div>
-  </ng-container>
+  </div>
+
+  <!-- Agents list -->
+  <div class="rounded-[12px] overflow-hidden" style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+    <div class="px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:#F5A623;">Agents</div>
+      <div class="text-[16px] font-bold mt-1">Gestion des caisses</div>
+    </div>
+
+    @if (openError) {
+      <div class="mx-6 mt-4 flex items-center gap-2 px-3 py-2.5 rounded-[8px] text-[12.5px]"
+           style="background:rgba(255,77,79,0.12);color:#FF4D4F;border:1px solid rgba(255,77,79,0.24);">
+        <app-icon name="alert" [size]="14" color="#FF4D4F" /> {{ openError }}
+      </div>
+    }
+
+    <table class="w-full" style="border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="color:rgba(255,255,255,0.55);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;">
+          @for (h of ['Agent','Email','Statut caisse','Solde actuel','']; track h; let i=$index) {
+            <th class="px-6 py-3 font-semibold"
+                [style.text-align]="i >= 2 ? 'center' : 'left'"
+                style="border-bottom:1px solid rgba(255,255,255,0.08);">{{ h }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (agent of agents; track agent.id; let i=$index; let last=$last) {
+          <tr [style.background]="i%2===1 ? 'rgba(255,255,255,0.02)' : 'transparent'"
+              [style.border-bottom]="!last ? '1px solid rgba(255,255,255,0.06)' : 'none'">
+
+            <!-- Name -->
+            <td class="px-6 py-[10px]">
+              <div class="flex items-center gap-2.5">
+                <div class="flex items-center justify-center rounded-[9px] text-[11px] font-bold flex-shrink-0"
+                     style="width:30px;height:30px;background:rgba(245,166,35,0.18);color:#F5A623;">
+                  {{ agent.prenom.charAt(0) }}{{ agent.nom.charAt(0) }}
+                </div>
+                <div>
+                  <div class="font-semibold" style="color:#fff;">{{ agent.prenom }} {{ agent.nom }}</div>
+                  <div class="text-[11px]" style="color:rgba(255,255,255,0.45);">{{ agent.actif ? 'Actif' : 'Inactif' }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Email -->
+            <td class="px-6 py-[10px] text-[12px]" style="color:rgba(255,255,255,0.55);">{{ agent.email }}</td>
+
+            <!-- Statut caisse -->
+            <td class="px-6 py-[10px] text-center">
+              <span class="inline-flex px-2 py-0.5 rounded-[5px] text-[11px] font-bold tracking-[0.04em]"
+                    [style.background]="isCaisseOuverte(agent) ? 'rgba(0,196,140,0.18)' : 'rgba(255,255,255,0.06)'"
+                    [style.color]="isCaisseOuverte(agent) ? '#00C48C' : 'rgba(255,255,255,0.45)'">
+                {{ isCaisseOuverte(agent) ? 'Ouverte' : 'Non ouverte' }}
+              </span>
+            </td>
+
+            <!-- Solde -->
+            <td class="px-6 py-[10px] text-center font-semibold font-mono"
+                [style.color]="isCaisseOuverte(agent) ? '#fff' : 'rgba(255,255,255,0.3)'">
+              {{ soldeCaisseLabel(agent) }} MAD
+            </td>
+
+            <!-- Actions -->
+            <td class="px-6 py-[10px] text-right">
+              @if (openingFor === agent.id) {
+                <div class="flex items-center gap-2 justify-end">
+                  <div class="flex items-center gap-1.5 rounded-[8px] overflow-hidden"
+                       style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);">
+                    <input type="number" min="0" [(ngModel)]="floatInput[agent.id]"
+                           placeholder="Montant MAD"
+                           class="w-[130px] px-3 py-1.5 text-[13px] bg-transparent outline-none"
+                           style="color:#F3F4F8;" />
+                  </div>
+                  <button (click)="confirmerOuverture(agent)" [disabled]="saving === agent.id"
+                          class="px-3 py-1.5 rounded-[7px] text-[12px] font-semibold cursor-pointer border-none outline-none disabled:opacity-50"
+                          style="background:#F5A623;color:#1A1F36;">
+                    @if (saving === agent.id) {
+                      <span class="inline-block w-3.5 h-3.5 rounded-full border-2 animate-spin"
+                            style="border-color:rgba(26,31,54,0.3);border-top-color:#1A1F36;"></span>
+                    } @else {
+                      Confirmer
+                    }
+                  </button>
+                  <button (click)="cancelOuverture()"
+                          class="px-3 py-1.5 rounded-[7px] text-[12px] font-semibold cursor-pointer border outline-none"
+                          style="background:transparent;color:rgba(255,255,255,0.55);border-color:rgba(255,255,255,0.12);">
+                    Annuler
+                  </button>
+                </div>
+              } @else {
+                <button (click)="openOuverture(agent)"
+                        [disabled]="!agent.actif || isCaisseOuverte(agent)"
+                        class="px-3 py-1.5 rounded-[7px] text-[12px] font-semibold cursor-pointer border-none outline-none disabled:opacity-40"
+                        style="background:rgba(245,166,35,0.12);color:#F5A623;"
+                        [title]="isCaisseOuverte(agent) ? 'Caisse déjà ouverte' : 'Ouvrir la caisse'">
+                  <app-icon name="plus" [size]="13" color="#F5A623" /> Ouvrir caisse
+                </button>
+              }
+            </td>
+          </tr>
+        }
+        @if (agents.length === 0) {
+          <tr><td colspan="5" class="px-6 py-12 text-center" style="color:rgba(255,255,255,0.45);">Aucun agent dans cette agence</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  } <!-- end @else -->
 </div>

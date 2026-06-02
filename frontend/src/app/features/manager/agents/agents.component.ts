@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrateg
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AgentsService, Agent } from './agents.service';
+import { AgenceService } from '../../../core/services/agence.service';
 import { catchError, forkJoin, of } from 'rxjs';
 
 interface AgentDisplay extends Agent {
@@ -28,16 +29,21 @@ export class AgentsComponent implements OnInit, OnDestroy {
   totalAgentsTransferts = 0;
   private pollingIntervalId: any;
 
+  private agenceId: number | null = null;
+
   constructor(
     private agentsService: AgentsService,
+    private agenceService: AgenceService,
     private changeDetectorRef: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.loadAgents();
-    this.pollingIntervalId = setInterval(() => {
+    // Load manager's agence first to know which agents belong to it
+    this.agenceService.getMonAgence().pipe(catchError(() => of(null))).subscribe(agence => {
+      this.agenceId = agence?.id ?? null;
       this.loadAgents();
-    }, 5000);
+      this.pollingIntervalId = setInterval(() => this.loadAgents(), 5000);
+    });
   }
 
   ngOnDestroy() {
@@ -65,8 +71,10 @@ export class AgentsComponent implements OnInit, OnDestroy {
       )
     }).subscribe(({ agents, transferts }) => {
 
-      // ✅ Filtrer uniquement ROLE_AGENT côté front
-      const agentsOnly = (agents as Agent[]).filter(a => a.role === 'ROLE_AGENT');
+      // Filter to ROLE_AGENT only AND belonging to this manager's agence
+      const agentsOnly = (agents as Agent[]).filter(a =>
+        a.role === 'ROLE_AGENT' && (this.agenceId == null || a.agenceId === this.agenceId)
+      );
 
       // Calculer les stats par agent
       const statsParAgent = new Map<number, any>();
@@ -114,7 +122,7 @@ export class AgentsComponent implements OnInit, OnDestroy {
 
       // Identifier le meilleur agent (plus de commissions)
       if (this.agents.length > 0) {
-        this.topAgent = this.agents.reduce((best, current) => 
+        this.topAgent = this.agents.reduce((best, current) =>
           (current.commissionsJour > best.commissionsJour) ? current : best
         );
         this.otherAgents = this.agents.filter(a => a.id !== this.topAgent?.id);

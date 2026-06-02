@@ -4,7 +4,9 @@ import { TranslateModule } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { CaisseService } from '../../../core/services/caisse.service';
+import { DeviseService } from '../../../core/services/devise.service';
 import { CaisseOperationResponse } from '../../../core/models/caisse';
+import { DeviseResponse } from '../../../core/models/devise/devise-response.model';
 import { TypeOperation } from '../../../core/models/enums';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -37,6 +39,7 @@ export class CaisseComponent implements OnInit {
   };
 
   operations: CaisseOperationResponse[] = [];
+  private tauxMap: Record<string, number> = {}; // devise code → tauxVersEuro
 
   // ── Pagination ─────────────────────────────────────────────────
   readonly pageSize = 6;
@@ -63,13 +66,24 @@ export class CaisseComponent implements OnInit {
 
   constructor(
     private caisseService: CaisseService,
+    private deviseService: DeviseService,
     private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
     this.loadClosureStatus();
     this.loadSoldeJour();
-    this.loadOperations();
+    // Load devises first so taux are available for MAD conversion
+    this.deviseService.getAllDevises().subscribe({
+      next: (devises) => {
+        this.tauxMap = devises.reduce((acc: Record<string, number>, d: DeviseResponse) => {
+          acc[d.code] = d.tauxVersEuro;
+          return acc;
+        }, {});
+        this.loadOperations();
+      },
+      error: () => this.loadOperations(), // fallback: load without taux
+    });
   }
 
   get agentEmail(): string {
@@ -129,14 +143,21 @@ export class CaisseComponent implements OnInit {
     });
   }
 
+  private toMAD(montant: number, devise: string): number {
+    const tauxMAD  = this.tauxMap['MAD']  ?? 0.093;
+    const tauxDev  = this.tauxMap[devise] ?? tauxMAD;
+    // Convert via EUR pivot: montant × tauxDev / tauxMAD
+    return montant * tauxDev / tauxMAD;
+  }
+
   private computeStats(ops: CaisseOperationResponse[]) {
     const envois   = ops.filter(o => o.type === TypeOperation.ENVOI);
     const retraits = ops.filter(o => o.type === TypeOperation.RETRAIT);
     return {
       envoiOps:      envois.length,
       retraitOps:    retraits.length,
-      totalEnvois:   envois.reduce((sum, o) => sum + o.montant, 0),
-      totalRetraits: retraits.reduce((sum, o) => sum + o.montant, 0),
+      totalEnvois:   envois.reduce((sum, o) => sum + this.toMAD(o.montant, o.devise ?? 'MAD'), 0),
+      totalRetraits: retraits.reduce((sum, o) => sum + this.toMAD(o.montant, o.devise ?? 'MAD'), 0),
     };
   }
 
@@ -149,8 +170,9 @@ export class CaisseComponent implements OnInit {
   }
 
   getAmountDisplay(op: CaisseOperationResponse): string {
-    const formatted = op.montant.toLocaleString('fr-MA');
-    return op.type === TypeOperation.RETRAIT ? `-${formatted}` : `+${formatted}`;
+    const formatted = op.montant.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const devise = op.devise ?? 'MAD';
+    return op.type === TypeOperation.RETRAIT ? `-${formatted} ${devise}` : `+${formatted} ${devise}`;
   }
 
   getPageEnd(): number {

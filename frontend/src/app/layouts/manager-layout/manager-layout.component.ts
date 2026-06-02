@@ -4,11 +4,12 @@ import { filter } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 import { TopbarComponent } from '../../shared/components/topbar/topbar.component';
+import { ToastComponent } from '../../shared/components/toast/toast.component';
 
 @Component({
   selector: 'app-manager-layout',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent, TopbarComponent],
+  imports: [RouterOutlet, SidebarComponent, TopbarComponent, ToastComponent],
   template: `
     <div class="flex overflow-hidden font-sans" style="height:100vh;background:#1A1F36;color:#F3F4F8;">
       <app-sidebar />
@@ -19,6 +20,7 @@ import { TopbarComponent } from '../../shared/components/topbar/topbar.component
         </div>
       </div>
     </div>
+    <app-toast />
   `,
 })
 export class ManagerLayoutComponent implements OnInit {

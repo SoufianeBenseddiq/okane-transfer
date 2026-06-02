@@ -71,6 +71,7 @@
         "performance": "PERFORMANCE"
       },
       "others":     "Autres agents",
+      "allMembers": "Membres de l'équipe",
       "active":     "✓ Actif",
       "inactive":   "✕ Inactif",
       "activate":   "Activer",
@@ -638,8 +639,10 @@
     "printSlip":       "Imprimer le bordereau",
     "confirmPayment":  "Confirmer le paiement",
     "notFound":        "Aucun transfert trouvé pour cette recherche",
-    "alreadyPaid":     "Ce transfert a déjà été payé",
-    "errorGeneric":    "Une erreur est survenue, veuillez réessayer"
+    "alreadyPaid":        "Ce transfert a déjà été payé",
+    "caisseNonOuverte":   "Votre caisse n'est pas ouverte aujourd'hui. Contactez votre manager pour obtenir un fond de caisse.",
+    "soldeInsuffisant":   "Solde caisse insuffisant pour payer ce transfert. Contactez votre manager.",
+    "errorGeneric":       "Une erreur est survenue, veuillez réessayer"
   },
 
   "caisse": {
@@ -666,6 +669,7 @@
       "showing": "Affichage de",
       "of":      "sur"
     },
+    "totalOps": "Total opérations",
     "type": {
       "ENVOI":    "Envoi",
       "RETRAIT":  "Retrait",

@@ -1,7 +1,7 @@
 <header class="flex items-center gap-[14px] flex-shrink-0 px-5 py-[14px] sm:px-7 sm:py-[18px]"
         style="background:#1A1F36;color:#F3F4F8;border-bottom:1px solid rgba(255,255,255,0.08);">
 
-  <!-- Sidebar toggle (visible on all screens) -->
+  <!-- Sidebar toggle -->
   <button (click)="toggleSidebar()" title="Menu"
           class="flex items-center justify-center rounded-[10px] cursor-pointer outline-none flex-shrink-0"
           style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:none;color:rgba(255,255,255,0.7);"
@@ -22,26 +22,143 @@
     }
   </div>
 
-  <!-- Right slot (action buttons injected by page) -->
+  <!-- Right slot -->
   <ng-content />
 
-  <!-- Bell -->
-  <button (click)="openNotifications()"
-          class="relative flex items-center justify-center rounded-[10px] cursor-pointer outline-none flex-shrink-0"
-          style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:none;color:#F3F4F8;">
-    <app-icon name="bell" [size]="16" />
-    @if (unreadCount > 0) {
-      <span class="absolute flex items-center justify-center rounded-full text-[9px] font-bold"
-            style="top:5px;right:5px;min-width:14px;height:14px;padding:0 3px;background:#F5A623;color:#1A1F36;border:2px solid #1A1F36;line-height:1;">
-        {{ unreadCount > 99 ? '99+' : unreadCount }}
-      </span>
-    } @else {
-      <span class="absolute rounded-full"
-            style="top:8px;right:8px;width:7px;height:7px;background:rgba(255,255,255,0.2);border:2px solid #1A1F36;"></span>
-    }
-  </button>
+  <!-- Notification bell + dropdown -->
+  <div class="relative notif-dropdown-container flex-shrink-0">
 
-  <!-- Language toggle (hidden on mobile) -->
+    <!-- Bell button -->
+    <button (click)="toggleDropdown()"
+            class="relative flex items-center justify-center rounded-[10px] cursor-pointer outline-none"
+            style="width:36px;height:36px;border:none;color:#F3F4F8;"
+            [style.background]="dropdownOpen ? 'rgba(245,166,35,0.15)' : 'rgba(255,255,255,0.05)'">
+      <app-icon name="bell" [size]="16" />
+      @if (unreadCount > 0) {
+        <span class="absolute flex items-center justify-center rounded-full text-[9px] font-bold"
+              style="top:5px;right:5px;min-width:14px;height:14px;padding:0 3px;
+                     background:#F5A623;color:#1A1F36;border:2px solid #1A1F36;line-height:1;">
+          {{ unreadCount > 99 ? '99+' : unreadCount }}
+        </span>
+      } @else {
+        <span class="absolute rounded-full"
+              style="top:8px;right:8px;width:7px;height:7px;
+                     background:rgba(255,255,255,0.2);border:2px solid #1A1F36;"></span>
+      }
+    </button>
+
+    <!-- Dropdown panel -->
+    @if (dropdownOpen) {
+      <div class="absolute right-0 mt-2 rounded-[14px] overflow-hidden shadow-2xl z-50"
+           style="width:360px;background:#1E2540;border:1px solid rgba(255,255,255,0.1);">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-4 py-3"
+             style="border-bottom:1px solid rgba(255,255,255,0.08);">
+          <div class="flex items-center gap-2">
+            <span class="text-[13.5px] font-bold" style="color:#F3F4F8;">Notifications</span>
+            @if (unreadCount > 0) {
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                    style="background:#F5A623;color:#1A1F36;">{{ unreadCount }}</span>
+            }
+          </div>
+          @if (unreadCount > 0) {
+            <button (click)="markAllAsRead()"
+                    class="text-[11.5px] font-semibold cursor-pointer border-none bg-transparent outline-none transition-colors"
+                    style="color:#F5A623;">
+              Tout marquer lu
+            </button>
+          }
+        </div>
+
+        <!-- List -->
+        <div class="overflow-y-auto" style="max-height:360px;">
+          @if (notifications.length === 0) {
+            <div class="flex flex-col items-center justify-center py-10 gap-3">
+              <div class="flex items-center justify-center rounded-full"
+                   style="width:48px;height:48px;background:rgba(255,255,255,0.05);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                     stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+              </div>
+              <p class="text-[12.5px] font-semibold" style="color:rgba(255,255,255,0.35);">Aucune notification</p>
+              <p class="text-[11px]" style="color:rgba(255,255,255,0.2);">Vous êtes à jour ✓</p>
+            </div>
+          } @else {
+            @for (notif of notifications; track notif.id) {
+              <div class="flex items-start gap-3 px-4 py-3.5"
+                   style="border-bottom:1px solid rgba(255,255,255,0.05);"
+                   [style.background]="notif.lue ? 'transparent' : 'rgba(245,166,35,0.04)'">
+
+                <!-- Alert icon -->
+                <div class="flex-shrink-0 flex items-center justify-center rounded-[9px] mt-0.5"
+                     style="width:32px;height:32px;background:rgba(255,77,79,0.12);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="#FF4D4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 8v4M12 16h.01"/>
+                  </svg>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                  <p class="text-[12.5px] font-semibold leading-snug"
+                     [style.color]="notif.lue ? 'rgba(255,255,255,0.55)' : '#F3F4F8'">
+                    {{ notifTitle(notif.message) }}
+                  </p>
+                  @if (notifBody(notif.message)) {
+                    <p class="text-[11.5px] mt-1 leading-relaxed"
+                       style="color:rgba(255,255,255,0.4);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                      {{ notifBody(notif.message) }}
+                    </p>
+                  }
+                  <p class="text-[10.5px] mt-1.5" style="color:rgba(255,255,255,0.25);">
+                    {{ formatTime(notif.envoyeLe) }}
+                  </p>
+                </div>
+
+                <!-- Mark as read button (only when unread) -->
+                @if (!notif.lue) {
+                  <button (click)="markAsRead(notif, $event)"
+                          class="flex-shrink-0 flex items-center justify-center rounded-[7px] cursor-pointer border-none outline-none transition-all mt-0.5"
+                          style="width:26px;height:26px;background:rgba(245,166,35,0.1);color:#F5A623;"
+                          title="Marquer comme lu"
+                          onmouseover="this.style.background='rgba(245,166,35,0.25)'"
+                          onmouseout="this.style.background='rgba(245,166,35,0.1)'">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 12l5 5L20 6"/>
+                    </svg>
+                  </button>
+                } @else {
+                  <div class="flex-shrink-0 mt-1.5" style="width:8px;height:8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                         stroke="rgba(0,196,140,0.5)" stroke-width="2" stroke-linecap="round">
+                      <path d="M4 12l5 5L20 6"/>
+                    </svg>
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Footer -->
+        <div class="px-4 py-2.5 text-center"
+             style="border-top:1px solid rgba(255,255,255,0.08);">
+          <p class="text-[10.5px]" style="color:rgba(255,255,255,0.25);">
+            5 dernières · Mise à jour toutes les 30s
+          </p>
+        </div>
+
+      </div>
+    }
+  </div>
+
+  <!-- Language toggle -->
   <div class="hidden sm:flex rounded-[10px] p-0.5" style="background:rgba(255,255,255,0.05);">
     @for (l of lang.langs; track l) {
       <button (click)="lang.use(l)"

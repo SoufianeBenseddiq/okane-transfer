@@ -6,10 +6,12 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { TransfertService } from '../../../core/services/transfert.service';
 import { DeviseService } from '../../../core/services/devise.service';
+import { PaysService } from '../../../core/services/pays.service';
 import { UserService } from '../../../core/services/user.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DeviseResponse } from '../../../core/models/devise/devise-response.model';
 import { CorridorResponse } from '../../../core/models/devise/corridor-response.model';
+import { PaysResponse } from '../../../core/models/pays/pays-response.model';
 import { FraisResult } from '../../../core/models/devise/frais-result.model';
 import { CreateTransfertRequest } from '../../../core/models/transfert/create-transfert-request.model';
 import { CreateTransfertAvecNouveauClientRequest } from '../../../core/models/transfert/create-transfert-avec-nouveau-client-request.model';
@@ -39,6 +41,7 @@ export class EnvoiComponent implements OnInit {
 
   private transfertService = inject(TransfertService);
   private deviseService    = inject(DeviseService);
+  private paysService      = inject(PaysService);
   private userService      = inject(UserService);
   private authService      = inject(AuthService);
 
@@ -51,7 +54,7 @@ export class EnvoiComponent implements OnInit {
     { num: 4, label: 'envoi.step4Label' },
   ];
 
-  // ─── Étape 1 : Expéditeur ─────────────────────────────────────────────────
+  // ─── Étape 1 : Corridor + Expéditeur ─────────────────────────────────────
   searchQuery         = signal<string>('');
   clientsTrouves      = signal<UserResponse[]>([]);
   clientSelectionne   = signal<UserResponse | null>(null);
@@ -62,183 +65,80 @@ export class EnvoiComponent implements OnInit {
 
   nouveauClient = {
     nom: '', prenom: '', email: '', motDePasse: '', typePiece: 'CIN',
-    numeroPiece: '', telephone: '', pays: 'Maroc',
+    numeroPiece: '', telephone: '', pays: '',
   };
   nouveauClientNomSignal = signal<string | null>(null);
 
   typesPiece = ['CIN', 'Passeport', 'Titre de sejour', 'Carte de resident'];
-  paysList   = ['Maroc', 'France', 'Belgique', 'Espagne', 'Italie', 'Allemagne', 'Pays-Bas'];
 
   // ─── Étape 2 : Bénéficiaire ───────────────────────────────────────────────
   beneficiaire: BeneficiaireForm = {
     nom: '', prenom: '', telephone: '',
-    paysReception: 'Senegal', ville: '', relation: '',
+    paysReception: '', ville: '', relation: '',
   };
   beneficiaireNomSignal = signal<string | null>(null);
-  paysReceptionList = ['Senegal', 'Cote Ivoire', 'Mali', 'Guinee', 'Cameroun', 'Congo'];
-  relationsList     = ['Famille', 'Conjoint(e)', 'Parent', 'Enfant', 'Soeur', 'Frere', 'Ami(e)', 'Autre'];
-
-  countryPhoneCodes: Record<string, string> = {
-    'Maroc': '+212',
-    'France': '+33',
-    'Belgique': '+32',
-    'Espagne': '+34',
-    'Italie': '+39',
-    'Allemagne': '+49',
-    'Pays-Bas': '+31',
-    'Senegal': '+221',
-    'Cote Ivoire': '+225',
-    'Mali': '+223',
-    'Guinee': '+224',
-    'Cameroun': '+237',
-    'Congo': '+242'
-  };
-
-  countryPhonePlaceholders: Record<string, string> = {
-    'Maroc': '6 00 00 00 00',
-    'France': '6 00 00 00 00',
-    'Belgique': '4 00 00 00 00',
-    'Espagne': '6 00 00 00 00',
-    'Italie': '3 00 000 0000',
-    'Allemagne': '15 00000000',
-    'Pays-Bas': '6 00000000',
-    'Senegal': '77 000 00 00',
-    'Cote Ivoire': '07 00 00 00 00',
-    'Mali': '70 00 00 00',
-    'Guinee': '620 00 00 00',
-    'Cameroun': '6 00 00 00 00',
-    'Congo': '06 000 00 00'
-  };
-
-  countryPhoneLengths: Record<string, number> = {
-    'Maroc': 9,
-    'France': 9,
-    'Belgique': 9,
-    'Espagne': 9,
-    'Italie': 10,
-    'Allemagne': 10,
-    'Pays-Bas': 9,
-    'Senegal': 9,
-    'Cote Ivoire': 10,
-    'Mali': 8,
-    'Guinee': 9,
-    'Cameroun': 9,
-    'Congo': 9
-  };
-
-  formatPhoneNumber(value: string, country: string): string {
-    if (!value) return '';
-    const digits = value.replace(/\D/g, '');
-
-    if (country === 'Maroc' || country === 'France' || country === 'Espagne' || country === 'Cameroun') {
-      const match = digits.match(/^(\d{1})(\d{0,2})(\d{0,2})(\d{0,2})(\d{0,2})$/);
-      if (match) {
-        return [match[1], match[2], match[3], match[4], match[5]].filter(Boolean).join(' ');
-      }
-    } else if (country === 'Belgique') {
-      const match = digits.match(/^(\d{1})(\d{0,2})(\d{0,2})(\d{0,2})(\d{0,2})$/);
-      if (match) {
-        return [match[1], match[2], match[3], match[4], match[5]].filter(Boolean).join(' ');
-      }
-    } else if (country === 'Senegal' || country === 'Congo') {
-      const match = digits.match(/^(\d{2})(\d{0,3})(\d{0,2})(\d{0,2})$/);
-      if (match) {
-        return [match[1], match[2], match[3], match[4]].filter(Boolean).join(' ');
-      }
-    } else if (country === 'Cote Ivoire') {
-      const match = digits.match(/^(\d{2})(\d{0,2})(\d{0,2})(\d{0,2})(\d{0,2})$/);
-      if (match) {
-        return [match[1], match[2], match[3], match[4], match[5]].filter(Boolean).join(' ');
-      }
-    } else if (country === 'Mali') {
-      const match = digits.match(/^(\d{2})(\d{0,2})(\d{0,2})(\d{0,2})$/);
-      if (match) {
-        return [match[1], match[2], match[3], match[4]].filter(Boolean).join(' ');
-      }
-    } else if (country === 'Guinee') {
-      const match = digits.match(/^(\d{3})(\d{0,2})(\d{0,2})(\d{0,2})$/);
-      if (match) {
-        return [match[1], match[2], match[3], match[4]].filter(Boolean).join(' ');
-      }
-    } else if (country === 'Italie') {
-      const match = digits.match(/^(\d{1})(\d{0,2})(\d{0,3})(\d{0,4})$/);
-      if (match) {
-        return [match[1], match[2], match[3], match[4]].filter(Boolean).join(' ');
-      }
-    } else if (country === 'Allemagne') {
-      const match = digits.match(/^(\d{2})(\d{0,8})$/);
-      if (match) {
-        return [match[1], match[2]].filter(Boolean).join(' ');
-      }
-    } else if (country === 'Pays-Bas') {
-      const match = digits.match(/^(\d{1})(\d{0,8})$/);
-      if (match) {
-        return [match[1], match[2]].filter(Boolean).join(' ');
-      }
-    }
-
-    return digits;
-  }
-
-  onPhoneInput(value: string, field: 'nouveauClient' | 'beneficiaire'): void {
-    if (field === 'nouveauClient') {
-      this.nouveauClient.telephone = this.formatPhoneNumber(value, this.nouveauClient.pays);
-    } else {
-      this.beneficiaire.telephone = this.formatPhoneNumber(value, this.beneficiaire.paysReception);
-    }
-  }
-
-  onPaysChange(pays: string): void {
-    this.nouveauClient.pays = pays;
-    this.nouveauClient.telephone = this.formatPhoneNumber(this.nouveauClient.telephone, pays);
-  }
-
-  onPaysReceptionChange(pays: string): void {
-    this.beneficiaire.paysReception = pays;
-    this.beneficiaire.telephone = this.formatPhoneNumber(this.beneficiaire.telephone, pays);
-  }
+  relationsList = ['Famille', 'Conjoint(e)', 'Parent', 'Enfant', 'Soeur', 'Frere', 'Ami(e)', 'Autre'];
 
   erreursForm: Record<string, boolean> = {};
 
-  // ─── Étape 3 : Montant & Corridor ─────────────────────────────────────────
+  // ─── Étape 3 : Montant ────────────────────────────────────────────────────
   montantEnvoye       = signal<number>(2000);
-  corridorSelectionne = signal<CorridorResponse | null>(null);
-  corridors           = signal<CorridorResponse[]>([]);
+  corridorSelectionne  = signal<CorridorResponse | null>(null);
+  corridors            = signal<CorridorResponse[]>([]);
+  corridorSearch       = signal<string>('');
+  pays                = signal<PaysResponse[]>([]);
   devisesParCode      = signal<Record<string, DeviseResponse>>({});
   fraisResult         = signal<FraisResult | null>(null);
+  fraisError          = signal<string | null>(null);
   chargementFrais     = signal<boolean>(false);
   modesReception      = ['Cash au guichet', 'Mobile Money', 'Virement bancaire'];
   modeReception       = signal<string>('Cash au guichet');
 
   // ─── Étape 4 : Confirmation ───────────────────────────────────────────────
-  transfertCree   = signal<TransfertResponse | null>(null);
-  chargementEnvoi = signal<boolean>(false);
-  erreurEnvoi     = signal<string | null>(null);
-  codeCopie       = signal<boolean>(false);
+  transfertCree     = signal<TransfertResponse | null>(null);
+  chargementEnvoi   = signal<boolean>(false);
+  erreurEnvoi       = signal<string | null>(null);
+  codeCopie         = signal<boolean>(false);
   envoiEmailEnCours = signal<boolean>(false);
-  messageEmail = signal<string | null>(null);
-  erreurEmail = signal<string | null>(null);
+  messageEmail      = signal<string | null>(null);
+  erreurEmail       = signal<string | null>(null);
 
   // ─── Computed ─────────────────────────────────────────────────────────────
+  sourceCountry = computed(() => this.corridorSelectionne()?.paysSource ?? null);
+  destCountry   = computed(() => this.corridorSelectionne()?.paysDestination ?? null);
+
+  corridorsFiltres = computed(() => {
+    const q = this.corridorSearch().trim().toLowerCase();
+    if (!q) return this.corridors();
+    return this.corridors().filter(c => {
+      const tokens = [
+        c.paysSource?.nom, c.paysDestination?.nom,
+        c.paysSource?.codeIso, c.paysDestination?.codeIso,
+        c.deviseSource, c.deviseDestination,
+      ];
+      return tokens.some(t => t?.toLowerCase().includes(q));
+    });
+  });
+
   expediteurNom = computed(() => {
     const c = this.clientSelectionne();
     if (c) return `${c.prenom} ${c.nom}`;
-    // For new client, use the signal that is updated on each form change
     return this.nouveauClientNomSignal();
   });
 
-  beneficiaireNom = computed(() => {
-    return this.beneficiaireNomSignal();
-  });
+  beneficiaireNom = computed(() => this.beneficiaireNomSignal());
 
   corridorNom = computed(() => {
     const c = this.corridorSelectionne();
-    return c ? `${c.deviseSource} → ${c.deviseDestination}` : null;
+    if (!c) return null;
+    const src = c.paysSource?.nom ?? c.deviseSource;
+    const dst = c.paysDestination?.nom ?? c.deviseDestination;
+    return `${src} → ${dst}`;
   });
 
   clientsAffiches = computed(() => {
     const list = this.clientsTrouves();
-    const sel = this.clientSelectionne();
+    const sel  = this.clientSelectionne();
     if (!sel) return list;
     return list.filter(c => c.id !== sel.id);
   });
@@ -246,14 +146,14 @@ export class EnvoiComponent implements OnInit {
   calcul = computed(() => {
     const frais    = this.fraisResult();
     const corridor = this.corridorSelectionne();
-    const deviseSource = corridor ? this.devisesParCode()[corridor.deviseSource] : null;
+    const deviseSource      = corridor ? this.devisesParCode()[corridor.deviseSource] : null;
     const deviseDestination = corridor ? this.devisesParCode()[corridor.deviseDestination] : null;
     const taux = frais?.taux ?? (deviseSource && deviseDestination
       ? +(deviseSource.tauxVersEuro / deviseDestination.tauxVersEuro).toFixed(4)
       : null);
-    const montantFrais = frais?.montantFrais ?? 0;
-    const commissionAgence = frais?.partAgence ?? 0;
-    const montantNetSource = frais
+    const montantFrais      = frais?.montantFrais ?? 0;
+    const commissionAgence  = frais?.partAgence ?? 0;
+    const montantNetSource  = frais
       ? this.montantEnvoye() - montantFrais - commissionAgence
       : null;
     const montantRecu = montantNetSource == null
@@ -268,6 +168,7 @@ export class EnvoiComponent implements OnInit {
       frais:             montantFrais,
       commissionAgence,
       montantRecu,
+      montantNetMAD:     montantNetSource ?? 0, // net amount in source devise (MAD) = montantRecu in MAD before conversion
       taux,
       delaiMin:          frais?.delaiMin ?? 5,
     };
@@ -277,9 +178,7 @@ export class EnvoiComponent implements OnInit {
   referenceTransfert = computed(() => this.transfertCree()?.numeroReference ?? '—');
 
   // ─── Getter/Setter pour [(ngModel)] sur signal ────────────────────────────
-  get pieceSelectionneeIdValue(): number | null {
-    return this.pieceSelectionneeId();
-  }
+  get pieceSelectionneeIdValue(): number | null { return this.pieceSelectionneeId(); }
   set pieceSelectionneeIdValue(val: number | null) {
     const v = val as any;
     if (v === null || v === undefined || v === '' || v === 'null') {
@@ -291,45 +190,76 @@ export class EnvoiComponent implements OnInit {
 
   // ─── Init ─────────────────────────────────────────────────────────────────
   ngOnInit(): void {
-    this.chargerDevises();
-    this.chargerCorridors();
-  }
-
-  chargerDevises(): void {
     this.deviseService.getAllDevises().subscribe({
       next: (devises) => {
-        const map = devises.reduce((acc, devise) => {
-          acc[devise.code] = devise;
-          return acc;
-        }, {} as Record<string, DeviseResponse>);
+        const map = devises.reduce((acc, d) => { acc[d.code] = d; return acc; }, {} as Record<string, DeviseResponse>);
         this.devisesParCode.set(map);
       },
-      error: (err) => console.error('Erreur chargement devises', err),
+    });
+    this.paysService.getAll().subscribe({ next: (p) => this.pays.set(p) });
+    this.deviseService.getAllCorridors().subscribe({
+      next: (corridors) => {
+        const actifs = corridors.filter(c => c.actif && c.paysSource && c.paysDestination);
+        this.corridors.set(actifs);
+      },
     });
   }
 
-  chargerCorridors(): void {
-    this.deviseService.getAllCorridors().subscribe({
-      next: (corridors) => {
-        const actifs = corridors.filter(c => c.actif);
-        this.corridors.set(actifs);
-        if (actifs.length > 0) {
-          this.corridorSelectionne.set(actifs[0]);
-          this.recalculerFrais();
-        }
-      },
-      error: (err) => console.error('Erreur chargement corridors', err),
-    });
+  // ─── Corridor selection (step 1) ──────────────────────────────────────────
+  onCorridorSelect(corridor: CorridorResponse): void {
+    this.corridorSelectionne.set(corridor);
+    // Pre-fill sender country from corridor source
+    this.nouveauClient.pays     = corridor.paysSource?.nom ?? '';
+    this.nouveauClient.telephone = '';
+    // Pre-fill beneficiary country from corridor destination (read-only)
+    this.beneficiaire.paysReception = corridor.paysDestination?.nom ?? '';
+    this.beneficiaire.telephone     = '';
+    this.fraisResult.set(null);
+  }
+
+  // ─── Phone helpers ────────────────────────────────────────────────────────
+  phonePrefix(country: PaysResponse | null): string {
+    return country?.indicatifTel ?? '';
+  }
+
+  phonePlaceholder(country: PaysResponse | null): string {
+    return country?.formatTel ?? '00 00 00 00';
+  }
+
+  phoneLength(country: PaysResponse | null): number {
+    return country?.longueurTel ?? 9;
+  }
+
+  formatPhoneNumber(value: string): string {
+    const digits = value.replace(/\D/g, '');
+    return digits.match(/.{1,2}/g)?.join(' ') ?? digits;
+  }
+
+  onPhoneInput(value: string, field: 'nouveauClient' | 'beneficiaire'): void {
+    if (field === 'nouveauClient') {
+      this.nouveauClient.telephone = this.formatPhoneNumber(value);
+    } else {
+      this.beneficiaire.telephone = this.formatPhoneNumber(value);
+    }
+  }
+
+  private telephoneComplet(telephone: string, country: PaysResponse | null): string {
+    const prefix = country?.indicatifTel ?? '';
+    return `${prefix}${telephone}`.replace(/\s/g, '');
+  }
+
+  private validatePhone(telephone: string, country: PaysResponse | null): boolean {
+    const digits = telephone.replace(/\s/g, '');
+    const expected = country?.longueurTel ?? 9;
+    return /^\d+$/.test(digits) && digits.length === expected;
   }
 
   // ─── Étape 1 ──────────────────────────────────────────────────────────────
   onRechercher(): void {
     const q = this.searchQuery().trim();
     if (!q) return;
-
     this.chargementRecherche.set(true);
     this.rechercheEffectuee.set(false);
-
     this.userService.searchClients(q).subscribe({
       next: (users) => {
         this.clientsTrouves.set(users);
@@ -353,17 +283,14 @@ export class EnvoiComponent implements OnInit {
   onSelectionnerClient(client: UserResponse): void {
     this.clientSelectionne.set(client);
     this.pieceSelectionneeId.set(null);
-    this.erreursForm = {}; // Clear errors when selecting a client
+    this.erreursForm = {};
     this.userService.getPieces(client.id).subscribe({
       next: (pieces) => {
         this.piecesClient.set(pieces);
         const principale = pieces.find(p => p.principale === true) ?? pieces[0] ?? null;
         this.pieceSelectionneeId.set(principale ? principale.id : null);
       },
-      error: () => {
-        this.piecesClient.set([]);
-        this.pieceSelectionneeId.set(null);
-      },
+      error: () => { this.piecesClient.set([]); this.pieceSelectionneeId.set(null); },
     });
   }
 
@@ -373,7 +300,8 @@ export class EnvoiComponent implements OnInit {
     this.pieceSelectionneeId.set(null);
     this.nouveauClient = {
       nom: '', prenom: '', email: '', motDePasse: '', typePiece: 'CIN',
-      numeroPiece: '', telephone: '', pays: 'Maroc',
+      numeroPiece: '', telephone: '',
+      pays: this.corridorSelectionne()?.paysSource?.nom ?? '',
     };
     this.nouveauClientNomSignal.set(null);
     this.searchQuery.set('');
@@ -383,19 +311,10 @@ export class EnvoiComponent implements OnInit {
   }
 
   // ─── Étape 3 ──────────────────────────────────────────────────────────────
-  onCorridorChange(corridorId: number | string): void {
-    const id = Number(corridorId);
-    const c  = this.corridors().find(x => x.id === id) ?? null;
-    this.corridorSelectionne.set(c);
-    this.recalculerFrais();
-  }
-
   onMontantChange(montant: number | string): void {
     const value = Number(montant);
     this.montantEnvoye.set(value);
-    if (Number.isFinite(value) && value > 0) {
-      delete this.erreursForm['montant'];
-    }
+    if (Number.isFinite(value) && value > 0) delete this.erreursForm['montant'];
     this.recalculerFrais();
   }
 
@@ -404,36 +323,11 @@ export class EnvoiComponent implements OnInit {
     return Number.isFinite(montant) && montant > 0;
   }
 
-  private telephoneComplet(telephone: string, pays: string): string {
-    return `${this.countryPhoneCodes[pays] ?? ''}${telephone}`.replace(/\s/g, '');
-  }
-
-  private formatReceiptPhone(telephone?: string | null): string {
-    if (!telephone) return '—';
-
-    const trimmed = telephone.trim();
-    const digits = trimmed.replace(/\s+/g, '');
-
-    if (digits.startsWith('+')) {
-      const countryCodeMatch = digits.match(/^\+(\d{1,3})/);
-      if (!countryCodeMatch) {
-        return trimmed;
-      }
-
-      const countryCode = countryCodeMatch[1];
-      const rest = digits.slice(countryCode.length + 1).replace(/\D/g, '');
-      const grouped = rest.match(/.{1,2}/g)?.join(' ') ?? rest;
-      return `+${countryCode} ${grouped}`.trim();
-    }
-
-    return digits.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
-  }
-
   private typePieceApi(typePiece: string): 'CIN' | 'PASSEPORT' | 'CARTE_SEJOUR' | 'PERMIS' {
-    const normalized = typePiece.toLowerCase();
-    if (normalized === 'passeport') return 'PASSEPORT';
-    if (normalized === 'titre de sejour' || normalized === 'carte de resident') return 'CARTE_SEJOUR';
-    if (normalized === 'permis') return 'PERMIS';
+    const n = typePiece.toLowerCase();
+    if (n === 'passeport') return 'PASSEPORT';
+    if (n === 'titre de sejour' || n === 'carte de resident') return 'CARTE_SEJOUR';
+    if (n === 'permis') return 'PERMIS';
     return 'CIN';
   }
 
@@ -453,16 +347,22 @@ export class EnvoiComponent implements OnInit {
     const montant  = this.montantEnvoye();
     if (!corridor || !montant || montant <= 0) {
       this.fraisResult.set(null);
+      this.fraisError.set(null);
       return;
     }
     this.chargementFrais.set(true);
+    this.fraisError.set(null);
     this.deviseService.calculerFrais(corridor.id, montant).subscribe({
       next: (frais) => {
         this.fraisResult.set(frais);
+        this.fraisError.set(null);
         this.chargementFrais.set(false);
       },
-      error: () => {
+      error: (err) => {
         this.fraisResult.set(null);
+        this.fraisError.set(
+          err?.error?.message ?? 'Aucune tranche tarifaire pour ce montant sur ce corridor.'
+        );
         this.chargementFrais.set(false);
       },
     });
@@ -479,12 +379,17 @@ export class EnvoiComponent implements OnInit {
     let hasError = false;
 
     if (etape === 1) {
+      // Must have a corridor selected
+      if (!this.corridorSelectionne()) {
+        this.erreursForm['corridor'] = true;
+        return;
+      }
+
       if (!this.clientSelectionne()) {
-        // Vérifier que le formulaire nouveau client est rempli
         const nc = this.nouveauClient;
-        if (!nc.nom?.trim()) { this.erreursForm['nom'] = true; hasError = true; }
+        if (!nc.nom?.trim())    { this.erreursForm['nom'] = true;    hasError = true; }
         if (!nc.prenom?.trim()) { this.erreursForm['prenom'] = true; hasError = true; }
-        if (!nc.email?.trim()) { this.erreursForm['email'] = true; hasError = true; }
+        if (!nc.email?.trim())  { this.erreursForm['email'] = true;  hasError = true; }
         else if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(nc.email.trim())) {
           this.erreursForm['email_format'] = true; hasError = true;
         }
@@ -493,60 +398,39 @@ export class EnvoiComponent implements OnInit {
           this.erreursForm['motDePasse_strength'] = true; hasError = true;
         }
         if (!nc.telephone?.trim()) {
-          this.erreursForm['telephone'] = true;
-          hasError = true;
-        } else {
-          const rawPhone = nc.telephone.replace(/\s/g, '');
-          const expectedLen = this.countryPhoneLengths[nc.pays] || 9;
-          if (!/^\d+$/.test(rawPhone) || rawPhone.length !== expectedLen) {
-            this.erreursForm['telephone_format'] = true;
-            hasError = true;
-          }
+          this.erreursForm['telephone'] = true; hasError = true;
+        } else if (!this.validatePhone(nc.telephone, this.sourceCountry())) {
+          this.erreursForm['telephone_format'] = true; hasError = true;
         }
         if (!nc.numeroPiece?.trim()) { this.erreursForm['numeroPiece'] = true; hasError = true; }
-
-        if (hasError) {
-          return;
-        }
+        if (hasError) return;
       }
-      // Push new client name into signal for recap visibility
       if (!this.clientSelectionne()) {
         const nc = this.nouveauClient;
-        this.nouveauClientNomSignal.set(
-          `${nc.prenom} ${nc.nom}`.trim() || null
-        );
+        this.nouveauClientNomSignal.set(`${nc.prenom} ${nc.nom}`.trim() || null);
       }
       this.etapeActive.update(v => v + 1);
 
     } else if (etape === 2) {
       const b = this.beneficiaire;
-      if (!b.nom?.trim()) { this.erreursForm['b_nom'] = true; hasError = true; }
+      if (!b.nom?.trim())    { this.erreursForm['b_nom'] = true;    hasError = true; }
       if (!b.prenom?.trim()) { this.erreursForm['b_prenom'] = true; hasError = true; }
       if (!b.telephone?.trim()) {
-        this.erreursForm['b_telephone'] = true;
-        hasError = true;
-      } else {
-        const rawPhone = b.telephone.replace(/\s/g, '');
-        const expectedLen = this.countryPhoneLengths[b.paysReception] || 9;
-        if (!/^\d+$/.test(rawPhone) || rawPhone.length !== expectedLen) {
-          this.erreursForm['b_telephone_format'] = true;
-          hasError = true;
-        }
+        this.erreursForm['b_telephone'] = true; hasError = true;
+      } else if (!this.validatePhone(b.telephone, this.destCountry())) {
+        this.erreursForm['b_telephone_format'] = true; hasError = true;
       }
-      if (!b.paysReception?.trim()) { this.erreursForm['b_paysReception'] = true; hasError = true; }
-
-      if (hasError) {
-        return;
-      }
-      // Push beneficiary name into signal for recap visibility
-      this.beneficiaireNomSignal.set(
-        `${b.prenom} ${b.nom}`.trim() || null
-      );
+      if (hasError) return;
+      this.beneficiaireNomSignal.set(`${b.prenom} ${b.nom}`.trim() || null);
       this.recalculerFrais();
       this.etapeActive.update(v => v + 1);
+
     } else if (etape === 3) {
-      if (!this.montantEstValide()) {
-        this.erreursForm['montant'] = true;
+      if (!this.montantEstValide()) { this.erreursForm['montant'] = true; return; }
+      if (!this.fraisResult()) {
+        this.erreurEnvoi.set(
+          this.fraisError() ?? 'Aucune tranche tarifaire configurée pour ce montant. Modifiez le montant.'
+        );
         return;
       }
       this.soumettreTransfert();
@@ -563,22 +447,11 @@ export class EnvoiComponent implements OnInit {
     const corridor    = this.corridorSelectionne();
     const currentUser = this.authService.currentUser;
 
-    if (!corridor) {
-      this.erreurEnvoi.set('Veuillez sélectionner un corridor.');
-      return;
-    }
-    if (!this.montantEstValide()) {
-      this.erreursForm['montant'] = true;
-      this.erreurEnvoi.set('Veuillez corriger les erreurs dans le formulaire.');
-      return;
-    }
+    if (!corridor) { this.erreurEnvoi.set('Veuillez sélectionner un corridor.'); return; }
+    if (!this.montantEstValide()) { this.erreursForm['montant'] = true; return; }
 
-    // Forcer reset du chargementFrais au cas où il serait bloqué
     this.chargementFrais.set(false);
-
     const pieceId = this.pieceSelectionneeId();
-
-    // Bloquer uniquement si le client a des pièces mais aucune n'est sélectionnée
     if (client && pieceId == null && this.piecesClient().length > 0) {
       this.erreurEnvoi.set("Veuillez sélectionner une pièce d'identité.");
       return;
@@ -591,11 +464,9 @@ export class EnvoiComponent implements OnInit {
       const nc = this.nouveauClient;
       const request: CreateTransfertAvecNouveauClientRequest = {
         nouveauClient: {
-          nom: nc.nom.trim(),
-          prenom: nc.prenom.trim(),
-          email: nc.email.trim(),
-          motDePasse: nc.motDePasse,
-          telephone: this.telephoneComplet(nc.telephone, nc.pays),
+          nom: nc.nom.trim(), prenom: nc.prenom.trim(),
+          email: nc.email.trim(), motDePasse: nc.motDePasse,
+          telephone: this.telephoneComplet(nc.telephone, this.sourceCountry()),
           pays: nc.pays,
         },
         pieceIdentite: {
@@ -609,11 +480,10 @@ export class EnvoiComponent implements OnInit {
         grilleTarifaireId:     this.fraisResult()?.grilleTarifaireId ?? null,
         nomBeneficiaire:       this.beneficiaire.nom,
         prenomBeneficiaire:    this.beneficiaire.prenom,
-        telephoneBeneficiaire: this.telephoneComplet(this.beneficiaire.telephone, this.beneficiaire.paysReception),
+        telephoneBeneficiaire: this.telephoneComplet(this.beneficiaire.telephone, this.destCountry()),
         paysBeneficiaire:      this.beneficiaire.paysReception,
         montant:               this.montantEnvoye(),
       };
-
       this.transfertService.createAvecNouveauClient(request).subscribe({
         next: (transfert) => {
           this.transfertCree.set(transfert);
@@ -622,10 +492,7 @@ export class EnvoiComponent implements OnInit {
           this.erreurEmail.set(null);
           this.etapeActive.set(4);
         },
-        error: (err) => {
-          this.erreurEnvoi.set(this.messageErreur(err));
-          this.chargementEnvoi.set(false);
-        },
+        error: (err) => { this.erreurEnvoi.set(this.messageErreur(err)); this.chargementEnvoi.set(false); },
       });
       return;
     }
@@ -639,7 +506,7 @@ export class EnvoiComponent implements OnInit {
       grilleTarifaireId:     this.fraisResult()?.grilleTarifaireId ?? null,
       nomBeneficiaire:       this.beneficiaire.nom,
       prenomBeneficiaire:    this.beneficiaire.prenom,
-      telephoneBeneficiaire: this.telephoneComplet(this.beneficiaire.telephone, this.beneficiaire.paysReception),
+      telephoneBeneficiaire: this.telephoneComplet(this.beneficiaire.telephone, this.destCountry()),
       paysBeneficiaire:      this.beneficiaire.paysReception,
       montant:               this.montantEnvoye(),
     };
@@ -652,10 +519,7 @@ export class EnvoiComponent implements OnInit {
         this.erreurEmail.set(null);
         this.etapeActive.set(4);
       },
-      error: (err) => {
-        this.erreurEnvoi.set(this.messageErreur(err));
-        this.chargementEnvoi.set(false);
-      },
+      error: (err) => { this.erreurEnvoi.set(this.messageErreur(err)); this.chargementEnvoi.set(false); },
     });
   }
 
@@ -673,34 +537,20 @@ export class EnvoiComponent implements OnInit {
       this.erreurEmail.set('Aucun reçu de transfert disponible.');
       return;
     }
-
     const destinataireEmail = (this.clientSelectionne()?.email ?? this.nouveauClient.email ?? '').trim();
     if (!destinataireEmail) {
       this.erreurEmail.set("Aucune adresse email n'est disponible pour cet expéditeur.");
       return;
     }
-
-    const request: SendTransfertReceiptEmailRequest = {
-      codeRetrait: transfert.codeRetrait,
-      destinataireEmail,
-    };
-
+    const request: SendTransfertReceiptEmailRequest = { codeRetrait: transfert.codeRetrait, destinataireEmail };
     this.envoiEmailEnCours.set(true);
     this.erreurEmail.set(null);
     this.messageEmail.set(null);
-
     this.transfertService.envoyerRecuParEmail(request).subscribe({
-      next: () => {
-        this.messageEmail.set(`Reçu envoyé à ${destinataireEmail}`);
-        this.envoiEmailEnCours.set(false);
-      },
-      error: (err) => {
-        this.erreurEmail.set(this.messageErreur(err));
-        this.envoiEmailEnCours.set(false);
-      },
+      next: () => { this.messageEmail.set(`Reçu envoyé à ${destinataireEmail}`); this.envoiEmailEnCours.set(false); },
+      error: (err) => { this.erreurEmail.set(this.messageErreur(err)); this.envoiEmailEnCours.set(false); },
     });
   }
-
 
   nouveauTransfert(): void {
     this.etapeActive.set(1);
@@ -712,42 +562,25 @@ export class EnvoiComponent implements OnInit {
     this.searchQuery.set('');
     this.nouveauClient = {
       nom: '', prenom: '', email: '', motDePasse: '', typePiece: 'CIN',
-      numeroPiece: '', telephone: '', pays: 'Maroc',
+      numeroPiece: '', telephone: '', pays: '',
     };
     this.nouveauClientNomSignal.set(null);
-    this.beneficiaire = {
-      nom: '', prenom: '', telephone: '',
-      paysReception: 'Senegal', ville: '', relation: '',
-    };
+    this.beneficiaire = { nom: '', prenom: '', telephone: '', paysReception: '', ville: '', relation: '' };
     this.beneficiaireNomSignal.set(null);
     this.montantEnvoye.set(2000);
     this.fraisResult.set(null);
+    this.fraisError.set(null);
     this.transfertCree.set(null);
     this.erreurEnvoi.set(null);
     this.messageEmail.set(null);
     this.erreurEmail.set(null);
-    if (this.corridors().length > 0) {
-      this.corridorSelectionne.set(this.corridors()[0]);
-    }
+    this.corridorSelectionne.set(null);
   }
 
-  getFlagEmoji(country?: string | null): string {
-    if (!country) return '🏳️';
-    const c = country.toLowerCase().trim();
-    if (c === 'maroc' || c === 'ma') return '🇲🇦';
-    if (c === 'france' || c === 'fr') return '🇫🇷';
-    if (c === 'belgique' || c === 'be') return '🇧🇪';
-    if (c === 'espagne' || c === 'es') return '🇪🇸';
-    if (c === 'italie' || c === 'it') return '🇮🇹';
-    if (c === 'allemagne' || c === 'de') return '🇩🇪';
-    if (c === 'pays-bas' || c === 'nl') return '🇳🇱';
-    if (c === 'senegal' || c === 'sn') return '🇸🇳';
-    if (c === 'cote d\'ivoire' || c === 'cote ivoire' || c === 'ci') return '🇨🇮';
-    if (c === 'mali' || c === 'ml') return '🇲🇱';
-    if (c === 'guinee' || c === 'gn') return '🇬🇳';
-    if (c === 'cameroun' || c === 'cm') return '🇨🇲';
-    if (c === 'congo' || c === 'cg') return '🇨🇬';
-    return '🏳️';
+  getFlagEmoji(codeIso?: string | null): string {
+    if (!codeIso || codeIso.length !== 2) return '🏳️';
+    const code = codeIso.toUpperCase();
+    return code.split('').map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('');
   }
 
   formatMontant(n: number): string {
@@ -766,129 +599,46 @@ export class EnvoiComponent implements OnInit {
     d.setDate(d.getDate() + 30);
     return d.toLocaleDateString('fr-FR');
   }
+
+  private formatReceiptPhone(telephone?: string | null): string {
+    if (!telephone) return '—';
+    const digits = telephone.trim().replace(/\s+/g, '');
+    if (digits.startsWith('+')) {
+      const m = digits.match(/^\+(\d{1,3})/);
+      if (!m) return telephone.trim();
+      const rest = digits.slice(m[1].length + 1).replace(/\D/g, '');
+      return `+${m[1]} ${rest.match(/.{1,2}/g)?.join(' ') ?? rest}`.trim();
+    }
+    return digits.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+  }
+
   imprimerRecu(): void {
-  const transfert = this.transfertCree();
-  const calcul    = this.calcul();
-
-  const contenu = `
-    <html>
-    <head>
-      <title>Reçu de transfert</title>
-      <style>
-        body      { font-family: Arial, sans-serif; padding: 40px; color: #111; }
-        h1        { color: #d97706; font-size: 22px; margin-bottom: 4px; }
-        .subtitle { color: #666; font-size: 13px; margin-bottom: 30px; }
-        .code     { font-size: 36px; font-weight: bold; color: #d97706;
-                    letter-spacing: 6px; margin: 20px 0; font-family: monospace; }
-        .ref      { font-size: 12px; color: #888; margin-bottom: 30px; }
-        .grid     { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
-        .bloc label { font-size: 10px; text-transform: uppercase;
-                      color: #999; display: block; margin-bottom: 4px; }
-        .bloc p   { font-size: 14px; font-weight: bold; margin: 0; }
-        .montant  { font-size: 22px; color: #d97706; font-weight: bold; }
-        hr        { border: none; border-top: 1px solid #eee; margin: 20px 0; }
-        .footer   { margin-top: 40px; font-size: 11px; color: #aaa; text-align: center; }
-        .badge    { display: inline-block; background: #f0fdf4; color: #16a34a;
-                    border: 1px solid #bbf7d0; padding: 4px 12px;
-                    border-radius: 20px; font-size: 12px; font-weight: bold; }
-      </style>
-    </head>
-    <body>
-      <h1>🏦 Okane Transfer</h1>
-      <p class="subtitle">Reçu officiel de transfert d'argent</p>
-      <span class="badge">✓ Transfert confirmé</span>
-
-      <p class="code">${transfert?.codeRetrait ?? '—'}</p>
-      <p class="ref">Référence : <strong>${transfert?.numeroReference ?? '—'}</strong></p>
-
-      <hr/>
-
-      <div class="grid">
-        <div class="bloc">
-          <label>Expéditeur</label>
-          <p>${this.expediteurNom() ?? '—'}</p>
-          <p style="font-size:12px;color:#888;margin-top:2px">${this.formatReceiptPhone(transfert?.telephoneExpediteur ?? this.nouveauClient.telephone)}</p>
-        </div>
-        <div class="bloc">
-          <label>Bénéficiaire</label>
-          <p>${this.beneficiaireNom() ?? '—'}</p>
-          <p style="font-size:12px;color:#888;margin-top:2px">${this.formatReceiptPhone(transfert?.telephoneBeneficiaire ?? this.beneficiaire.telephone)}</p>
-        </div>
-        <div class="bloc">
-          <label>Pays de réception</label>
-          <p>${this.beneficiaire.paysReception}</p>
-        </div>
-        <div class="bloc">
-          <label>Mode de réception</label>
-          <p>${this.modeReception()}</p>
-        </div>
-        <div class="bloc">
-          <label>Montant envoyé</label>
-          <p>${this.formatMontant(transfert?.montantEnvoye ?? calcul.montantEnvoye)} ${calcul.deviseSource ?? '—'}</p>
-        </div>
-        <div class="bloc">
-          <label>Frais OkaneTransfer</label>
-          <p>${this.formatMontant(transfert?.frais ?? calcul.frais)} ${calcul.deviseSource ?? '—'}</p>
-        </div>
-        <div class="bloc">
-          <label>Commission agence</label>
-          <p>${this.formatMontant(transfert?.partAgence ?? calcul.commissionAgence)} ${calcul.deviseSource ?? '—'}</p>
-        </div>
-        <div class="bloc">
-          <label>Montant reçu</label>
-          <p class="montant">
-            ${this.formatMontant(transfert?.montantRecu ?? calcul.montantRecu)}
-            ${transfert?.deviseReception ?? calcul.deviseDestination}
-          </p>
-        </div>
-        <div class="bloc">
-          <label>Valable jusqu'au</label>
-          <p>${this.getExpirationDate()}</p>
-        </div>
-      </div>
-
-      <hr/>
-
-      <div class="footer">
-        Imprimé le ${new Date().toLocaleDateString('fr-FR')}
-        à ${new Date().toLocaleTimeString('fr-FR')}
-        &nbsp;—&nbsp; Conservez ce reçu, il est indispensable pour le retrait.
-      </div>
-    </body>
-    </html>
-  `;
-
-  const fenetre = window.open('', '_blank', 'width=750,height=650');
-  if (fenetre) {
-    fenetre.document.write(contenu);
-    fenetre.document.close();
-    fenetre.focus();
-    setTimeout(() => {
-      fenetre.print();
-      fenetre.close();
-    }, 600);
+    const transfert = this.transfertCree();
+    const calcul    = this.calcul();
+    const contenu   = this.buildReceiptHtml(transfert, calcul);
+    const fenetre   = window.open('', '_blank', 'width=750,height=650');
+    if (fenetre) {
+      fenetre.document.write(contenu);
+      fenetre.document.close();
+      fenetre.focus();
+      setTimeout(() => { fenetre.print(); fenetre.close(); }, 600);
+    }
   }
-  }
+
   async shareRecu(): Promise<void> {
     const transfert = this.transfertCree();
-    const calcul = this.calcul();
-    const html = this.buildReceiptHtml(transfert, calcul);
-
-    // Try Web Share API with a blob (works on mobile/modern browsers)
+    const calcul    = this.calcul();
+    const html      = this.buildReceiptHtml(transfert, calcul);
     try {
       const blob = new Blob([html], { type: 'text/html' });
       const file = new File([blob], `recu-${transfert?.numeroReference ?? Date.now()}.html`, { type: 'text/html' });
-      // @ts-ignore navigator.canShare
+      // @ts-ignore
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        // @ts-ignore navigator.share
+        // @ts-ignore
         await navigator.share({ files: [file], title: 'Reçu de transfert', text: 'Reçu Okane Transfer' });
         return;
       }
-    } catch (e) {
-      // ignore and fallback to download
-    }
-
-    // Fallback: trigger download of the HTML receipt
+    } catch (e) { /* fallback */ }
     const a = document.createElement('a');
     const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
     a.href = url;
@@ -900,33 +650,24 @@ export class EnvoiComponent implements OnInit {
   }
 
   private buildReceiptHtml(transfert: any, calcul: any): string {
-    return `
-    <html>
-    <head>
-      <meta charset="utf-8" />
-      <title>Reçu de transfert</title>
-      <style>
-        body{font-family: Arial, sans-serif;padding:40px;color:#111}
-        h1{color:#d97706;font-size:22px;margin-bottom:4px}
-        .subtitle{color:#666;font-size:13px;margin-bottom:30px}
-        .code{font-size:36px;font-weight:bold;color:#d97706;letter-spacing:6px;margin:20px 0;font-family:monospace}
-        .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
-        .bloc label{font-size:10px;text-transform:uppercase;color:#999;display:block;margin-bottom:4px}
-        .bloc p{font-size:14px;font-weight:bold;margin:0}
-        .montant{font-size:22px;color:#d97706;font-weight:bold}
-        hr{border:none;border-top:1px solid #eee;margin:20px 0}
-        .footer{margin-top:40px;font-size:11px;color:#aaa;text-align:center}
-      </style>
-    </head>
-    <body>
+    return `<html><head><meta charset="utf-8"/><title>Reçu de transfert</title>
+      <style>body{font-family:Arial,sans-serif;padding:40px;color:#111}h1{color:#d97706;font-size:22px}
+      .code{font-size:36px;font-weight:bold;color:#d97706;letter-spacing:6px;margin:20px 0;font-family:monospace}
+      .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+      .bloc label{font-size:10px;text-transform:uppercase;color:#999;display:block;margin-bottom:4px}
+      .bloc p{font-size:14px;font-weight:bold;margin:0}
+      .montant{font-size:22px;color:#d97706;font-weight:bold}
+      hr{border:none;border-top:1px solid #eee;margin:20px 0}
+      .footer{margin-top:40px;font-size:11px;color:#aaa;text-align:center}</style></head>
+      <body>
       <h1>🏦 Okane Transfer</h1>
-      <p class="subtitle">Reçu officiel de transfert d'argent</p>
+      <p>Reçu officiel de transfert d'argent</p>
       <p class="code">${transfert?.codeRetrait ?? '—'}</p>
-      <p>Référence : <strong>${transfert?.numeroReference ?? '—'}</strong></p>
-      <hr/>
+      <p>Référence : <strong>${transfert?.numeroReference ?? '—'}</strong></p><hr/>
       <div class="grid">
-        <div class="bloc"><label>Expéditeur</label><p>${this.expediteurNom() ?? '—'}</p><p style="font-size:12px;color:#888;margin-top:2px">${this.formatReceiptPhone(transfert?.telephoneExpediteur ?? this.nouveauClient.telephone)}</p></div>
-        <div class="bloc"><label>Bénéficiaire</label><p>${this.beneficiaireNom() ?? '—'}</p><p style="font-size:12px;color:#888;margin-top:2px">${this.formatReceiptPhone(transfert?.telephoneBeneficiaire ?? this.beneficiaire.telephone)}</p></div>
+        <div class="bloc"><label>Expéditeur</label><p>${this.expediteurNom() ?? '—'}</p><p style="font-size:12px;color:#888">${this.formatReceiptPhone(transfert?.telephoneExpediteur ?? this.nouveauClient.telephone)}</p></div>
+        <div class="bloc"><label>Bénéficiaire</label><p>${this.beneficiaireNom() ?? '—'}</p><p style="font-size:12px;color:#888">${this.formatReceiptPhone(transfert?.telephoneBeneficiaire ?? this.beneficiaire.telephone)}</p></div>
+        <div class="bloc"><label>Corridor</label><p>${this.corridorNom() ?? '—'}</p></div>
         <div class="bloc"><label>Pays de réception</label><p>${this.beneficiaire.paysReception}</p></div>
         <div class="bloc"><label>Mode de réception</label><p>${this.modeReception()}</p></div>
         <div class="bloc"><label>Montant envoyé</label><p>${this.formatMontant(transfert?.montantEnvoye ?? calcul.montantEnvoye)} ${calcul.deviseSource ?? '—'}</p></div>
@@ -934,11 +675,8 @@ export class EnvoiComponent implements OnInit {
         <div class="bloc"><label>Commission agence</label><p>${this.formatMontant(transfert?.partAgence ?? calcul.commissionAgence)} ${calcul.deviseSource ?? '—'}</p></div>
         <div class="bloc"><label>Montant reçu</label><p class="montant">${this.formatMontant(transfert?.montantRecu ?? calcul.montantRecu)} ${transfert?.deviseReception ?? calcul.deviseDestination}</p></div>
         <div class="bloc"><label>Valable jusqu'au</label><p>${this.getExpirationDate()}</p></div>
-      </div>
-      <hr/>
+      </div><hr/>
       <div class="footer">Imprimé le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')} — Conservez ce reçu.</div>
-    </body>
-    </html>
-    `;
+      </body></html>`;
   }
 }

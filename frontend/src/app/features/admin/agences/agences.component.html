@@ -119,6 +119,17 @@
                 </div>
               </div>
 
+              <!-- Caisse agence pool -->
+              <div class="flex items-center justify-between mb-4 px-3 py-2 rounded-[8px]"
+                   style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);">
+                <span class="text-[11.5px] font-semibold" style="color:rgba(255,255,255,0.55);">
+                  Caisse agence
+                </span>
+                <span class="text-[12.5px] font-bold" style="color:#00C48C;font-variant-numeric:tabular-nums;">
+                  {{ a.soldeCaisseAgence.toLocaleString('fr-FR') }} MAD
+                </span>
+              </div>
+
               <!-- Actions -->
               <div class="flex gap-2 mt-auto flex-wrap">
                 <button (click)="goDetail(a.id)"

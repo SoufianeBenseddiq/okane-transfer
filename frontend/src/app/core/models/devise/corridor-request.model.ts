@@ -1,4 +1,4 @@
 export interface CorridorRequest {
-  deviseSourceId: number;
-  deviseDestinationId: number;
+  paysSourceId: number;
+  paysDestinationId: number;
 }

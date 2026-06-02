@@ -76,7 +76,7 @@
         </p>
       </div>
       <p class="text-3xl font-black text-red-400 tracking-tight">
-        -{{ formatMontant(cashStats.totalRetraits) }} <span class="text-lg font-bold">MAD</span>
+        {{ cashStats.totalRetraits > 0 ? '-' : '' }}{{ formatMontant(cashStats.totalRetraits) }} <span class="text-lg font-bold">MAD</span>
       </p>
       <p class="text-xs text-gray-500 mt-1.5">
         {{ cashStats.retraitOps }} {{ 'caisse.operations' | translate }}
@@ -229,7 +229,7 @@
                   'text-emerald-400': op.type === TypeOperation.ENVOI,
                   'text-amber-400':   op.type === TypeOperation.OUVERTURE
                 }">
-            {{ getAmountDisplay(op) }} MAD
+            {{ getAmountDisplay(op) }}
           </td>
 
         </tr>

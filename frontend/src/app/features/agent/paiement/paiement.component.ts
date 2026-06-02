@@ -145,10 +145,17 @@ export class PaiementComponent {
         this.ouvrirRecu(transfertPaye);
       },
       error: (err) => {
-        this.isLoading    = false;
-        this.errorMessage = err.status === 409
-          ? 'payment.alreadyPaid'
-          : 'payment.errorGeneric';
+        this.isLoading = false;
+        const msg: string = err?.error?.message ?? '';
+        if (err.status === 409) {
+          this.errorMessage = 'payment.alreadyPaid';
+        } else if (msg.toLowerCase().includes('caisse') && msg.toLowerCase().includes('ouvert')) {
+          this.errorMessage = 'payment.caisseNonOuverte';
+        } else if (msg.toLowerCase().includes('insuffisant') || msg.toLowerCase().includes('solde')) {
+          this.errorMessage = 'payment.soldeInsuffisant';
+        } else {
+          this.errorMessage = 'payment.errorGeneric';
+        }
       },
     });
   }

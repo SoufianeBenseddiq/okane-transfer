@@ -67,7 +67,7 @@
         <span class="text-red-400">*</span>
       </label>
       <div class="flex items-center bg-[#0e1420] rounded-xl border-2 px-4 py-3 transition-colors"
-           [ngClass]="gap !== null ? (gap === 0 ? 'border-emerald-500/50' : 'border-red-500/50') : 'border-white/10'">
+           [ngClass]="gap !== null ? (hasNoGap ? 'border-emerald-500/50' : 'border-red-500/50') : 'border-white/10'">
         <input
           [(ngModel)]="realBalance"
           (input)="computeGap()"
@@ -80,17 +80,17 @@
 
     <!-- Écart constaté -->
     <div *ngIf="gap !== null" class="mx-6 mb-4 rounded-xl px-4 py-3"
-         [ngClass]="gap === 0 ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-red-500/10 border border-red-500/20'">
+         [ngClass]="hasNoGap ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-red-500/10 border border-red-500/20'">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-xs font-bold uppercase tracking-widest"
-             [ngClass]="gap === 0 ? 'text-emerald-400' : 'text-red-400'">
-            {{ gap === 0 ? ('cloture.noGap' | translate) : ('cloture.gapFound' | translate) }}
+             [ngClass]="hasNoGap ? 'text-emerald-400' : 'text-red-400'">
+            {{ hasNoGap ? ('cloture.noGap' | translate) : ('cloture.gapFound' | translate) }}
           </p>
-          <p *ngIf="gap !== 0" class="text-xs text-gray-400 mt-0.5">{{ 'cloture.willBeReported' | translate }}</p>
+          <p *ngIf="!hasNoGap" class="text-xs text-gray-400 mt-0.5">{{ 'cloture.willBeReported' | translate }}</p>
         </div>
         <p class="text-2xl font-black"
-           [ngClass]="gap === 0 ? 'text-emerald-400' : 'text-red-400'">
+           [ngClass]="hasNoGap ? 'text-emerald-400' : 'text-red-400'">
           {{ gap > 0 ? '+' : '' }}{{ gap | number:'1.0-0' }} <span class="text-sm font-bold">MAD</span>
         </p>
       </div>
@@ -100,7 +100,7 @@
     <div class="mx-6 mb-4">
       <label class="text-sm font-semibold text-white mb-2 flex items-center gap-1">
         {{ 'cloture.note' | translate }}
-        <span *ngIf="gap !== null && gap !== 0" class="text-red-400">*</span>
+        <span *ngIf="gap !== null && !hasNoGap" class="text-red-400">*</span>
       </label>
       <textarea
         [(ngModel)]="note"
@@ -108,11 +108,11 @@
         [placeholder]="'cloture.notePlaceholder' | translate"
         class="w-full bg-[#0e1420] text-sm text-white rounded-xl px-4 py-3 border border-white/10 outline-none resize-none placeholder:text-gray-600 focus:border-white/25 transition-colors leading-relaxed">
       </textarea>
-      <p *ngIf="gap !== null && gap !== 0" class="text-xs text-gray-500 mt-1">{{ 'cloture.mandatoryIfGap' | translate }}</p>
+      <p *ngIf="gap !== null && !hasNoGap" class="text-xs text-gray-500 mt-1">{{ 'cloture.mandatoryIfGap' | translate }}</p>
     </div>
 
     <!-- Warning manager -->
-    <div *ngIf="gap !== null && gap !== 0" class="mx-6 mb-5 flex items-center gap-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3">
+    <div *ngIf="gap !== null && !hasNoGap" class="mx-6 mb-5 flex items-center gap-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3">
       <svg class="shrink-0" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
       </svg>

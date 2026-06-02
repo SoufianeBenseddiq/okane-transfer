@@ -6,9 +6,12 @@ export interface UserResponse {
   prenom: string;
   email: string | null;
   telephone: string;
-  pays: string;
+  pays: string | null;        // pays.nom
+  paysCodeIso: string | null; // pays.codeIso — for flag emoji
+  paysId: number | null;
   role: RoleUtilisateur;
   actif: boolean;
+  soldeCaisse?: number | null; // ROLE_AGENT only
   agenceId?: number;
   creeLe: string;
 }

@@ -1,112 +1,120 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
-import { catchError, map } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
-interface CaisseTransaction {
-  id: string;
-  type: 'in' | 'out';
-  amount: number;
-  description: string;
-  time: string;
-}
+import { forkJoin } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
+import { AgenceService } from '../../../core/services/agence.service';
+import { UserService } from '../../../core/services/user.service';
+import { AgenceResponse } from '../../../core/models/agence';
+import { UserResponse } from '../../../core/models/user/user-response.model';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { environment } from '../../../../environments/environment';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 @Component({
   selector: 'app-caisse',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: './caisse.component.html',
-  styleUrl: './caisse.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CaisseComponent implements OnInit, OnDestroy {
-  openingBalance = 0;
-  currentBalance = 0;
-  transactions: CaisseTransaction[] = [];
+export class CaisseComponent implements OnInit {
+  agence: AgenceResponse | null = null;
+  agents: UserResponse[] = [];
   loading = true;
   error: string | null = null;
-  private apiUrl = `${environment.apiUrl}/api`;
-  private pollingIntervalId: any;
+
+  // Ouverture state per agent
+  openingFor: number | null = null;  // agentId being opened
+  floatInput: Record<number, number> = {};
+  saving: number | null = null;
+  openError: string | null = null;
+
+  private readonly caisseBase = `${environment.apiUrl}/api/caisse-operations`;
 
   constructor(
+    private agenceService: AgenceService,
+    private userService: UserService,
     private http: HttpClient,
-    private changeDetectorRef: ChangeDetectorRef
   ) {}
 
-  ngOnInit() {
-    this.loadCaisseData();
-    // Polling toutes les 5 secondes pour synchroniser les transactions
-    this.pollingIntervalId = setInterval(() => {
-      this.loadCaisseData();
-    }, 5000);
+  ngOnInit(): void {
+    this.load();
   }
 
-  ngOnDestroy() {
-    if (this.pollingIntervalId) {
-      clearInterval(this.pollingIntervalId);
-    }
-  }
-
-  loadCaisseData() {
+  load(): void {
     this.loading = true;
-    this.error = null;
+    forkJoin({
+      agence: this.agenceService.getMonAgence().pipe(catchError(() => of(null))),
+      agents: this.userService.findAll('ROLE_AGENT' as any).pipe(catchError(() => of([]))),
+    }).subscribe({
+      next: ({ agence, agents }) => {
+        this.agence = agence;
+        // Only show agents belonging to this manager's agence
+        this.agents = agence ? agents.filter(a => a.agenceId === agence.id) : agents;
+        this.loading = false;
+      },
+      error: () => { this.loading = false; },
+    });
+  }
 
-    // Récupérer les transferts pour afficher les transactions
-    this.http.get<any[]>(`${this.apiUrl}/transferts`)
-      .pipe(
-        map(transferts => {
-          console.log('📡 API TRANSFERTS REÇUS:', transferts?.length || 0, 'transferts');
-          console.log('🕐 Heure:', new Date().toLocaleTimeString());
-          
-          if (transferts && transferts.length > 0) {
-            // Transformer les transferts en transactions
-            this.transactions = [...transferts
-              .sort((a, b) => new Date(b.creeLe).getTime() - new Date(a.creeLe).getTime())
-              .map(t => ({
-                id: t.codeRetrait || `TRF-${t.numeroReference}`,
-                type: t.statut === 'PAYE' ? 'out' : 'in',
-                amount: t.montantEnvoye || 0,
-                description: `Transfert - ${t.statut}`,
-                time: new Date(t.creeLe).toLocaleTimeString('fr-FR', { 
-                  hour: '2-digit', 
-                  minute: '2-digit' 
-                })
-              })) as CaisseTransaction[]];
+  get poolDisponible(): number {
+    return this.agence?.soldeCaisseAgence ?? 0;
+  }
 
-            console.log('✅ TRANSACTIONS AFFICHÉES:', this.transactions.length);
-            this.transactions.forEach(tx => {
-              console.log(`   - ${tx.id}: ${tx.description} → ${tx.amount} MAD`);
-            });
+  isCaisseOuverte(agent: UserResponse): boolean {
+    return (agent.soldeCaisse ?? 0) > 0;
+  }
 
-            // Calculer les soldes
-            const transfertsPayes = transferts.filter(t => t.statut === 'PAYE');
-            const totalMontants = transfertsPayes.reduce((s, t) => s + (t.montantRecu || 0), 0);
-            const totalFrais = transfertsPayes.reduce((s, t) => s + (t.frais || 0), 0);
+  soldeCaisseLabel(agent: UserResponse): string {
+    const s = agent.soldeCaisse ?? 0;
+    return s.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
 
-            this.openingBalance = totalMontants + totalFrais;
-            this.currentBalance = totalMontants;
-            
-            console.log(`💰 SOLDES: Ouverture=${this.openingBalance}, Actuel=${this.currentBalance}`);
-          } else {
-            console.log('❌ AUCUN TRANSFERT REÇU');
-            this.transactions = [];
-            this.openingBalance = 0;
-            this.currentBalance = 0;
-          }
-          this.loading = false;
-          this.changeDetectorRef.markForCheck();
-        }),
-        catchError(err => {
-          console.error('❌ ERREUR CHARGEMENT TRANSFERTS:', err);
-          this.error = 'Les données de caisse ne sont pas disponibles. Vérifiez que le backend fonctionne correctement.';
-          this.loading = false;
-          this.transactions = [];
-          this.changeDetectorRef.markForCheck();
-          return [];
-        })
-      )
-      .subscribe();
+  openOuverture(agent: UserResponse): void {
+    this.openingFor = agent.id;
+    this.floatInput[agent.id] = 0;
+    this.openError = null;
+  }
+
+  cancelOuverture(): void {
+    this.openingFor = null;
+    this.openError = null;
+  }
+
+  confirmerOuverture(agent: UserResponse): void {
+    const montant = this.floatInput[agent.id] ?? 0;
+    if (montant <= 0) { this.openError = 'Le montant doit être supérieur à 0.'; return; }
+    if (montant > this.poolDisponible) {
+      this.openError = `Fonds insuffisants. Disponible : ${this.poolDisponible.toLocaleString('fr-FR')} MAD`;
+      return;
+    }
+
+    this.saving = agent.id;
+    this.openError = null;
+    const params = new HttpParams()
+      .set('agentEmail', agent.email ?? '')
+      .set('montantInitial', montant.toString());
+
+    this.http.post(`${this.caisseBase}/ouvrir`, {}, { params }).subscribe({
+      next: () => {
+        this.saving = null;
+        this.openingFor = null;
+        // Refresh data to show updated soldeCaisseAgence and agent soldeCaisse
+        this.load();
+      },
+      error: (err) => {
+        this.openError = err?.error?.message ?? 'Erreur lors de l\'ouverture de la caisse.';
+        this.saving = null;
+      },
+    });
+  }
+
+  formatMontant(n: number): string {
+    return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  get totalSoldeAgents(): number {
+    return this.agents.reduce((s, a) => s + (a.soldeCaisse ?? 0), 0);
   }
 }
