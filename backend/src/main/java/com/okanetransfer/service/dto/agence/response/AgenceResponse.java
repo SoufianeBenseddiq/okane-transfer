@@ -11,6 +11,7 @@ public class AgenceResponse {
     private String pays;
     private BigDecimal plafondJournalier;
     private BigDecimal montantTraiteAujourdhui;
+    private BigDecimal soldeCaisseAgence;
     private Boolean active;
     private String responsableNom;
     private Long responsableId;
@@ -36,6 +37,9 @@ public class AgenceResponse {
 
     public BigDecimal getMontantTraiteAujourdhui() { return montantTraiteAujourdhui; }
     public void setMontantTraiteAujourdhui(BigDecimal montantTraiteAujourdhui) { this.montantTraiteAujourdhui = montantTraiteAujourdhui; }
+
+    public BigDecimal getSoldeCaisseAgence() { return soldeCaisseAgence; }
+    public void setSoldeCaisseAgence(BigDecimal soldeCaisseAgence) { this.soldeCaisseAgence = soldeCaisseAgence; }
 
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }

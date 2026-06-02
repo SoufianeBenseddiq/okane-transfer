@@ -1,10 +1,12 @@
 package com.okanetransfer.service.impl.caisse;
 
+import com.okanetransfer.entity.agence.Agence;
 import com.okanetransfer.entity.caisse.CaisseOperation;
 import com.okanetransfer.entity.caisse.ClotureCaisse;
 import com.okanetransfer.entity.user.Agent;
+import com.okanetransfer.repository.agence.AgenceRepository;
 import com.okanetransfer.repository.caisse.CaisseOperationRepository;
-//import com.okanetransfer.repository.user.AgentRepository;
+import com.okanetransfer.repository.user.UtilisateurRepository;
 import com.okanetransfer.service.converter.caisse.CaisseOperationConverter;
 import com.okanetransfer.service.dto.caisse.response.CaisseOperationResponse;
 import com.okanetransfer.service.facade.caisse.CaisseOperationService;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 public class CaisseOperationServiceImpl implements CaisseOperationService {
 
     @Override
+    @Transactional(readOnly = true)
     public List<CaisseOperationResponse> findByAgentEmail(String email) {
         if (utilisateurService.getAgentByEmail(email) == null) {
             throw new EntityNotFoundException("Agent introuvable avec l'email : " + email);
@@ -54,17 +57,30 @@ public class CaisseOperationServiceImpl implements CaisseOperationService {
             throw new EntityNotFoundException("Agent introuvable : " + agentEmail);
         }
 
-        CaisseOperation operation = new CaisseOperation();
+        // Check soldeCaisseAgence has enough to cover the float
+        Agence agence = agent.getAgence();
+        if (agence != null) {
+            BigDecimal pool = agence.getSoldeCaisseAgence() != null
+                    ? agence.getSoldeCaisseAgence() : BigDecimal.ZERO;
+            if (montantInitial.compareTo(pool) > 0) {
+                throw new IllegalArgumentException(
+                    "Fonds insuffisants dans la caisse agence. Disponible : " + pool + " MAD");
+            }
+            agence.setSoldeCaisseAgence(pool.subtract(montantInitial));
+            agenceRepository.save(agence);
+        }
 
+        // Set agent's starting balance
+        agent.setSoldeCaisse(montantInitial);
+        utilisateurRepository.save(agent);
+
+        CaisseOperation operation = new CaisseOperation();
         operation.setAgent(agent);
         operation.setMontant(montantInitial);
         operation.setType(TypeOperation.OUVERTURE);
         operation.setDateHeure(LocalDateTime.now());
 
-        return converter.toResponse(
-                repository.save(operation)
-        );
-
+        return converter.toResponse(repository.save(operation));
     }
 
     @Override
@@ -111,7 +127,10 @@ public class CaisseOperationServiceImpl implements CaisseOperationService {
 
     @Override
     public BigDecimal consulterSoldeDuJour(String agentEmail) {
-        return consulterSoldePourDate(agentEmail, LocalDate.now());
+        Agent agent = utilisateurService.getAgentByEmail(agentEmail);
+        if (agent == null) throw new EntityNotFoundException("Agent introuvable : " + agentEmail);
+        // soldeCaisse is the authoritative real-time balance (maintained by ouverture/envoi/retrait/clôture)
+        return agent.getSoldeCaisse() != null ? agent.getSoldeCaisse() : BigDecimal.ZERO;
     }
 
     @Override
@@ -151,14 +170,20 @@ public class CaisseOperationServiceImpl implements CaisseOperationService {
 
 
     private final CaisseOperationRepository repository;
-    private final CaisseOperationConverter converter;
-    private final UtilisateurService utilisateurService;
+    private final CaisseOperationConverter  converter;
+    private final UtilisateurService        utilisateurService;
+    private final UtilisateurRepository     utilisateurRepository;
+    private final AgenceRepository          agenceRepository;
 
     public CaisseOperationServiceImpl(CaisseOperationRepository repository,
                                       CaisseOperationConverter converter,
-                                      UtilisateurService utilisateurService) {
-        this.repository = repository;
-        this.converter = converter;
-        this.utilisateurService=utilisateurService;
+                                      UtilisateurService utilisateurService,
+                                      UtilisateurRepository utilisateurRepository,
+                                      AgenceRepository agenceRepository) {
+        this.repository            = repository;
+        this.converter             = converter;
+        this.utilisateurService    = utilisateurService;
+        this.utilisateurRepository = utilisateurRepository;
+        this.agenceRepository      = agenceRepository;
     }
 }

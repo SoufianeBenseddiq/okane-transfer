@@ -9,8 +9,9 @@ public class CorridorResponse {
     private String deviseDestination;
     private Boolean actif;
     private LocalDate dateActivation;
+    private PaysResponse paysSource;
+    private PaysResponse paysDestination;
 
-    // getters / setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -25,4 +26,10 @@ public class CorridorResponse {
 
     public LocalDate getDateActivation() { return dateActivation; }
     public void setDateActivation(LocalDate dateActivation) { this.dateActivation = dateActivation; }
+
+    public PaysResponse getPaysSource() { return paysSource; }
+    public void setPaysSource(PaysResponse paysSource) { this.paysSource = paysSource; }
+
+    public PaysResponse getPaysDestination() { return paysDestination; }
+    public void setPaysDestination(PaysResponse paysDestination) { this.paysDestination = paysDestination; }
 }

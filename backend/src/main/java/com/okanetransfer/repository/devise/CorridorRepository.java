@@ -9,9 +9,8 @@ import java.util.Optional;
 @Repository
 public interface CorridorRepository extends JpaRepository<Corridor, Long> {
 
-    Optional<Corridor> findByDeviseSource_CodeAndDeviseDestination_CodeAndActifTrue(
-            String codeSource, String codeDestination);
+    boolean existsByPaysSource_IdAndPaysDestination_Id(Long paysSourceId, Long paysDestinationId);
 
-    boolean existsByDeviseSource_IdAndDeviseDestination_Id(
-            Long sourceId, Long destinationId);
+    Optional<Corridor> findByPaysSource_CodeIsoAndPaysDestination_CodeIsoAndActifTrue(
+            String isoSource, String isoDestination);
 }

@@ -20,7 +20,7 @@ public final class ExpediteurConverter {
             response.setNomClient(client.getNom());
             response.setPrenomClient(client.getPrenom());
             response.setTelephoneClient(client.getTelephone());
-            response.setPaysClient(client.getPays());
+            response.setPaysClient(client.getPays() != null ? client.getPays().getNom() : null);
         }
 
         PieceIdentite pieceIdentite = expediteur.getPieceConfirmee();

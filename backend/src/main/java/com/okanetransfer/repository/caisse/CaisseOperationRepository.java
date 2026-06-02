@@ -28,7 +28,7 @@ public interface CaisseOperationRepository extends JpaRepository<CaisseOperation
     ), 0)
     FROM caisse_operations
     WHERE agent_id = :agentId
-      AND date_heure BETWEEN :debut AND :fin
+      AND dateHeure BETWEEN :debut AND :fin
     """, nativeQuery = true)
     BigDecimal calculerSoldeTheorique(
             @Param("agentId") Long agentId,

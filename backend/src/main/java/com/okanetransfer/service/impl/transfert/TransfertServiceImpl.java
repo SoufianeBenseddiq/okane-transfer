@@ -14,6 +14,7 @@ import com.okanetransfer.repository.agence.AgenceRepository;
 import com.okanetransfer.repository.caisse.CaisseOperationRepository;
 import com.okanetransfer.repository.devise.CorridorRepository;
 import com.okanetransfer.repository.devise.GrilleTarifaireRepository;
+import com.okanetransfer.repository.devise.PaysRepository;
 import com.okanetransfer.repository.transfert.BeneficiaireRepository;
 import com.okanetransfer.repository.transfert.ExpediteurRepository;
 import com.okanetransfer.repository.transfert.TransfertRepository;
@@ -57,20 +58,21 @@ import java.util.List;
 @Transactional
 public class TransfertServiceImpl implements ITransfertService {
 
-    private final TransfertRepository transfertRepository;
-    private final BeneficiaireRepository beneficiaireRepository;
-    private final ExpediteurRepository expediteurRepository;
-    private final UtilisateurRepository utilisateurRepository;
-    private final PieceIdentiteRepository pieceIdentiteRepository;
-    private final AgenceRepository agenceRepository;
-    private final CorridorRepository corridorRepository;
+    private final TransfertRepository       transfertRepository;
+    private final BeneficiaireRepository    beneficiaireRepository;
+    private final ExpediteurRepository      expediteurRepository;
+    private final UtilisateurRepository     utilisateurRepository;
+    private final PieceIdentiteRepository   pieceIdentiteRepository;
+    private final AgenceRepository          agenceRepository;
+    private final CorridorRepository        corridorRepository;
     private final GrilleTarifaireRepository grilleTarifaireRepository;
-    private final PieceIdentiteService pieceIdentiteService;
+    private final PaysRepository            paysRepository;
+    private final PieceIdentiteService      pieceIdentiteService;
     private final CaisseOperationRepository caisseOperationRepository;
-    private final CodeGenerator codeGenerator;
-    private final PasswordEncoder passwordEncoder;
-    private final JavaMailSender javaMailSender;
-    private final String mailFrom;
+    private final CodeGenerator             codeGenerator;
+    private final PasswordEncoder           passwordEncoder;
+    private final JavaMailSender            javaMailSender;
+    private final String                    mailFrom;
 
     public TransfertServiceImpl(
             TransfertRepository transfertRepository,
@@ -81,6 +83,7 @@ public class TransfertServiceImpl implements ITransfertService {
             AgenceRepository agenceRepository,
             CorridorRepository corridorRepository,
             GrilleTarifaireRepository grilleTarifaireRepository,
+            PaysRepository paysRepository,
             PieceIdentiteService pieceIdentiteService,
             CaisseOperationRepository caisseOperationRepository,
             CodeGenerator codeGenerator,
@@ -88,20 +91,21 @@ public class TransfertServiceImpl implements ITransfertService {
             JavaMailSender javaMailSender,
             @Value("${mail.from:no-reply@okanetransfer.local}") String mailFrom) {
 
-        this.transfertRepository = transfertRepository;
-        this.beneficiaireRepository = beneficiaireRepository;
-        this.expediteurRepository = expediteurRepository;
-        this.utilisateurRepository = utilisateurRepository;
-        this.pieceIdentiteRepository = pieceIdentiteRepository;
-        this.agenceRepository = agenceRepository;
-        this.corridorRepository = corridorRepository;
-        this.grilleTarifaireRepository = grilleTarifaireRepository;
-        this.pieceIdentiteService = pieceIdentiteService;
-        this.caisseOperationRepository = caisseOperationRepository;
-        this.codeGenerator = codeGenerator;
-        this.passwordEncoder = passwordEncoder;
-        this.javaMailSender = javaMailSender;
-        this.mailFrom = mailFrom;
+        this.transfertRepository        = transfertRepository;
+        this.beneficiaireRepository     = beneficiaireRepository;
+        this.expediteurRepository       = expediteurRepository;
+        this.utilisateurRepository      = utilisateurRepository;
+        this.pieceIdentiteRepository    = pieceIdentiteRepository;
+        this.agenceRepository           = agenceRepository;
+        this.corridorRepository         = corridorRepository;
+        this.grilleTarifaireRepository  = grilleTarifaireRepository;
+        this.paysRepository             = paysRepository;
+        this.pieceIdentiteService       = pieceIdentiteService;
+        this.caisseOperationRepository  = caisseOperationRepository;
+        this.codeGenerator              = codeGenerator;
+        this.passwordEncoder            = passwordEncoder;
+        this.javaMailSender             = javaMailSender;
+        this.mailFrom                   = mailFrom;
     }
 
     // ── Lecture ───────────────────────────────────────────────────────────────
@@ -252,6 +256,13 @@ public class TransfertServiceImpl implements ITransfertService {
                 : grilleTarifaireRepository.findById(request.getGrilleTarifaireId())
                 .orElseThrow(() -> new IllegalArgumentException("Grille tarifaire introuvable"));
 
+        // Auto-reset plafond if it's a new day
+        if (agenceEnvoi.getDateDernierReset() == null
+                || !LocalDate.now().equals(agenceEnvoi.getDateDernierReset())) {
+            agenceEnvoi.setMontantTraiteAujourdhui(BigDecimal.ZERO);
+            agenceEnvoi.setDateDernierReset(LocalDate.now());
+        }
+
         // Vérification du plafond journalier de l'agence
         BigDecimal montantActuel = agenceEnvoi.getMontantTraiteAujourdhui() != null
                 ? agenceEnvoi.getMontantTraiteAujourdhui()
@@ -309,11 +320,11 @@ public class TransfertServiceImpl implements ITransfertService {
         BigDecimal montantRecu;
 
         if (corridor != null
-                && corridor.getDeviseSource() != null
-                && corridor.getDeviseDestination() != null
-                && corridor.getDeviseDestination().getTauxVersEuro().compareTo(BigDecimal.ZERO) != 0) {
-            BigDecimal taux = corridor.getDeviseSource().getTauxVersEuro()
-                    .divide(corridor.getDeviseDestination().getTauxVersEuro(), 4, RoundingMode.HALF_UP);
+                && corridor.getPaysSource() != null && corridor.getPaysSource().getDevise() != null
+                && corridor.getPaysDestination() != null && corridor.getPaysDestination().getDevise() != null
+                && corridor.getPaysDestination().getDevise().getTauxVersEuro().compareTo(BigDecimal.ZERO) != 0) {
+            BigDecimal taux = corridor.getPaysSource().getDevise().getTauxVersEuro()
+                    .divide(corridor.getPaysDestination().getDevise().getTauxVersEuro(), 4, RoundingMode.HALF_UP);
             montantRecu = montantNetMAD.multiply(taux).setScale(2, RoundingMode.HALF_UP);
         } else {
             montantRecu = montantNetMAD;
@@ -338,8 +349,11 @@ public class TransfertServiceImpl implements ITransfertService {
 
         transfert = transfertRepository.save(transfert);
 
-        // Mise à jour du montant traité de l'agence
+        // Mise à jour du montant traité + soldeCaisseAgence (envoi = agence receives cash from sender)
         agenceEnvoi.setMontantTraiteAujourdhui(montantActuel.add(request.getMontant()));
+        BigDecimal soldeAgence = agenceEnvoi.getSoldeCaisseAgence() != null
+                ? agenceEnvoi.getSoldeCaisseAgence() : BigDecimal.ZERO;
+        agenceEnvoi.setSoldeCaisseAgence(soldeAgence.add(request.getMontant()));
         agenceRepository.save(agenceEnvoi);
 
         enregistrerOperationCaisse(transfert, agent, TypeOperation.ENVOI, transfert.getMontantEnvoye());
@@ -370,7 +384,7 @@ public class TransfertServiceImpl implements ITransfertService {
         client.setTelephone(telephoneClient);
         client.setEmail(emailClient);
         client.setMotDePasseHash(passwordEncoder.encode(nouveauClientRequest.getMotDePasse()));
-        client.setPays(nouveauClientRequest.getPays().trim());
+        client.setPays(paysRepository.findByNom(nouveauClientRequest.getPays().trim()).orElse(null));
         client.setRole(RoleUtilisateur.ROLE_CLIENT);
         client.setActif(true);
         client.setTwoFactorActive(false);
@@ -544,8 +558,12 @@ public class TransfertServiceImpl implements ITransfertService {
                 ? BigDecimal.ZERO
                 : agentPaiement.getSoldeCaisse();
 
-        if (soldeActuel.compareTo(transfert.getMontantRecu()) < 0) {
-            throw new RuntimeException("Solde caisse insuffisant pour payer ce transfert");
+        // Convert montantRecu (dest currency) to MAD before comparing with soldeCaisse (MAD)
+        BigDecimal montantRecuEnMAD = montantToMAD(transfert, transfert.getMontantRecu());
+        if (soldeActuel.compareTo(montantRecuEnMAD) < 0) {
+            BigDecimal manquant = montantRecuEnMAD.subtract(soldeActuel).setScale(2, RoundingMode.HALF_UP);
+            throw new RuntimeException(
+                "Solde caisse insuffisant pour payer ce transfert. Manque : " + manquant + " MAD");
         }
 
         transfert.setStatut(StatutTransfert.PAYE);
@@ -556,6 +574,7 @@ public class TransfertServiceImpl implements ITransfertService {
 
         transfert = transfertRepository.save(transfert);
 
+        // Pass original montantRecu for display; method converts to MAD internally for soldeCaisse
         enregistrerOperationCaisse(transfert, agentPaiement, TypeOperation.RETRAIT, transfert.getMontantRecu());
 
         return TransfertConverter.toResponse(transfert);
@@ -573,11 +592,30 @@ public class TransfertServiceImpl implements ITransfertService {
 
     // ── Helpers privés ────────────────────────────────────────────────────────
 
+    /**
+     * Converts an amount in the transfert's destination devise to MAD via EUR pivot.
+     * Used to keep soldeCaisse always in MAD.
+     */
+    private BigDecimal montantToMAD(Transfert transfert, BigDecimal montant) {
+        if (transfert.getCorridor() == null) return montant;
+        var corridor = transfert.getCorridor();
+        if (corridor.getPaysDestination() == null || corridor.getPaysDestination().getDevise() == null) return montant;
+        if (corridor.getPaysSource()      == null || corridor.getPaysSource().getDevise()      == null) return montant;
+
+        BigDecimal tauxDest = corridor.getPaysDestination().getDevise().getTauxVersEuro(); // e.g. EUR=1.0, XOF=0.001524
+        BigDecimal tauxSrc  = corridor.getPaysSource().getDevise().getTauxVersEuro();       // MAD=0.093
+
+        if (tauxSrc.compareTo(BigDecimal.ZERO) == 0) return montant;
+        // amount_dest × tauxDest / tauxSrc → MAD
+        return montant.multiply(tauxDest).divide(tauxSrc, 2, RoundingMode.HALF_UP);
+    }
+
     private void enregistrerOperationCaisse(Transfert transfert, Agent agent, TypeOperation type, BigDecimal montant) {
         if (agent == null || montant == null) {
             return;
         }
 
+        // Store original amount (in actual currency) for display in caisse history
         CaisseOperation operation = new CaisseOperation();
         operation.setAgent(agent);
         operation.setTransfert(transfert);
@@ -591,8 +629,10 @@ public class TransfertServiceImpl implements ITransfertService {
                 ? BigDecimal.ZERO
                 : agent.getSoldeCaisse();
 
+        // soldeCaisse always in MAD — convert RETRAIT (foreign currency) before updating balance
         if (type == TypeOperation.RETRAIT) {
-            agent.setSoldeCaisse(soldeActuel.subtract(montant));
+            BigDecimal montantEnMAD = montantToMAD(transfert, montant);
+            agent.setSoldeCaisse(soldeActuel.subtract(montantEnMAD));
         } else {
             agent.setSoldeCaisse(soldeActuel.add(montant));
         }

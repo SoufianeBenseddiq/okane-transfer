@@ -1,6 +1,8 @@
 package com.okanetransfer.service.impl.user;
 
+import com.okanetransfer.entity.devise.Pays;
 import com.okanetransfer.entity.user.*;
+import com.okanetransfer.repository.devise.PaysRepository;
 import com.okanetransfer.repository.user.UtilisateurRepository;
 import com.okanetransfer.service.converter.user.UtilisateurConverter;
 import com.okanetransfer.service.dto.user.request.AdminUpdateUserRequest;
@@ -38,22 +40,27 @@ import java.util.List;
 public class UtilisateurServiceImpl implements UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
-
-    // injection de l'interface — jamais de PieceIdentiteRepository directement
-    private final PieceIdentiteService pieceIdentiteService;
-
-    private final PasswordEncoder passwordEncoder;
-
-    private final UtilisateurConverter utilisateurConverter;
+    private final PieceIdentiteService  pieceIdentiteService;
+    private final PasswordEncoder       passwordEncoder;
+    private final UtilisateurConverter  utilisateurConverter;
+    private final PaysRepository        paysRepository;
 
     public UtilisateurServiceImpl(UtilisateurRepository utilisateurRepository,
                                   PieceIdentiteService pieceIdentiteService,
                                   PasswordEncoder passwordEncoder,
-                                  UtilisateurConverter utilisateurConverter) {
+                                  UtilisateurConverter utilisateurConverter,
+                                  PaysRepository paysRepository) {
         this.utilisateurRepository = utilisateurRepository;
         this.pieceIdentiteService  = pieceIdentiteService;
         this.passwordEncoder       = passwordEncoder;
         this.utilisateurConverter  = utilisateurConverter;
+        this.paysRepository        = paysRepository;
+    }
+
+    /** Resolves a Pays entity from a country name string. Returns null if not found. */
+    private Pays resolvePays(String nom) {
+        if (nom == null || nom.isBlank()) return null;
+        return paysRepository.findByNom(nom).orElse(null);
     }
 
     // =========================================================================
@@ -142,6 +149,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         };
 
         utilisateurConverter.applyCreate(utilisateur, request, passwordEncoder);
+        utilisateur.setPays(resolvePays(request.getPays()));
 
         return utilisateurConverter.toResponse(utilisateurRepository.save(utilisateur));
     }
@@ -215,7 +223,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         if (request.getNom()       != null) user.setNom(request.getNom());
         if (request.getPrenom()    != null) user.setPrenom(request.getPrenom());
         if (request.getTelephone() != null) user.setTelephone(request.getTelephone());
-        if (request.getPays()      != null) user.setPays(request.getPays());
+        if (request.getPays()      != null) user.setPays(resolvePays(request.getPays()));
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
             if (utilisateurRepository.existsByEmail(request.getEmail())) {
                 throw new IllegalArgumentException("Cet email est déjà utilisé : " + request.getEmail());
@@ -258,6 +266,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
                 ));
 
         utilisateurConverter.applyUpdate(user, request);
+        if (request.getPays() != null) user.setPays(resolvePays(request.getPays()));
 
         return utilisateurConverter.toResponse(utilisateurRepository.save(user));
     }
@@ -320,7 +329,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         user.setPrenom("SUPPRIME");
         user.setEmail("deleted_" + clientId + "@supprime.local");
         user.setTelephone("0000000000");
-        user.setPays("XX");
+        user.setPays(null);
         user.setMotDePasseHash("SUPPRIME");   // hash invalide → connexion impossible
         user.setActif(false);
 

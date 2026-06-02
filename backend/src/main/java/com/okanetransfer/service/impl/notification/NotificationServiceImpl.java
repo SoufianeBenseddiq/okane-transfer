@@ -10,7 +10,9 @@ import com.okanetransfer.service.dto.notification.request.UpdateNotificationRequ
 import com.okanetransfer.service.dto.notification.response.NotificationResponse;
 import com.okanetransfer.service.facade.notification.INotificationService;
 import com.okanetransfer.shared.enums.TypeNotification;
+import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -150,5 +152,52 @@ public class NotificationServiceImpl implements INotificationService {
         List<Notification> notifications = notificationRepository.findByDestinataireIdAndLueIsFalse(destinataireId);
         notifications.forEach(n -> n.setLue(true));
         notificationRepository.saveAll(notifications);
+    }
+
+    // ── Event-driven dispatch ─────────────────────────────────────────────────
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void creerAlerte(String titre, String message, List<Long> destinataireIds) {
+        if (destinataireIds == null || destinataireIds.isEmpty()) return;
+        String fullMessage = titre + "\n" + message;
+        for (Long id : destinataireIds) {
+            utilisateurRepository.findById(id).ifPresent(destinataire -> {
+                Notification n = new Notification();
+                n.setDestinataire(destinataire);
+                n.setMessage(fullMessage);
+                n.setType(TypeNotification.ALERTE);
+                n.setLue(false);
+                notificationRepository.save(n);
+            });
+        }
+    }
+
+    // ── Current-user scoped ───────────────────────────────────────────────────
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NotificationResponse> getMesNotifications(String email) {
+        return utilisateurRepository.findByEmail(email)
+                .map(u -> notificationRepository.findByDestinataireId(u.getId())
+                        .stream().map(NotificationConverter::toResponse).toList())
+                .orElse(List.of());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countMesNonLues(String email) {
+        return utilisateurRepository.findByEmail(email)
+                .map(u -> (long) notificationRepository.findByDestinataireIdAndLueIsFalse(u.getId()).size())
+                .orElse(0L);
+    }
+
+    @Override
+    public void marquerToutLu(String email) {
+        utilisateurRepository.findByEmail(email).ifPresent(u -> {
+            List<Notification> unread = notificationRepository.findByDestinataireIdAndLueIsFalse(u.getId());
+            unread.forEach(n -> n.setLue(true));
+            notificationRepository.saveAll(unread);
+        });
     }
 }

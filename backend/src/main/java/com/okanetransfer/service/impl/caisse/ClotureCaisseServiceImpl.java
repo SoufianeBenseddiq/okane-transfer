@@ -1,7 +1,9 @@
 package com.okanetransfer.service.impl.caisse;
 
+import com.okanetransfer.entity.agence.Agence;
 import com.okanetransfer.entity.caisse.ClotureCaisse;
 import com.okanetransfer.entity.user.Agent;
+import com.okanetransfer.repository.agence.AgenceRepository;
 import com.okanetransfer.repository.caisse.CaisseOperationRepository;
 import com.okanetransfer.repository.caisse.ClotureCaisseRepository;
 import com.okanetransfer.repository.user.UtilisateurRepository;
@@ -152,12 +154,23 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
                 .subtract(soldeTheorique);
 
         cloture.setEcart(ecart);
+        cloture.setEcartSignale(ecart.compareTo(BigDecimal.ZERO) != 0);
 
-        cloture.setEcartSignale(
-                ecart.compareTo(BigDecimal.ZERO) != 0
-        );
+        ClotureCaisseResponse response = converter.toResponse(repository.save(cloture));
 
-        return converter.toResponse(repository.save(cloture));
+        // Return agent's remaining cash to soldeCaisseAgence
+        BigDecimal soldeAgent = agent.getSoldeCaisse() != null ? agent.getSoldeCaisse() : BigDecimal.ZERO;
+        Agence agence = agent.getAgence();
+        if (agence != null && soldeAgent.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal pool = agence.getSoldeCaisseAgence() != null
+                    ? agence.getSoldeCaisseAgence() : BigDecimal.ZERO;
+            agence.setSoldeCaisseAgence(pool.add(soldeAgent));
+            agenceRepository.save(agence);
+        }
+        agent.setSoldeCaisse(BigDecimal.ZERO);
+        utilisateurRepository.save(agent);
+
+        return response;
     }
 
     private Agent resolveAgent(String agentEmail) {
@@ -174,20 +187,23 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
     }
 
     private final ClotureCaisseRepository repository;
-    private final ClotureCaisseConverter converter;
-    private final UtilisateurService utilisateurService;
-    private final CaisseOperationService caisseOperationService;
-    private final UtilisateurRepository utilisateurRepository;
+    private final ClotureCaisseConverter  converter;
+    private final UtilisateurService      utilisateurService;
+    private final CaisseOperationService  caisseOperationService;
+    private final UtilisateurRepository   utilisateurRepository;
+    private final AgenceRepository        agenceRepository;
 
     public ClotureCaisseServiceImpl(ClotureCaisseRepository repository,
                                     ClotureCaisseConverter converter,
                                     CaisseOperationService caisseOperationService,
                                     UtilisateurService utilisateurService,
-                                    UtilisateurRepository utilisateurRepository) {
-        this.repository = repository;
-        this.converter = converter;
+                                    UtilisateurRepository utilisateurRepository,
+                                    AgenceRepository agenceRepository) {
+        this.repository            = repository;
+        this.converter             = converter;
         this.caisseOperationService = caisseOperationService;
-        this.utilisateurService = utilisateurService;
+        this.utilisateurService    = utilisateurService;
         this.utilisateurRepository = utilisateurRepository;
+        this.agenceRepository      = agenceRepository;
     }
 }

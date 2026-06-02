@@ -12,10 +12,10 @@ public class CaisseOperationResponse {
     private String agentNom;
     private TypeOperation type;
     private BigDecimal montant;
+    private String devise;   // actual currency: MAD for ENVOI, EUR/XOF/… for RETRAIT
     private LocalDateTime dateHeure;
     private Long transfertId;
     private String referenceTransfert;
-
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -31,6 +31,9 @@ public class CaisseOperationResponse {
 
     public BigDecimal getMontant() { return montant; }
     public void setMontant(BigDecimal montant) { this.montant = montant; }
+
+    public String getDevise() { return devise; }
+    public void setDevise(String devise) { this.devise = devise; }
 
     public LocalDateTime getDateHeure() { return dateHeure; }
     public void setDateHeure(LocalDateTime dateHeure) { this.dateHeure = dateHeure; }
