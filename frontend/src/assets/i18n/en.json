@@ -71,6 +71,7 @@
         "performance": "PERFORMANCE"
       },
       "others":     "Other agents",
+      "allMembers": "Team members",
       "active":     "✓ Active",
       "inactive":   "✕ Inactive",
       "activate":   "Activate",
@@ -635,8 +636,13 @@
     "residencePermit": "Residence permit",
     "verifyIdWarning": "Verify that the name on the ID matches exactly",
     "cancel":          "Cancel",
-    "printSlip":       "Print slip",
-    "confirmPayment":  "Confirm payment"
+    "printSlip":          "Print slip",
+    "confirmPayment":     "Confirm payment",
+    "notFound":           "No transfer found for this search",
+    "alreadyPaid":        "This transfer has already been paid",
+    "caisseNonOuverte":   "Your cash register is not open today. Contact your manager to get a starting float.",
+    "soldeInsuffisant":   "Insufficient cash register balance to pay this transfer. Contact your manager.",
+    "errorGeneric":       "An error occurred, please try again"
   },
 
   "caisse": {
@@ -661,6 +667,7 @@
       "type":   "Type",
       "amount": "Amount"
     },
+    "totalOps": "Total operations",
     "type": {
       "ENVOI":    "Send",
       "RETRAIT":  "Withdrawal",

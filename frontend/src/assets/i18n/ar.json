@@ -71,6 +71,7 @@
         "performance": "الأداء"
       },
       "others":     "وكلاء آخرون",
+      "allMembers": "أعضاء الفريق",
       "active":     "✓ نشط",
       "inactive":   "✕ غير نشط",
       "activate":   "تفعيل",
@@ -661,6 +662,7 @@
       "type":   "النوع",
       "amount": "المبلغ"
     },
+    "totalOps": "إجمالي العمليات",
     "type": {
       "ENVOI":    "تحويل",
       "RETRAIT":  "سحب",

@@ -1,5 +1,7 @@
 package com.okanetransfer.service.converter.user;
 
+import com.okanetransfer.entity.devise.Pays;
+import com.okanetransfer.entity.user.Agent;
 import com.okanetransfer.entity.user.Utilisateur;
 import com.okanetransfer.service.dto.user.request.CreateUserRequest;
 import com.okanetransfer.service.dto.user.request.UpdateProfilRequest;
@@ -15,15 +17,13 @@ public class UtilisateurConverter {
 
     /**
      * Populates common Utilisateur fields from a CreateUserRequest.
-     * Subclass instantiation (Client/Agent/Manager/Administrateur) stays in the service
-     * because role-based branching is business logic, not mapping.
+     * pays is intentionally NOT set here — the service resolves the Pays entity and sets it.
      */
     public void applyCreate(Utilisateur utilisateur, CreateUserRequest request, PasswordEncoder encoder) {
         utilisateur.setNom(request.getNom());
         utilisateur.setPrenom(request.getPrenom());
         utilisateur.setEmail(request.getEmail());
         utilisateur.setTelephone(request.getTelephone());
-        utilisateur.setPays(request.getPays());
         utilisateur.setRole(request.getRole());
         utilisateur.setActif(true);
         utilisateur.setMotDePasseHash(encoder.encode(request.getMotDePasse()));
@@ -31,12 +31,12 @@ public class UtilisateurConverter {
 
     /**
      * Applies non-null fields only — PATCH semantics.
+     * pays is NOT set here — the service resolves the Pays entity and sets it.
      */
     public void applyUpdate(Utilisateur utilisateur, UpdateProfilRequest request) {
         if (request.getNom()       != null) utilisateur.setNom(request.getNom());
         if (request.getPrenom()    != null) utilisateur.setPrenom(request.getPrenom());
         if (request.getTelephone() != null) utilisateur.setTelephone(request.getTelephone());
-        if (request.getPays()      != null) utilisateur.setPays(request.getPays());
     }
 
     public UserResponse toResponse(Utilisateur u) {
@@ -48,10 +48,24 @@ public class UtilisateurConverter {
         r.setPrenom(u.getPrenom());
         r.setEmail(u.getEmail());
         r.setTelephone(u.getTelephone());
-        r.setPays(u.getPays());
         r.setRole(u.getRole().name());
         r.setActif(u.getActif());
         r.setCreeLe(u.getCreeLe());
+
+        Pays pays = u.getPays();
+        if (pays != null) {
+            r.setPays(pays.getNom());
+            r.setPaysCodeIso(pays.getCodeIso());
+            r.setPaysId(pays.getId());
+        }
+
+        if (u instanceof Agent agent) {
+            r.setSoldeCaisse(agent.getSoldeCaisse());
+            if (agent.getAgence() != null) {
+                r.setAgenceId(agent.getAgence().getId());
+            }
+        }
+
         return r;
     }
 

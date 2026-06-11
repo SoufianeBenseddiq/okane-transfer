@@ -85,9 +85,8 @@ export class NotificationsComponent implements OnInit {
     if (n.lue) return;
     this.markingRead = n.id;
     this.notifService.markAsRead(n.id).subscribe({
-      next: updated => {
-        const idx = this.notifications.findIndex(x => x.id === n.id);
-        if (idx !== -1) this.notifications[idx] = updated;
+      next: () => {
+        n.lue = true;
         this.markingRead = null;
       },
       error: () => { this.markingRead = null; },

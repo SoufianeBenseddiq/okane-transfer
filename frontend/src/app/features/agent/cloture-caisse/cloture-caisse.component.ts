@@ -69,11 +69,12 @@ export class ClotureCaisseComponent implements OnInit {
         // Load the actual theoretical balance computed by the backend
         this.caisse.consulterSoldeDuJour(this.agentEmail).subscribe({
           next: (solde) => {
-            this.stats = { ...this.stats, theoretique: solde };
+            // Round to 2dp so comparison with agent-entered value is exact
+            this.stats = { ...this.stats, theoretique: Math.round(Number(solde) * 100) / 100 };
             this.loading = false;
           },
           error: () => {
-            this.stats = { ...this.stats, theoretique: totalIn - totalOut };
+            this.stats = { ...this.stats, theoretique: Math.round((totalIn - totalOut) * 100) / 100 };
             this.loading = false;
           },
         });
@@ -91,13 +92,19 @@ export class ClotureCaisseComponent implements OnInit {
       this.gap = null;
       return;
     }
-    this.gap = rb - this.stats.theoretique;
+    // Round to 2 decimal places to avoid floating-point noise
+    this.gap = Math.round((rb - this.stats.theoretique) * 100) / 100;
+  }
+
+  /** True when gap is exactly 0 (within 1 centime tolerance) */
+  get hasNoGap(): boolean {
+    return this.gap !== null && Math.abs(this.gap) < 0.01;
   }
 
   get canValidate(): boolean {
     if (this.loading || this.submitting) return false;
     if (this.gap === null) return false;
-    if (this.gap !== 0 && !this.note.trim()) return false;
+    if (!this.hasNoGap && !this.note.trim()) return false;
     return true;
   }
 

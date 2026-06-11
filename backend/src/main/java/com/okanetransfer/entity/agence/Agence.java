@@ -4,6 +4,7 @@ import com.okanetransfer.entity.user.Agent;
 import com.okanetransfer.entity.user.Manager;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -28,6 +29,12 @@ public class Agence {
 
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal montantTraiteAujourdhui = BigDecimal.ZERO;
+
+    @Column
+    private LocalDate dateDernierReset;
+
+    @Column(nullable = false, precision = 15, scale = 2)
+    private BigDecimal soldeCaisseAgence = BigDecimal.ZERO;
 
     @Column(nullable = false)
     private Boolean active = true;
@@ -116,6 +123,12 @@ public class Agence {
     public void setAgents(List<Agent> agents) {
         this.agents = agents;
     }
+
+    public LocalDate getDateDernierReset() { return dateDernierReset; }
+    public void setDateDernierReset(LocalDate dateDernierReset) { this.dateDernierReset = dateDernierReset; }
+
+    public BigDecimal getSoldeCaisseAgence() { return soldeCaisseAgence; }
+    public void setSoldeCaisseAgence(BigDecimal soldeCaisseAgence) { this.soldeCaisseAgence = soldeCaisseAgence; }
 
     public Boolean getEstCentrale() { return estCentrale; }
     public void setEstCentrale(Boolean estCentrale) { this.estCentrale = estCentrale; }

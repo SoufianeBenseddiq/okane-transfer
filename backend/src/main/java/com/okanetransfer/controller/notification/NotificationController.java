@@ -6,6 +6,7 @@ import com.okanetransfer.service.dto.notification.response.NotificationResponse;
 import com.okanetransfer.service.facade.notification.INotificationService;
 import com.okanetransfer.shared.enums.TypeNotification;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -82,6 +83,24 @@ public class NotificationController {
     @PutMapping("/destinataire/{destinataireId}/read-all")
     public ResponseEntity<Void> markAllAsRead(@PathVariable("destinataireId") Long destinataireId) {
         notificationService.markAllAsRead(destinataireId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ── Current-user scoped endpoints ─────────────────────────────────────────
+
+    @GetMapping("/me")
+    public ResponseEntity<List<NotificationResponse>> getMes(Authentication auth) {
+        return ResponseEntity.ok(notificationService.getMesNotifications(auth.getName()));
+    }
+
+    @GetMapping("/me/unread/count")
+    public ResponseEntity<Long> countMesNonLues(Authentication auth) {
+        return ResponseEntity.ok(notificationService.countMesNonLues(auth.getName()));
+    }
+
+    @PutMapping("/me/read-all")
+    public ResponseEntity<Void> marquerToutLu(Authentication auth) {
+        notificationService.marquerToutLu(auth.getName());
         return ResponseEntity.noContent().build();
     }
 }

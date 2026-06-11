@@ -5,6 +5,7 @@ export interface AgenceResponse {
   pays: string;
   plafondJournalier: number;
   montantTraiteAujourdhui: number;
+  soldeCaisseAgence: number;
   active: boolean;
   responsableNom: string | null;
   responsableId: number | null;

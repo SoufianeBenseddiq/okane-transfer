@@ -32,4 +32,17 @@ public interface INotificationService {
     void markAsRead(Long notificationId);
 
     void markAllAsRead(Long destinataireId);
+
+    // ── Event-driven dispatch ─────────────────────────────────────────────────
+
+    /** Creates ALERTE notifications for a list of user IDs (admins + manager). */
+    void creerAlerte(String titre, String message, List<Long> destinataireIds);
+
+    // ── Current-user scoped ───────────────────────────────────────────────────
+
+    List<NotificationResponse> getMesNotifications(String email);
+
+    long countMesNonLues(String email);
+
+    void marquerToutLu(String email);
 }

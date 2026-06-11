@@ -3,15 +3,17 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { ToastService } from '../services/toast.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
-  const auth = inject(AuthService);
+  const auth  = inject(AuthService);
   const router = inject(Router);
+  const toast  = inject(ToastService);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+
       if (error.status === 401) {
-        // Try to refresh token once
         const refreshToken = auth.refreshToken;
         if (refreshToken) {
           return auth.refresh({ refreshToken }).pipe(
@@ -34,7 +36,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       if (error.status === 403 && !req.url.includes('/api/auth')) {
-        router.navigate(['/unauthorized']);
+        // Stay on current page — show a toast instead of redirecting
+        const msg = error?.error?.message ?? 'Vous n\'avez pas les droits pour effectuer cette action.';
+        toast.show(msg, 'error');
         return throwError(() => error);
       }
 

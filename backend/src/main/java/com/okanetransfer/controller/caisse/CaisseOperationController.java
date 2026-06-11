@@ -45,7 +45,7 @@ public class CaisseOperationController {
     }
 
     @PostMapping("ouvrir")
-    @PreAuthorize("hasRole('ROLE_AGENT')")
+    @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<CaisseOperationResponse> ouvrirCaisse(@RequestParam("agentEmail") String agentEmail, @RequestParam("montantInitial") BigDecimal montantInitial) {
         return ResponseEntity.ok(
                 caisseOperationService.ouvrirCaisse(agentEmail, montantInitial)

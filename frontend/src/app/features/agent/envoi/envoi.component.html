@@ -54,6 +54,56 @@
           <p class="text-sm text-gray-400 mt-1">{{ 'envoi.step1Subtitle' | translate }}</p>
         </div>
 
+        <!-- ── Sélection du corridor ── -->
+        <div class="bg-[#111827] border rounded-xl p-5"
+             [ngClass]="erreursForm['corridor'] ? 'border-red-500' : 'border-[#1F2937]'">
+          <div class="flex items-center gap-2 mb-3">
+<!--            <span class="text-amber-400">🛤️</span>-->
+            <span class="text-sm font-semibold">Sélectionnez le corridor de transfert</span>
+            <span class="text-red-400 text-xs ml-1">*</span>
+          </div>
+          @if (corridors().length === 0) {
+            <p class="text-xs text-gray-500 py-2">Chargement des corridors…</p>
+          } @else {
+            <div class="relative mb-3">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">🔍</span>
+              <input type="text"
+                     [ngModel]="corridorSearch()"
+                     (ngModelChange)="corridorSearch.set($event)"
+                     placeholder="Maroc, MAD, Sénégal, EUR…"
+                     class="w-full bg-[#0B1120] border border-[#1F2937] rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all" />
+            </div>
+            <div class="grid grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-1">
+              @for (c of corridorsFiltres(); track c.id) {
+                <button type="button"
+                        (click)="onCorridorSelect(c)"
+                        class="flex flex-col items-start p-3 rounded-xl border transition-all text-left"
+                        [ngClass]="corridorSelectionne()?.id === c.id
+                          ? 'border-amber-500 bg-amber-500/10'
+                          : 'border-[#374151] bg-[#0B1120] hover:border-amber-500/40'">
+                  <div class="flex items-center gap-2 w-full">
+                    <span class="text-base leading-none">{{ getFlagEmoji(c.paysSource?.codeIso) }}</span>
+                    <span class="text-xs font-bold text-white">{{ c.paysSource?.nom ?? c.deviseSource }}</span>
+                    <span class="text-gray-500 text-xs">→</span>
+                    <span class="text-base leading-none">{{ getFlagEmoji(c.paysDestination?.codeIso) }}</span>
+                    <span class="text-xs font-bold text-white">{{ c.paysDestination?.nom ?? c.deviseDestination }}</span>
+                    @if (corridorSelectionne()?.id === c.id) {
+                      <span class="ml-auto text-amber-400 text-xs">✓</span>
+                    }
+                  </div>
+                  <div class="mt-1 text-[10px] font-semibold text-amber-500/70">{{ c.deviseSource }} → {{ c.deviseDestination }}</div>
+                </button>
+              }
+              @if (corridorsFiltres().length === 0) {
+                <p class="col-span-2 text-xs text-gray-500 text-center py-4">Aucun corridor ne correspond à "{{ corridorSearch() }}"</p>
+              }
+            </div>
+          }
+          @if (erreursForm['corridor']) {
+            <p class="text-[10px] text-red-400 mt-2">Veuillez sélectionner un corridor pour continuer.</p>
+          }
+        </div>
+
         <!-- ── Bloc recherche ── -->
         <div class="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
           <div class="flex items-center gap-2 mb-4">
@@ -213,22 +263,22 @@
               <div class="flex rounded-lg overflow-hidden border transition-all focus-within:border-amber-500 focus-within:ring-1 focus-within:ring-amber-500/20"
                    [ngClass]="(erreursForm['telephone'] || erreursForm['telephone_format']) ? 'border-red-500' : 'border-[#1F2937]'">
                 <div class="bg-[#1F2937] px-3 flex items-center justify-center text-sm font-semibold text-gray-300 border-r border-[#374151]">
-                  {{ countryPhoneCodes[nouveauClient.pays] || '+' }}
+                  {{ phonePrefix(sourceCountry()) || '+' }}
                 </div>
-                <input type="tel" [ngModel]="nouveauClient.telephone" (ngModelChange)="onPhoneInput($event, 'nouveauClient')" [placeholder]="countryPhonePlaceholders[nouveauClient.pays] || '6 00 00 00 00'"
+                <input type="tel" [ngModel]="nouveauClient.telephone" (ngModelChange)="onPhoneInput($event, 'nouveauClient')"
+                       [placeholder]="phonePlaceholder(sourceCountry())"
                        class="w-full bg-[#0B1120] px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none" />
               </div>
               @if (erreursForm['telephone']) { <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span> }
               @if (erreursForm['telephone_format']) { <span class="text-[10px] text-red-500">{{ 'envoi.invalidPhoneFormat' | translate }}</span> }
             </div>
             <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-gray-300">{{ 'envoi.pays' | translate }} <span class="text-red-400">*</span></label>
-              <select [ngModel]="nouveauClient.pays" (ngModelChange)="onPaysChange($event)"
-                      class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all appearance-none">
-                @for (pays of paysList; track pays) {
-                  <option [value]="pays">{{ pays }}</option>
-                }
-              </select>
+              <label class="text-xs font-semibold text-gray-300">{{ 'envoi.pays' | translate }}</label>
+              <div class="flex items-center gap-2 bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3">
+                <span class="text-base leading-none">{{ getFlagEmoji(sourceCountry()?.codeIso) }}</span>
+                <span class="text-sm text-white font-semibold">{{ sourceCountry()?.nom ?? '—' }}</span>
+                <span class="ml-auto text-[10px] font-bold text-amber-500">{{ sourceCountry()?.deviseCode }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -290,22 +340,23 @@
               <div class="flex rounded-lg overflow-hidden border transition-all focus-within:border-amber-500 focus-within:ring-1 focus-within:ring-amber-500/20"
                    [ngClass]="(erreursForm['b_telephone'] || erreursForm['b_telephone_format']) ? 'border-red-500' : 'border-[#1F2937]'">
                 <div class="bg-[#1F2937] px-3 flex items-center justify-center text-sm font-semibold text-gray-300 border-r border-[#374151]">
-                  {{ countryPhoneCodes[beneficiaire.paysReception] || '+' }}
+                  {{ phonePrefix(destCountry()) || '+' }}
                 </div>
-                <input type="tel" [ngModel]="beneficiaire.telephone" (ngModelChange)="onPhoneInput($event, 'beneficiaire')" [placeholder]="countryPhonePlaceholders[beneficiaire.paysReception] || '77 000 00 00'"
+                <input type="tel" [ngModel]="beneficiaire.telephone" (ngModelChange)="onPhoneInput($event, 'beneficiaire')"
+                       [placeholder]="phonePlaceholder(destCountry())"
                        class="w-full bg-[#0B1120] px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none" />
               </div>
               @if (erreursForm['b_telephone']) { <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span> }
               @if (erreursForm['b_telephone_format']) { <span class="text-[10px] text-red-500">{{ 'envoi.invalidPhoneFormat' | translate }}</span> }
             </div>
             <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-gray-300">{{ 'envoi.paysReception' | translate }} <span class="text-red-400">*</span></label>
-              <select [ngModel]="beneficiaire.paysReception" (ngModelChange)="onPaysReceptionChange($event)"
-                      class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all appearance-none">
-                @for (pays of paysReceptionList; track pays) {
-                  <option [value]="pays">{{ pays }}</option>
-                }
-              </select>
+              <label class="text-xs font-semibold text-gray-300">{{ 'envoi.paysReception' | translate }}</label>
+              <div class="flex items-center gap-2 bg-[#0B1120] border border-amber-500/30 rounded-lg px-4 py-3">
+                <span class="text-base leading-none">{{ getFlagEmoji(destCountry()?.codeIso) }}</span>
+                <span class="text-sm text-white font-semibold">{{ destCountry()?.nom ?? '—' }}</span>
+                <span class="ml-auto text-[10px] font-bold text-amber-500">{{ destCountry()?.deviseCode }}</span>
+                <span class="text-[10px] text-amber-400/70 ml-1">défini par le corridor</span>
+              </div>
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.ville' | translate }}</label>
@@ -369,25 +420,33 @@
                 {{ calcul().deviseSource ?? '—' }}
               </span>
             </div>
-            @if (erreursForm['montant']) { <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span> }
+            @if (erreursForm['montant']) {
+            <span class="text-[10px] text-red-500">{{ 'envoi.requiredField' | translate }}</span>
+          }
+          @if (fraisError() && montantEnvoye() > 0) {
+            <div class="flex items-center gap-2 rounded-lg px-3 py-2 text-[12.5px]"
+                 style="background:rgba(255,77,79,0.08);color:#FF4D4F;border:1px solid rgba(255,77,79,0.2);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>
+                <path d="M12 9v4M12 17h.01"/>
+              </svg>
+              {{ fraisError() }}
+            </div>
+          }
           </div>
 
           <div class="grid grid-cols-2 gap-4">
-            <!-- Corridor -->
+            <!-- Corridor (read-only, selected in step 1) -->
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-gray-300">{{ 'envoi.corridorLabel' | translate }}</label>
-              @if (corridors().length === 0) {
-                <p class="text-xs text-red-400 py-3">Aucun corridor actif disponible.</p>
-              } @else {
-                <select
-                  [ngModel]="corridorSelectionne()?.id"
-                  (ngModelChange)="onCorridorChange($event)"
-                  class="bg-[#0B1120] border border-[#1F2937] rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-all appearance-none">
-                  @for (c of corridors(); track c.id) {
-                    <option [value]="c.id">{{ c.deviseSource }} → {{ c.deviseDestination }}</option>
-                  }
-                </select>
-              }
+              <div class="flex items-center gap-2 bg-[#0B1120] border border-amber-500/30 rounded-lg px-4 py-3">
+                <span class="text-base leading-none">{{ getFlagEmoji(corridorSelectionne()?.paysSource?.codeIso) }}</span>
+                <span class="text-xs font-semibold text-white">{{ corridorSelectionne()?.paysSource?.nom ?? corridorSelectionne()?.deviseSource }}</span>
+                <span class="text-gray-500 text-xs">→</span>
+                <span class="text-base leading-none">{{ getFlagEmoji(corridorSelectionne()?.paysDestination?.codeIso) }}</span>
+                <span class="text-xs font-semibold text-white">{{ corridorSelectionne()?.paysDestination?.nom ?? corridorSelectionne()?.deviseDestination }}</span>
+              </div>
             </div>
             <!-- Mode de réception -->
             <div class="flex flex-col gap-1.5">
@@ -424,7 +483,7 @@
           </button>
           <button
             (click)="etapeSuivante()"
-            [disabled]="chargementEnvoi() || chargementFrais()"
+            [disabled]="chargementEnvoi() || chargementFrais() || !!fraisError()"
             class="bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm px-8 py-3 rounded-lg transition-all flex items-center gap-2 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed">
             @if (chargementEnvoi()) {
               <span class="animate-spin">⏳</span> Envoi en cours…
@@ -505,16 +564,16 @@
               <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ 'envoi.expediteur' | translate }}</p>
               <p class="text-sm font-bold text-white">{{ transfertCree()?.nomExpediteur ?? expediteurNom() ?? '—' }}</p>
               <p class="text-xs text-gray-400">
-                {{ getFlagEmoji(transfertCree()?.paysExpediteur ?? clientSelectionne()?.pays ?? nouveauClient.pays) }}
-                {{ transfertCree()?.villeExpediteur ?? 'Maroc' }}
+                {{ getFlagEmoji(sourceCountry()?.codeIso) }}
+                {{ sourceCountry()?.nom ?? nouveauClient.pays }}
               </p>
             </div>
             <div>
               <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ 'envoi.beneficiaire' | translate }}</p>
               <p class="text-sm font-bold text-white">{{ transfertCree()?.nomBeneficiaire ?? beneficiaireNom() ?? '—' }}</p>
               <p class="text-xs text-gray-400">
-                {{ getFlagEmoji(transfertCree()?.paysBeneficiaire ?? beneficiaire.paysReception) }}
-                {{ beneficiaire.ville || 'Destination' }} · {{ transfertCree()?.telephoneBeneficiaire ?? beneficiaire.telephone }}
+                {{ getFlagEmoji(destCountry()?.codeIso) }}
+                {{ beneficiaire.ville || destCountry()?.nom }} · {{ transfertCree()?.telephoneBeneficiaire ?? beneficiaire.telephone }}
               </p>
             </div>
             <div>
@@ -617,14 +676,21 @@
 
           <div class="h-px bg-[#1F2937]"></div>
 
-          <div class="flex justify-between items-center">
+          <div class="flex justify-between items-start">
             <span class="text-xs text-gray-400">{{ 'envoi.beneficiaireRecoit' | translate }}</span>
-            <span class="text-xl font-extrabold text-amber-400">
+            <span class="text-right">
               @if (chargementFrais()) {
                 <span class="text-gray-500 text-sm">Calcul…</span>
               } @else {
-                {{ formatMontant(calcul().montantRecu) }}
-                <span class="text-xs font-medium ml-1">{{ calcul().deviseDestination ?? '—' }}</span>
+                <div class="text-xl font-extrabold text-amber-400">
+                  {{ formatMontant(calcul().montantRecu) }}
+                  <span class="text-xs font-medium ml-1">{{ calcul().deviseDestination ?? '—' }}</span>
+                </div>
+                @if (calcul().deviseDestination && calcul().deviseDestination !== 'MAD' && calcul().montantNetMAD > 0) {
+                  <div class="text-[11px] text-gray-500 mt-0.5">
+                    ≈ {{ formatMontant(calcul().montantNetMAD) }} MAD
+                  </div>
+                }
               }
             </span>
           </div>

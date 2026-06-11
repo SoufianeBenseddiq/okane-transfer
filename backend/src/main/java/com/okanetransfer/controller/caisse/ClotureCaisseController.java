@@ -4,6 +4,7 @@ package com.okanetransfer.controller.caisse;
 import com.okanetransfer.service.dto.caisse.request.ClotureCaisseRequest;
 import com.okanetransfer.service.dto.caisse.response.ClotureCaisseResponse;
 import com.okanetransfer.service.facade.caisse.ClotureCaisseService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,12 @@ public class ClotureCaisseController {
     public ResponseEntity<ClotureCaisseResponse> findByAgentEmailAndDate(
             @PathVariable("email") String email,
             @PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ResponseEntity.ok(clotureCaisseService.findByAgentEmailAndDate(email, date));
+        try {
+            return ResponseEntity.ok(clotureCaisseService.findByAgentEmailAndDate(email, date));
+        } catch (EntityNotFoundException e) {
+            // No clôture yet for this date — this is the normal case during the day
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // MANAGER et ADMIN voient les écarts signalés

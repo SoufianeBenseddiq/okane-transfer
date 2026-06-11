@@ -6,6 +6,7 @@ export interface CaisseOperationResponse {
   agentNom: string;
   type: TypeOperation;
   montant: number;
+  devise: string;              // actual currency: MAD for ENVOI, EUR/XOF/… for RETRAIT
   dateHeure: string;
   referenceTransfert: string | null;
 }

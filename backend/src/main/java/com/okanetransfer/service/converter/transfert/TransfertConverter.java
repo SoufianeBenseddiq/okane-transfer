@@ -1,6 +1,7 @@
 package com.okanetransfer.service.converter.transfert;
 
 
+import com.okanetransfer.entity.devise.Corridor;
 import com.okanetransfer.entity.transfert.Transfert;
 import com.okanetransfer.entity.user.Client;
 import com.okanetransfer.service.dto.transfert.response.TransfertResponse;
@@ -46,8 +47,8 @@ public class TransfertConverter {
         if (t.getExpediteur() != null && t.getExpediteur().getClient() != null) {
             Client client = t.getExpediteur().getClient();
             r.setNomExpediteur(client.getNom() + " " + client.getPrenom());
-            r.setPaysExpediteur(client.getPays());
-            r.setVilleExpediteur(client.getPays());
+            r.setPaysExpediteur(client.getPays() != null ? client.getPays().getNom() : null);
+            r.setVilleExpediteur(client.getPays() != null ? client.getPays().getNom() : null);
             r.setTelephoneExpediteur(client.getTelephone());
         }
 
@@ -65,14 +66,18 @@ public class TransfertConverter {
             r.setAgentId(t.getAgentSaisie().getId());
         }
 
-        // ── Corridor → devise de réception ────────────────────────────────────
-        if (t.getCorridor() != null && t.getCorridor().getDeviseDestination() != null) {
-            r.setDeviseReception(t.getCorridor().getDeviseDestination().getCode());
+        // ── Corridor → devise de réception (derived from pays.devise) ────────────
+        Corridor corridor = t.getCorridor();
+        if (corridor != null
+                && corridor.getPaysDestination() != null
+                && corridor.getPaysDestination().getDevise() != null) {
 
-            BigDecimal tauxSource = t.getCorridor().getDeviseSource() != null
-                    ? t.getCorridor().getDeviseSource().getTauxVersEuro()
+            r.setDeviseReception(corridor.getPaysDestination().getDevise().getCode());
+
+            BigDecimal tauxSource = (corridor.getPaysSource() != null && corridor.getPaysSource().getDevise() != null)
+                    ? corridor.getPaysSource().getDevise().getTauxVersEuro()
                     : null;
-            BigDecimal tauxDest = t.getCorridor().getDeviseDestination().getTauxVersEuro();
+            BigDecimal tauxDest = corridor.getPaysDestination().getDevise().getTauxVersEuro();
 
             if (tauxSource != null && tauxDest != null
                     && tauxDest.compareTo(BigDecimal.ZERO) != 0) {

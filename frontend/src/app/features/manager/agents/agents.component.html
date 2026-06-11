@@ -44,11 +44,11 @@
       </div>
     </div>
 
-    <!-- Other Agents Grid -->
-    <div *ngIf="otherAgents.length > 0" class="agents-section">
-      <h3>{{ 'manager.agents.others' | translate }}</h3>
+    <!-- All team members -->
+    <div *ngIf="agents.length > 0" class="agents-section">
+      <h3>{{ 'manager.agents.allMembers' | translate }}</h3>
       <div class="agents-grid">
-        <div *ngFor="let agent of otherAgents" class="agent-card" [ngClass]="'status-' + agent.status">
+        <div *ngFor="let agent of agents" class="agent-card" [ngClass]="'status-' + agent.status">
           <div class="agent-header">
             <h3>{{ agent.prenom }} {{ agent.nom }}</h3>
             <span class="status-badge" [ngClass]="agent.status">

@@ -1,36 +1,21 @@
 package com.okanetransfer.service.facade.aml;
 
-import java.util.List;
-
 import com.okanetransfer.entity.aml.DeclarationSoupcon;
 import com.okanetransfer.entity.transfert.Transfert;
 
+import java.util.List;
+
 public interface IAmlService {
 
-    /**
-     * Vérifie si l'expéditeur ou le bénéficiaire est sur la liste OFAC
-     * @param transfert le transfert à vérifier
-     * @throws OFACViolationException si une personne est trouvée sur la liste
-     */
+    /** Blocks transfer if sender or beneficiary matches the OFAC sanctions list. */
     void verifierOFAC(Transfert transfert);
 
-    /**
-     * Évalue un transfert contre toutes les règles AML actives
-     * @param transfert le transfert à évaluer
-     * @return la liste des déclarations générées (peut être vide)
-     */
+    /** Evaluates a transfer against all active AML rules and creates declarations. */
     List<DeclarationSoupcon> evaluerTransfert(Transfert transfert);
 
-    /**
-     * Récupère toutes les déclarations de soupçon
-     * @return liste de toutes les déclarations
-     */
+    /** Returns all suspicious declarations. */
     List<DeclarationSoupcon> getDeclarations();
 
-    /**
-     * Marque une déclaration comme traitée par l'admin
-     * @param declarationId l'id de la déclaration
-     * @return la déclaration mise à jour
-     */
+    /** Marks a declaration as processed. */
     DeclarationSoupcon traiterDeclaration(Long declarationId);
 }

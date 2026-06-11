@@ -11,56 +11,31 @@ public class Corridor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "devise_source_id", nullable = false)
-    private Devise deviseSource;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "pays_source_id", nullable = false)
+    private Pays paysSource;
 
-    @ManyToOne
-    @JoinColumn(name = "devise_destination_id", nullable = false)
-    private Devise deviseDestination;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "pays_destination_id", nullable = false)
+    private Pays paysDestination;
 
     @Column(nullable = false)
     private Boolean actif = true;
 
     private LocalDate dateActivation;
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Pays getPaysSource() { return paysSource; }
+    public void setPaysSource(Pays paysSource) { this.paysSource = paysSource; }
 
-    public Devise getDeviseSource() {
-        return deviseSource;
-    }
+    public Pays getPaysDestination() { return paysDestination; }
+    public void setPaysDestination(Pays paysDestination) { this.paysDestination = paysDestination; }
 
-    public void setDeviseSource(Devise deviseSource) {
-        this.deviseSource = deviseSource;
-    }
+    public Boolean getActif() { return actif; }
+    public void setActif(Boolean actif) { this.actif = actif; }
 
-    public Devise getDeviseDestination() {
-        return deviseDestination;
-    }
-
-    public void setDeviseDestination(Devise deviseDestination) {
-        this.deviseDestination = deviseDestination;
-    }
-
-    public Boolean getActif() {
-        return actif;
-    }
-
-    public void setActif(Boolean actif) {
-        this.actif = actif;
-    }
-
-    public LocalDate getDateActivation() {
-        return dateActivation;
-    }
-
-    public void setDateActivation(LocalDate dateActivation) {
-        this.dateActivation = dateActivation;
-    }
+    public LocalDate getDateActivation() { return dateActivation; }
+    public void setDateActivation(LocalDate dateActivation) { this.dateActivation = dateActivation; }
 }

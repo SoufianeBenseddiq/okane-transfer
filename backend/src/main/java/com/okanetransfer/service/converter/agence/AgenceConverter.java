@@ -30,6 +30,7 @@ public class AgenceConverter {
         response.setPays(agence.getPays());
         response.setPlafondJournalier(agence.getPlafondJournalier());
         response.setMontantTraiteAujourdhui(agence.getMontantTraiteAujourdhui());
+        response.setSoldeCaisseAgence(agence.getSoldeCaisseAgence() != null ? agence.getSoldeCaisseAgence() : java.math.BigDecimal.ZERO);
         response.setActive(agence.getActive());
         response.setEstCentrale(agence.getEstCentrale());
 

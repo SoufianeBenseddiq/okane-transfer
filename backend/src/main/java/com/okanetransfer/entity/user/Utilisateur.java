@@ -1,5 +1,6 @@
 package com.okanetransfer.entity.user;
 
+import com.okanetransfer.entity.devise.Pays;
 import com.okanetransfer.shared.enums.RoleUtilisateur;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -29,8 +30,9 @@ public abstract class Utilisateur {
     @Column(nullable = false)
     private String telephone;
 
-    @Column(nullable = false)
-    private String pays;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "pays_id")
+    private Pays pays;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -47,83 +49,33 @@ public abstract class Utilisateur {
         this.creeLe = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getNom() { return nom; }
+    public void setNom(String nom) { this.nom = nom; }
 
-    public String getNom() {
-        return nom;
-    }
+    public String getPrenom() { return prenom; }
+    public void setPrenom(String prenom) { this.prenom = prenom; }
 
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getPrenom() {
-        return prenom;
-    }
+    public String getMotDePasseHash() { return motDePasseHash; }
+    public void setMotDePasseHash(String motDePasseHash) { this.motDePasseHash = motDePasseHash; }
 
-    public void setPrenom(String prenom) {
-        this.prenom = prenom;
-    }
+    public String getTelephone() { return telephone; }
+    public void setTelephone(String telephone) { this.telephone = telephone; }
 
-    public String getEmail() {
-        return email;
-    }
+    public Pays getPays() { return pays; }
+    public void setPays(Pays pays) { this.pays = pays; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public RoleUtilisateur getRole() { return role; }
+    public void setRole(RoleUtilisateur role) { this.role = role; }
 
-    public String getMotDePasseHash() {
-        return motDePasseHash;
-    }
+    public Boolean getActif() { return actif; }
+    public void setActif(Boolean actif) { this.actif = actif; }
 
-    public void setMotDePasseHash(String motDePasseHash) {
-        this.motDePasseHash = motDePasseHash;
-    }
-
-    public String getTelephone() {
-        return telephone;
-    }
-
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
-    }
-
-    public String getPays() {
-        return pays;
-    }
-
-    public void setPays(String pays) {
-        this.pays = pays;
-    }
-
-    public RoleUtilisateur getRole() {
-        return role;
-    }
-
-    public void setRole(RoleUtilisateur role) {
-        this.role = role;
-    }
-
-    public Boolean getActif() {
-        return actif;
-    }
-
-    public void setActif(Boolean actif) {
-        this.actif = actif;
-    }
-
-    public LocalDateTime getCreeLe() {
-        return creeLe;
-    }
-
-    public void setCreeLe(LocalDateTime creeLe) {
-        this.creeLe = creeLe;
-    }
+    public LocalDateTime getCreeLe() { return creeLe; }
+    public void setCreeLe(LocalDateTime creeLe) { this.creeLe = creeLe; }
 }

@@ -10,20 +10,53 @@
 
 <div class="flex-1 overflow-y-auto p-4 sm:p-7 flex flex-col gap-5">
 
-  <!-- Corridor tabs -->
-  <div class="flex rounded-[10px] p-0.5 flex-wrap gap-0.5 overflow-x-auto"
-       style="background:rgba(255,255,255,0.05);">
-    @if (loadingCorridors) {
-      <span class="px-4 py-[7px] text-[12.5px]" style="color:rgba(255,255,255,0.4);">{{ 'frais.loading' | translate }}</span>
-    } @else {
-      @for (c of corridors; track c.id) {
-        <button (click)="selectCorridor(c.id)"
-                class="px-[14px] py-[7px] rounded-[7px] text-[12.5px] font-semibold cursor-pointer border-none outline-none whitespace-nowrap"
-                [style.background]="activeCorridorId === c.id ? '#F5A623' : 'transparent'"
-                [style.color]="activeCorridorId === c.id ? '#1A1F36' : 'rgba(255,255,255,0.55)'">
-          {{ c.deviseSource }} → {{ c.deviseDestination }}
-        </button>
+  <!-- Corridor selector -->
+  <div class="rounded-[12px] p-4 flex flex-col gap-3"
+       style="background:#252B45;border:1px solid rgba(255,255,255,0.08);">
+
+    <div class="flex items-center justify-between">
+      <div class="text-[10.5px] font-semibold tracking-[0.1em] uppercase" style="color:#F5A623;">
+        {{ 'frais.corridorSelect' | translate }}
+      </div>
+      @if (activeCorridor) {
+        <span class="text-[12px] font-semibold px-2.5 py-1 rounded-[6px]"
+              style="background:rgba(245,166,35,0.12);color:#F5A623;">
+          {{ activeCorridor.paysSource?.nom }} → {{ activeCorridor.paysDestination?.nom }}
+          <span style="opacity:0.6;font-weight:400;">({{ activeCorridor.deviseSource }} → {{ activeCorridor.deviseDestination }})</span>
+        </span>
       }
+    </div>
+
+    @if (loadingCorridors) {
+      <div class="flex items-center gap-2 text-[12.5px]" style="color:rgba(255,255,255,0.4);">
+        <div class="w-4 h-4 rounded-full border-2 animate-spin" style="border-color:rgba(255,255,255,0.12);border-top-color:#F5A623;"></div>
+        {{ 'frais.loading' | translate }}
+      </div>
+    } @else {
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style="color:rgba(255,255,255,0.35);">
+          <app-icon name="search" [size]="14" />
+        </span>
+        <input [(ngModel)]="corridorSearch"
+               placeholder="Maroc, France, EUR, XOF…"
+               class="w-full pl-9 pr-3 py-2 rounded-[8px] text-[13px] outline-none"
+               style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+      </div>
+
+      <div class="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto pr-1">
+        @for (c of filteredCorridors; track c.id) {
+          <button (click)="selectCorridor(c.id)"
+                  class="px-3 py-1.5 rounded-[7px] text-[12px] font-semibold cursor-pointer border outline-none whitespace-nowrap transition-all"
+                  [style.background]="activeCorridorId === c.id ? '#F5A623' : 'rgba(255,255,255,0.04)'"
+                  [style.color]="activeCorridorId === c.id ? '#1A1F36' : 'rgba(255,255,255,0.65)'"
+                  [style.border-color]="activeCorridorId === c.id ? '#F5A623' : 'rgba(255,255,255,0.08)'">
+            {{ c.paysSource?.nom }} → {{ c.paysDestination?.nom }}
+          </button>
+        }
+        @if (filteredCorridors.length === 0) {
+          <span class="text-[12px] py-1" style="color:rgba(255,255,255,0.35);">Aucun corridor ne correspond à "{{ corridorSearch }}"</span>
+        }
+      </div>
     }
   </div>
 
@@ -43,7 +76,12 @@
             {{ 'frais.grille.title' | translate }}
             @if (activeCorridor) {
               <span style="color:rgba(255,255,255,0.55);font-weight:400;font-size:14px;">
-                — {{ activeCorridor.deviseSource }} → {{ activeCorridor.deviseDestination }}
+                @if (activeCorridor.paysSource && activeCorridor.paysDestination) {
+                  — {{ activeCorridor.paysSource.nom }} → {{ activeCorridor.paysDestination.nom }}
+                  <span style="font-size:12px;opacity:0.6;">({{ activeCorridor.deviseSource }} → {{ activeCorridor.deviseDestination }})</span>
+                } @else {
+                  — {{ activeCorridor.deviseSource }} → {{ activeCorridor.deviseDestination }}
+                }
               </span>
             }
           </div>
@@ -77,14 +115,15 @@
                 <tr [style.background]="i%2===1 ? 'rgba(255,255,255,0.02)' : 'transparent'"
                     [style.border-bottom]="!last ? '1px solid rgba(255,255,255,0.06)' : 'none'">
                   <td class="px-5 py-3 font-semibold" style="color:#fff;font-variant-numeric:tabular-nums;">
-                    {{ g.montantMin }} — {{ g.montantMax }} MAD
+                    {{ g.montantMin }} — {{ g.montantMax }}
+                    <span class="text-[11px] font-normal" style="color:#F5A623;">{{ activeCorridor?.deviseSource }}</span>
                   </td>
                   <td class="px-5 py-3 text-right font-semibold" style="color:#F5A623;font-variant-numeric:tabular-nums;">
-                    {{ g.fraisFixe }} MAD
+                    {{ g.fraisFixe }} {{ activeCorridor?.deviseSource }}
                   </td>
                   <td class="px-5 py-3 text-right font-semibold" style="color:#F5A623;">{{ g.fraisPourcentage }}%</td>
-                  <td class="px-5 py-3 text-right" style="color:#F3F4F8;">{{ g.partAgence }} MAD</td>
-                  <td class="px-5 py-3 text-right" style="color:#F3F4F8;">{{ g.partCentrale }} MAD</td>
+                  <td class="px-5 py-3 text-right" style="color:#F3F4F8;">{{ g.partAgence }} {{ activeCorridor?.deviseSource }}</td>
+                  <td class="px-5 py-3 text-right" style="color:#F3F4F8;">{{ g.partCentrale }} {{ activeCorridor?.deviseSource }}</td>
                   <td class="px-5 py-3 text-right">
                     <span class="inline-flex gap-1">
                       <button (click)="openEdit(g)"
@@ -151,7 +190,10 @@
           <div class="flex items-center gap-2 px-3 py-2 rounded-[8px] text-[12px]"
                style="background:rgba(245,166,35,0.08);color:#F5A623;border:1px solid rgba(245,166,35,0.15);">
             <app-icon name="arrowRight" [size]="13" color="#F5A623" />
-            {{ activeCorridor.deviseSource }} → {{ activeCorridor.deviseDestination }}
+            {{ activeCorridor.paysSource?.nom ?? activeCorridor.deviseSource }}
+            ({{ activeCorridor.deviseSource }}) →
+            {{ activeCorridor.paysDestination?.nom ?? activeCorridor.deviseDestination }}
+            ({{ activeCorridor.deviseDestination }})
           </div>
         }
 
@@ -250,7 +292,7 @@
               <input [(ngModel)]="simulatorAmount" type="number" min="1"
                      class="text-[26px] font-bold flex-1 bg-transparent border-none outline-none"
                      style="color:#fff;font-variant-numeric:tabular-nums;" />
-              <span class="text-[13px] font-semibold" style="color:#F5A623;">MAD</span>
+              <span class="text-[13px] font-semibold" style="color:#F5A623;">{{ activeCorridor?.deviseSource ?? 'MAD' }}</span>
             </div>
           </div>
 
@@ -259,7 +301,10 @@
             <div class="flex items-center gap-2 px-3 py-[9px] rounded-[10px] text-[13px]"
                  style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#fff;">
               @if (activeCorridor) {
-                <span class="flex-1">{{ activeCorridor.deviseSource }} → {{ activeCorridor.deviseDestination }}</span>
+                <span class="flex-1">
+                  {{ activeCorridor.paysSource?.nom ?? activeCorridor.deviseSource }}
+                  → {{ activeCorridor.paysDestination?.nom ?? activeCorridor.deviseDestination }}
+                </span>
               } @else {
                 <span class="flex-1" style="color:rgba(255,255,255,0.4);">{{ 'common.choose' | translate }}</span>
               }
@@ -283,20 +328,22 @@
           <div class="flex flex-col gap-2 pt-4" style="border-top:1px dashed rgba(255,255,255,0.08);">
             <div class="flex justify-between items-baseline">
               <span class="text-[12px]" style="color:rgba(255,255,255,0.55);">{{ 'frais.sim.totalFees' | translate }}</span>
-              <span class="text-[13px] font-semibold font-mono" style="color:#fff;">− {{ fraisResult.montantFrais }} MAD</span>
+              <span class="text-[13px] font-semibold font-mono" style="color:#fff;">− {{ fraisResult.montantFrais }} {{ activeCorridor?.deviseSource }}</span>
             </div>
             <div class="flex justify-between items-baseline">
               <span class="text-[12px]" style="color:rgba(255,255,255,0.55);">{{ 'frais.sim.agencePart' | translate }}</span>
-              <span class="text-[13px] font-semibold" style="color:#F3F4F8;">{{ fraisResult.partAgence }} MAD</span>
+              <span class="text-[13px] font-semibold" style="color:#F3F4F8;">{{ fraisResult.partAgence }} {{ activeCorridor?.deviseSource }}</span>
             </div>
             <div class="flex justify-between items-baseline">
               <span class="text-[12px]" style="color:rgba(255,255,255,0.55);">{{ 'frais.sim.centralePart' | translate }}</span>
-              <span class="text-[13px] font-semibold" style="color:#F3F4F8;">{{ fraisResult.partCentrale }} MAD</span>
+              <span class="text-[13px] font-semibold" style="color:#F3F4F8;">{{ fraisResult.partCentrale }} {{ activeCorridor?.deviseSource }}</span>
             </div>
             <div class="my-1" style="height:1px;background:rgba(255,255,255,0.08);"></div>
             <div class="flex justify-between items-baseline mt-1">
               <span class="text-[12px]" style="color:rgba(255,255,255,0.55);">{{ 'frais.sim.received' | translate }}</span>
-              <span class="text-[20px] font-bold font-mono" style="color:#F5A623;">{{ fraisResult.montantRecu }} MAD</span>
+              <span class="text-[20px] font-bold font-mono" style="color:#F5A623;">
+                {{ fraisResult.montantRecu }} {{ activeCorridor?.deviseDestination }}
+              </span>
             </div>
           </div>
         } @else if (!calculating && activeCorridorId) {
