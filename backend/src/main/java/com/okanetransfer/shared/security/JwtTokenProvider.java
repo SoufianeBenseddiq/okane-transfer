@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -20,7 +21,7 @@ import java.util.Set;
  *   - refresh token → durée de vie 7j  (604 800 000 ms) — utilisé pour renouveler l'access token
  *
  * Algorithme de signature : HS256 (HMAC-SHA256)
- * Clé secrète : lue depuis la variable d'environnement JWT_SECRET (min 32 chars)
+ * Clé secrète : lue depuis la propriété jwt.secret (application.properties → ${JWT_SECRET}, min 32 chars)
  *
  * Utilisé par :
  *   - AuthServiceImpl    → generateAccessToken(), generateRefreshToken(), invalidateToken()
@@ -30,31 +31,30 @@ import java.util.Set;
 @Component
 public class JwtTokenProvider {
 
-    // durée de vie de l'access token : 1 heure en millisecondes
-    private static final long ACCESS_TOKEN_EXPIRATION  = 3_600_000L;
+    // durée de vie de l'access token en millisecondes (jwt.expiration)
+    private final long accessTokenExpiration;
 
     // durée de vie du refresh token : 7 jours en millisecondes
     private static final long REFRESH_TOKEN_EXPIRATION = 604_800_000L;
 
-    // clé de signature dérivée de JWT_SECRET (variable d'environnement)
+    // clé de signature dérivée de jwt.secret (application.properties)
     private final SecretKey secretKey;
 
     // blacklist des tokens invalidés (logout)
     // en production → utiliser Redis avec TTL = expiration du token
     private final Set<String> blacklistedTokens = new HashSet<>();
 
-    public JwtTokenProvider() {
-        // lire la clé depuis la variable d'environnement
-        String secret = System.getenv("JWT_SECRET");
-
+    public JwtTokenProvider(@Value("${jwt.secret}") String secret,
+                             @Value("${jwt.expiration}") long accessTokenExpiration) {
         if (secret == null || secret.length() < 32) {
             throw new IllegalStateException(
-                "JWT_SECRET manquante ou trop courte (minimum 32 caractères requis)"
+                "jwt.secret manquant ou trop court (minimum 32 caractères requis)"
             );
         }
 
         // dériver une SecretKey HMAC-SHA256 depuis la chaîne de caractères
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+        this.accessTokenExpiration = accessTokenExpiration;
     }
 
     // =========================================================================
@@ -75,7 +75,7 @@ public class JwtTokenProvider {
      */
     public String generateAccessToken(Utilisateur utilisateur) {
         Date now        = new Date();
-        Date expiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION);
+        Date expiration = new Date(now.getTime() + accessTokenExpiration);
 
         return Jwts.builder()
             .subject(utilisateur.getEmail())                  // sub = email

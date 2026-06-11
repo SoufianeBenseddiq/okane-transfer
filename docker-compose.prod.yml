@@ -31,9 +31,9 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      JWT_SECRET: fdb501b55b32d91cbd5957beb846dea8
-      AES_SECRET_KEY: fdb501b55b32d91cbd5957beb846dea8
-      AES_IV: 677722ca8f2f3a9c
+      JWT_SECRET: ${JWT_SECRET}
+      AES_SECRET_KEY: ${AES_SECRET_KEY}
+      AES_IV: ${AES_IV}
     ports:
       - "8080:8080"
     depends_on:
