@@ -7,10 +7,7 @@ import com.okanetransfer.entity.devise.Corridor;
 import com.okanetransfer.entity.devise.Devise;
 import com.okanetransfer.entity.devise.GrilleTarifaire;
 import com.okanetransfer.entity.devise.Pays;
-import com.okanetransfer.entity.user.Administrateur;
-import com.okanetransfer.entity.user.Agent;
-import com.okanetransfer.entity.user.Manager;
-import com.okanetransfer.entity.user.Utilisateur;
+import com.okanetransfer.entity.user.*;
 import com.okanetransfer.repository.agence.AgenceRepository;
 import com.okanetransfer.repository.aml.JournalAuditRepository;
 import com.okanetransfer.repository.aml.RegleAMLRepository;
@@ -298,6 +295,7 @@ public class DataInitializer {
         saveAgent("soufiane.benseddiq@okanetransfer.ma",    "Benseddiq", "Soufiane",   "+212662000002", marrakech, maroc);
         saveAgent("yousfi.btissam@okanetransfer.ma",        "Yousfi",    "Btissam",    "+212662000003", casablanca, maroc);
         saveAgent("abdelghani.bensalih@okanetransfer.ma",   "Bensalih",  "Abdelghani", "+212662000004", casablanca, maroc);
+        saveClient("client.test@okanetransfer.ma", "Alaoui", "Youssef", "+212663000001", maroc);
     }
 
     private void saveManager(String email, String nom, String prenom, String tel, Agence agence, Pays pays) {
@@ -320,6 +318,17 @@ public class DataInitializer {
         a.setRole(RoleUtilisateur.ROLE_AGENT);
         a.setActif(true); a.setAgence(agence);
         utilisateurRepository.save(a);
+    }
+
+    private void saveClient(String email, String nom, String prenom, String tel, Pays pays) {
+        if (utilisateurRepository.existsByEmail(email)) return;
+        Client c = new Client();
+        c.setNom(nom); c.setPrenom(prenom); c.setEmail(email);
+        c.setMotDePasseHash(passwordEncoder.encode("Okane123"));
+        c.setTelephone(tel); c.setPays(pays);
+        c.setRole(RoleUtilisateur.ROLE_CLIENT);
+        c.setActif(true); c.setTwoFactorActive(false);
+        utilisateurRepository.save(c);
     }
 
     // ── Règles AML ────────────────────────────────────────────────────────────

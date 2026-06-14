@@ -719,6 +719,13 @@
     "warningSuffix":      "will be reported to Karim Benjelloun (Manager).",
     "cancel":             "Cancel",
     "validate":           "Validate closing"
+  },
+  "NAV": {
+    "ACCUEIL": "Home",
+    "ENVOYER": "Send",
+    "MES_TRANSFERTS": "My transfers",
+    "BENEFICIAIRES": "Beneficiaries",
+    "AIDE": "Help"
   }
 
 }

@@ -713,5 +713,12 @@
     "warningSuffix":      "إلى كريم بنجلون (المدير).",
     "cancel":             "إلغاء",
     "validate":           "تأكيد الإغلاق"
+  },
+  "NAV": {
+    "ACCUEIL": "الرئيسية",
+    "ENVOYER": "إرسال",
+    "MES_TRANSFERTS": "تحويلاتي",
+    "BENEFICIAIRES": "المستفيدون",
+    "AIDE": "المساعدة"
   }
 }

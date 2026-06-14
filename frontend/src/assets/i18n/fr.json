@@ -721,5 +721,12 @@
     "warningSuffix":      "sera signalé à Karim Benjelloun (Manager).",
     "cancel":             "Annuler",
     "validate":           "Valider la clôture"
+  },
+  "NAV": {
+    "ACCUEIL": "Accueil",
+    "ENVOYER": "Envoyer",
+    "MES_TRANSFERTS": "Mes transferts",
+    "BENEFICIAIRES": "Bénéficiaires",
+    "AIDE": "Aide"
   }
 }
