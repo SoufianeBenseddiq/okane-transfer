@@ -17,8 +17,14 @@ export const clientRoutes: Routes = [
           import('./dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
-        path: 'historique',        loadComponent: () =>
+        path: 'historique',
+        loadComponent: () =>
           import('./historique/historique.component').then(m => m.HistoriqueComponent)
+      },
+      {
+        path: 'transfert/:id',
+        loadComponent: () =>
+          import('./historique/transfer-detail/transfer-detail.component').then(m => m.TransferDetailComponent)
       },
       {
         path: 'suivi/:reference',

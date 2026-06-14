@@ -1,0 +1,196 @@
+<div class="transfer-wrapper">
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <span>Mes transferts</span>
+    <span class="separator">/</span>
+    <span class="active">Détail</span>
+  </div>
+
+  <!-- Bouton retour -->
+  <button class="back-button" *ngIf="transfertId" (click)="onClose()">
+    <lucide-angular [img]="icons.ArrowLeft" class="icon-16"></lucide-angular>
+    Retour
+  </button>
+
+  <!-- État de chargement -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <!-- État d'erreur -->
+  <div class="error-state" *ngIf="error && !loading">
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="transfer-detail" *ngIf="!loading && !error && transfert">
+    <!-- HERO : statut du transfert (style dashboard, fond navy) -->
+    <div class="hero-section" [ngClass]="getStatutClass()">
+      <div class="hero-top">
+        <div class="hero-left">
+          <div class="hero-label">TRANSFERT</div>
+          <h1 class="reference-number">{{ transfert.numeroReference }}</h1>
+          <span class="status-badge" [ngClass]="getStatutClass()">
+            <lucide-angular [img]="getStatutIcon()" class="icon-14"></lucide-angular>
+            {{ transfert.statut }}
+          </span>
+        </div>
+        <div class="header-actions">
+          <button class="action-btn" (click)="onPrint()" title="Imprimer le reçu">
+            <lucide-angular [img]="icons.Printer" class="icon-20"></lucide-angular>
+          </button>
+        </div>
+      </div>
+
+      <!-- Timeline de progression -->
+      <div class="hero-timeline">
+        <div
+          class="step"
+          *ngFor="let step of getSteps(); let last = last"
+          [class.done]="step.done"
+          [class.active]="step.active"
+        >
+          <div class="step-marker">
+            <lucide-angular *ngIf="step.done" [img]="icons.Check" class="icon-14"></lucide-angular>
+          </div>
+          <div class="step-label">{{ step.label }}</div>
+          <div class="step-line" *ngIf="!last"></div>
+        </div>
+      </div>
+
+      <div class="hero-description">
+        <lucide-angular [img]="getStatutIcon()" class="icon-16"></lucide-angular>
+        <span *ngIf="transfert.statut === 'PAYE'">Le transfert a été payé avec succès au bénéficiaire.</span>
+        <span *ngIf="transfert.statut === 'EN_ATTENTE'">Le transfert est en attente de retrait.</span>
+        <span *ngIf="transfert.statut === 'ANNULE'">Ce transfert a été annulé.</span>
+        <span *ngIf="transfert.statut === 'EXPIRE'">Le délai de retrait a expiré.</span>
+        <span *ngIf="transfert.statut === 'BLOQUE'">Ce transfert est temporairement bloqué.</span>
+      </div>
+    </div>
+
+    <!-- Withdrawal Code Section -->
+    <div class="withdrawal-section">
+      <h3>CODE DE RETRAIT</h3>
+      <div class="code-container">
+        <div class="code-display">
+          <lucide-angular [img]="icons.ShieldCheck" class="icon-20 code-shield"></lucide-angular>
+          <span class="code-value">
+            {{ codeVisible ? transfert.codeRetrait : maskCode(transfert.codeRetrait) }}
+          </span>
+        </div>
+        <button class="code-action" (click)="copyToClipboard(transfert.codeRetrait)" title="Copier le code">
+          <lucide-angular [img]="icons.Copy" class="icon-18"></lucide-angular>
+        </button>
+        <button class="code-action reveal" (click)="toggleCodeVisibility()" title="Afficher le code">
+          <lucide-angular [img]="codeVisible ? icons.EyeOff : icons.Eye" class="icon-18"></lucide-angular>
+        </button>
+      </div>
+      <p class="code-info">Communiquez ce code uniquement au bénéficiaire.</p>
+    </div>
+
+    <!-- Parties Section -->
+    <div class="parties-section">
+      <div class="party-card">
+        <h3>EXPÉDITEUR</h3>
+        <div class="party-header">
+          <div class="avatar">{{ transfert.nomExpediteur.charAt(0).toUpperCase() }}</div>
+          <div class="party-info">
+            <div class="name">{{ transfert.nomExpediteur }}</div>
+            <div class="location">
+              <lucide-angular [img]="icons.MapPin" class="icon-14"></lucide-angular>
+              {{ transfert.villeExpediteur }}, {{ transfert.paysExpediteur }}
+            </div>
+          </div>
+        </div>
+        <div class="party-details">
+          <div class="detail-row">
+            <span class="label">CIN</span>
+            <span class="value">•• ••• •• ••78</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Téléphone</span>
+            <span class="value">{{ transfert.telephoneExpediteur }}</span>
+          </div>
+          <div class="detail-row" *ngIf="transfert.agenceEnvoi">
+            <span class="label">Agence</span>
+            <span class="value">{{ transfert.agenceEnvoi }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="party-card">
+        <h3>BÉNÉFICIAIRE</h3>
+        <div class="party-header">
+          <div class="avatar">{{ transfert.nomBeneficiaire.charAt(0).toUpperCase() }}</div>
+          <div class="party-info">
+            <div class="name">{{ transfert.nomBeneficiaire }}</div>
+            <div class="location">
+              <lucide-angular [img]="icons.MapPin" class="icon-14"></lucide-angular>
+              {{ transfert.villeBeneficiaire }}, {{ transfert.paysBeneficiaire }}
+            </div>
+          </div>
+        </div>
+        <div class="party-details">
+          <div class="detail-row">
+            <span class="label">Téléphone</span>
+            <span class="value">{{ transfert.telephoneBeneficiaire }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Moyen de retrait</span>
+            <span class="value">Cash au guichet · réseau OkaneTransfer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financial Section -->
+    <div class="financial-section">
+      <h3>DÉTAILS FINANCIERS</h3>
+      <div class="financial-details">
+        <div class="detail-row">
+          <span class="label">Montant envoyé</span>
+          <span class="value">{{ transfert.montantEnvoye | number: '1.2-2' }} MAD</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Frais OkaneTransfer</span>
+          <span class="value">- {{ transfert.frais | number: '1.2-2' }} MAD</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Taux du jour appliqué</span>
+          <span class="value">1 MAD = {{ transfert.tauxChange | number: '1.2-2' }} {{ transfert.deviseReception }}</span>
+        </div>
+        <div class="detail-row total">
+          <span class="label">{{ transfert.nomBeneficiaire }} reçoit</span>
+          <span class="value">{{ transfert.montantRecu | number: '1.2-2' }} {{ transfert.deviseReception }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expiration Section -->
+    <div class="expiration-section">
+      <h3>INFORMATIONS</h3>
+      <div class="expiration-content">
+        <div class="expiration-date">
+          <span class="label">
+            <lucide-angular [img]="icons.Calendar" class="icon-16"></lucide-angular>
+            Date d'expiration
+          </span>
+          <span class="value">{{ transfert.expireLe | date: 'dd / MM / yyyy' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="footer-actions">
+      <button class="btn btn-primary" (click)="onPrint()">
+        <lucide-angular [img]="icons.Printer" class="icon-18"></lucide-angular>
+        Imprimer le reçu
+      </button>
+      <button class="btn btn-close" (click)="onClose()">
+        <lucide-angular [img]="icons.X" class="icon-18"></lucide-angular>
+        Fermer
+      </button>
+    </div>
+  </div>
+</div>
