@@ -5,9 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a3eb003a-893a-4117-8a7d-2a521cf408bd" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/app.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/app.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/features/client/dashboard/dashboard.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/features/client/dashboard/dashboard.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/features/client/dashboard/dashboard.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/features/client/dashboard/dashboard.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/okanetransfer/shared/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/okanetransfer/shared/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/features/client/dashboard/dashboard.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/features/client/dashboard/dashboard.service.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,7 +45,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "Tomcat Server.Tomcat 10.1.521.executor": "Run",
-    "com.google.cloudcode.ide_session_index": "20260529_0001",
+    "com.google.cloudcode.ide_session_index": "20260614_0003",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "OT-51-implementation-dashboard-client-interface",
     "junie.onboarding.icon.badge.shown": "true",
@@ -84,7 +84,7 @@
   </component>
   <component name="RunManager">
     <configuration name="Tomcat 10.1.521" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local" APPLICATION_SERVER_NAME="Tomcat 10.1.521" ALTERNATIVE_JRE_ENABLED="false" nameIsGenerated="true">
-      <option name="OPEN_IN_BROWSER_URL" value="http://localhost:8080/okane_transfer_war/" />
+      <option name="OPEN_IN_BROWSER_URL" value="http://localhost:8080/okane_transfer_war" />
       <option name="UPDATING_POLICY" value="restart-server" />
       <deployment>
         <file path="$PROJECT_DIR$/backend/target/okane-transfer-1.0-SNAPSHOT.war">
@@ -94,7 +94,7 @@
         </file>
       </deployment>
       <server-settings>
-        <option name="BASE_DIRECTORY_NAME" value="770bd127-090e-45ff-9a13-9ef1f18266b7" />
+        <option name="BASE_DIRECTORY_NAME" value="105f119d-bc67-46f3-a31f-6d1acb1b130e" />
         <option name="HTTP_PORT" value="8080" />
       </server-settings>
       <predefined_log_file enabled="true" id="Tomcat" />
@@ -103,7 +103,7 @@
       <predefined_log_file id="Tomcat Host Manager" />
       <predefined_log_file id="Tomcat Localhost Access" />
       <RunnerSettings RunnerId="Debug">
-        <option name="DEBUG_PORT" value="46639" />
+        <option name="DEBUG_PORT" value="45621" />
       </RunnerSettings>
       <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Cover">
         <option name="USE_ENV_VARIABLES" value="true" />
@@ -192,7 +192,8 @@
       <workItem from="1779785335684" duration="4479000" />
       <workItem from="1780046082233" duration="410000" />
       <workItem from="1780501697479" duration="39000" />
-      <workItem from="1781447574337" duration="313000" />
+      <workItem from="1781447574337" duration="1430000" />
+      <workItem from="1781449391513" duration="2961000" />
     </task>
     <servers />
   </component>

@@ -1,14 +1,19 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { Observable, of, forkJoin } from 'rxjs';
+import { delay, map, switchMap } from 'rxjs/operators';
 import {
   DashboardData,
   Transfer,
   DashboardStats,
   Beneficiary,
+  TransferStatus,
 } from './dashboard.models';
 
+// ────────────────────────────────────────────────────────────────────────────
+// MOCK DATA - Comment out when APIs are ready
+// ────────────────────────────────────────────────────────────────────────────
+/*
 const MOCK_BENEFICIARIES: Beneficiary[] = [
   { id: '1', initials: 'AD', name: 'Aminata Diallo', country: 'Sénégal' },
   { id: '2', initials: 'KT', name: 'Kadiatou Touré', country: "Côte d'Ivoire" },
@@ -110,55 +115,209 @@ const MOCK_DASHBOARD_DATA: DashboardData = {
   stats: MOCK_STATS,
   recentTransfers: MOCK_RECENT_TRANSFERS,
 };
+*/
 
 @Injectable({
   providedIn: 'root',
 })
 export class DashboardService {
-  private apiBase = '/api/v1';
+  private apiBase = 'http://localhost:8080/okane_transfer_1_0_SNAPSHOT_war/api';
 
   constructor(private http: HttpClient) {}
 
   /**
    * Fetches the full dashboard data for the authenticated user.
-   * Replace the mock return with the real HTTP call when the API is ready.
+   * Combines multiple API calls:
+   * - GET /api/utilisateurs/me → user info (nom, prenom)
+   * - GET /api/transferts/mes-transferts?clientId={id} → transfers list
+   * - GET /api/beneficiaires → beneficiaries list
+   * 
+   * Backend needs a dedicated endpoint:
+   * GET /api/client/dashboard
+   * Response: { userName, activeTransfer, stats, recentTransfers }
    */
   getDashboardData(): Observable<DashboardData> {
-    // --- REAL CALL (uncomment when API is ready) ---
-    // return this.http.get<DashboardData>(`${this.apiBase}/dashboard`);
+    // TODO: Create backend endpoint GET /api/client/dashboard
+    // Should aggregate:
+    // - Current user name from Authentication context
+    // - Active transfer (statut = EN_ATTENTE)
+    // - Monthly stats (sum montantEnvoye WHERE creeLe >= startOfMonth)
+    // - Recent 4 transfers ordered by creeLe DESC
+    // - Unique beneficiaries count
+    
+    // Temporary: combine existing APIs
+    return forkJoin({
+      user: this.http.get<any>(`${this.apiBase}/utilisateurs/me`),
+      transfers: this.getRecentTransfers(4),
+      stats: this.getDashboardStats()
+    }).pipe(
+      map(({ user, transfers, stats }) => ({
+        userName: user.prenom || 'Client',
+        activeTransfer: transfers.find(t => t.status === 'pending' || t.status === 'to_withdraw') || null,
+        stats,
+        recentTransfers: transfers
+      }))
+    );
 
-    return of(MOCK_DASHBOARD_DATA).pipe(delay(300));
+    // return of(MOCK_DASHBOARD_DATA).pipe(delay(300));
   }
 
   /**
    * Fetches the active in-progress transfer for the authenticated user.
+   * Uses existing: GET /api/transferts/mes-transferts?clientId={id}
+   * Filters for statut = EN_ATTENTE
    */
   getActiveTransfer(): Observable<Transfer | null> {
-    // return this.http.get<Transfer | null>(`${this.apiBase}/transfers/active`);
-    return of(MOCK_ACTIVE_TRANSFER).pipe(delay(200));
+    // First get current user to get clientId
+    return this.http.get<any>(`${this.apiBase}/utilisateurs/me`).pipe(
+      switchMap(user => 
+        this.http.get<any[]>(`${this.apiBase}/transferts/mes-transferts?clientId=${user.id}`)
+      ),
+      map(transfers => {
+        const active = transfers.find(t => t.statut === 'EN_ATTENTE');
+        return active ? this.mapTransfertToTransfer(active) : null;
+      })
+    );
+
+    // return of(MOCK_ACTIVE_TRANSFER).pipe(delay(200));
   }
 
   /**
    * Fetches the last N transfers for the authenticated user.
+   * Uses: GET /api/transferts/mes-transferts?clientId={id}
+   * Takes first N results
    */
   getRecentTransfers(limit = 4): Observable<Transfer[]> {
-    // return this.http.get<Transfer[]>(`${this.apiBase}/transfers/recent?limit=${limit}`);
-    return of(MOCK_RECENT_TRANSFERS.slice(0, limit)).pipe(delay(200));
+    return this.http.get<any>(`${this.apiBase}/utilisateurs/me`).pipe(
+      switchMap(user => 
+        this.http.get<any[]>(`${this.apiBase}/transferts/mes-transferts?clientId=${user.id}`)
+      ),
+      map(transfers => 
+        transfers.slice(0, limit).map(t => this.mapTransfertToTransfer(t))
+      )
+    );
+
+    // return of(MOCK_RECENT_TRANSFERS.slice(0, limit)).pipe(delay(200));
   }
 
   /**
    * Fetches dashboard statistics (sent this month, beneficiaries, etc.).
+   * 
+   * Backend needs new endpoint:
+   * GET /api/client/stats
+   * Response: {
+   *   sentThisMonth: BigDecimal,
+   *   currency: String,
+   *   changeVsLastMonth: BigDecimal,
+   *   activeBeneficiariesCount: Integer,
+   *   beneficiaries: List<BeneficiaireResponse>
+   * }
+   * 
+   * Logic:
+   * - Sum transfert.montantEnvoye WHERE expediteur.client.id = currentUser.id 
+   *   AND transfert.creeLe >= first day of current month
+   * - Compare to same sum for previous month
+   * - Count distinct beneficiaires from user's transfers
    */
   getDashboardStats(): Observable<DashboardStats> {
-    // return this.http.get<DashboardStats>(`${this.apiBase}/dashboard/stats`);
-    return of(MOCK_STATS).pipe(delay(200));
+    // TODO: Create backend endpoint GET /api/client/stats
+    // For now return empty structure
+    return this.http.get<any>(`${this.apiBase}/transferts/stats`);
+    
+    // return of(MOCK_STATS).pipe(delay(200));
   }
 
   /**
    * Reveals the full withdrawal code for a given transfer.
+   * Uses: GET /api/transferts/{id}
+   * Returns the codeRetrait field
    */
   revealWithdrawalCode(transferId: string): Observable<string> {
-    // return this.http.get<string>(`${this.apiBase}/transfers/${transferId}/withdrawal-code`);
-    return of('K7AB-12QA').pipe(delay(500));
+    return this.http.get<any>(`${this.apiBase}/transferts/${transferId}`).pipe(
+      map(transfer => transfer.codeRetrait)
+    );
+
+    // return of('K7AB-12QA').pipe(delay(500));
+  }
+
+  /**
+   * Maps backend TransfertResponse to frontend Transfer model
+   */
+  private mapTransfertToTransfer(t: any): Transfer {
+    return {
+      id: t.id?.toString() || '',
+      reference: t.numeroReference || '',
+      recipientName: t.nomBeneficiaire || '',
+      amount: t.montantEnvoye || 0,
+      currency: 'MAD', // TODO: get from t.deviseSource when available
+      convertedAmount: t.montantRecu || 0,
+      convertedCurrency: 'XOF', // TODO: get from t.deviseDestination
+      destinationCountry: t.paysDestination || '',
+      destinationFlag: this.getCountryFlag(t.paysDestination),
+      status: this.mapStatut(t.statut),
+      createdAt: new Date(t.creeLe),
+      withdrawalCode: this.maskCode(t.codeRetrait),
+      steps: this.generateSteps(t.statut, t.creeLe, t.payeLe)
+    };
+  }
+
+  private mapStatut(statut: string): TransferStatus {
+    const map: Record<string, TransferStatus> = {
+      'EN_ATTENTE': 'to_withdraw',
+      'PAYE': 'paid',
+      'ANNULE': 'expired',
+      'EXPIRE': 'expired',
+      'BLOQUE': 'expired'
+    };
+    return map[statut] || 'pending';
+  }
+
+  private maskCode(code: string): string {
+    if (!code || code.length < 4) return code;
+    return code.substring(0, 2) + '••-••' + code.substring(code.length - 2);
+  }
+
+  private getCountryFlag(country: string): string {
+    const flags: Record<string, string> = {
+      'Sénégal': '🇸🇳',
+      'Senegal': '🇸🇳',
+      'France': '🇫🇷',
+      'Côte d\'Ivoire': '🇨🇮',
+      'Mali': '🇲🇱',
+      'Maroc': '🇲🇦'
+    };
+    return flags[country] || '🌍';
+  }
+
+  private generateSteps(statut: string, creeLe: string, payeLe?: string): any[] {
+    const created = new Date(creeLe);
+    const paid = payeLe ? new Date(payeLe) : null;
+    
+    return [
+      { 
+        label: 'Créé', 
+        time: created.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }), 
+        completed: true, 
+        current: false 
+      },
+      { 
+        label: 'Validé', 
+        time: created.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }), 
+        completed: statut !== 'EN_ATTENTE', 
+        current: statut === 'EN_ATTENTE' 
+      },
+      { 
+        label: 'À retirer', 
+        time: statut === 'PAYE' ? '' : 'en cours', 
+        completed: statut === 'PAYE', 
+        current: false 
+      },
+      { 
+        label: 'Payé', 
+        time: paid ? paid.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '', 
+        completed: statut === 'PAYE', 
+        current: false 
+      },
+    ];
   }
 }
