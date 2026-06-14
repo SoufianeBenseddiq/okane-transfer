@@ -2,6 +2,7 @@ package com.okanetransfer.controller.user;
 
 import com.okanetransfer.entity.user.Utilisateur;
 import com.okanetransfer.service.dto.user.request.AdminUpdateUserRequest;
+import com.okanetransfer.service.dto.user.request.ChangePasswordRequest;
 import com.okanetransfer.service.dto.user.request.CreateUserRequest;
 import com.okanetransfer.service.dto.user.request.UpdateProfilRequest;
 import com.okanetransfer.service.dto.user.response.UserResponse;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -100,4 +102,10 @@ public class UtilisateurController {
 public ResponseEntity<List<UserResponse>> search(@PathVariable(name = "q") String q) {
     return ResponseEntity.ok(utilisateurService.searchClients(q));
 }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<UserResponse> changePassword(@RequestBody ChangePasswordRequest request, Principal principal) {
+        UserResponse response = utilisateurService.changePassword(principal.getName(), request.getCurrentPassword(), request.getNewPassword());
+        return ResponseEntity.ok(response);
+    }
 }

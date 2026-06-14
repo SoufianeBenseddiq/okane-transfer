@@ -35,6 +35,7 @@ export class NavbarComponent implements OnInit {
     { labelKey: 'NAV.MES_TRANSFERTS',label: '', route: '/client/historique',     exact: false },
     { labelKey: 'NAV.BENEFICIAIRES', label: '', route: '/client/beneficiaires',  exact: false },
     { labelKey: 'NAV.AIDE',          label: '', route: '/client/aide',           exact: false },
+    {labelKey : 'profil', label: '', route: '/client/profil', exact: false}
   ];
 
   constructor(private translate: TranslateService,  public auth: AuthService) {}
