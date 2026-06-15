@@ -160,6 +160,7 @@
       "adresse":        "Adresse",
       "pays":           "Pays",
       "plafond":        "Plafond journalier (MAD)",
+      "soldeCaisseAgence": "Caisse agence (MAD)",
       "manager":        "Responsable (manager)",
       "noManager":      "— Aucun —",
       "estCentrale":    "Agence centrale",
@@ -297,7 +298,12 @@
     },
     "btn": {
       "createDevise":   "Créer la devise",
-      "createCorridor": "Créer le corridor"
+      "createCorridor": "Créer le corridor",
+      "updateRates":    "Mettre à jour via API"
+    },
+    "toast": {
+      "ratesUpdated":      "Taux de change mis à jour avec succès.",
+      "ratesUpdateError":  "Erreur lors de la mise à jour des taux de change."
     },
     "error": {
       "create":         "Erreur lors de la création.",

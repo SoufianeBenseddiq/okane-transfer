@@ -1,6 +1,7 @@
 package com.okanetransfer.controller.devise;
 
 import com.okanetransfer.service.facade.devise.IDeviseService;
+import com.okanetransfer.service.facade.devise.ITauxChangeService;
 import com.okanetransfer.service.dto.devise.request.DeviseRequest;
 import com.okanetransfer.service.dto.devise.response.DeviseResponse;
 import org.springframework.http.HttpStatus;
@@ -14,9 +15,11 @@ import java.util.List;
 public class DeviseController {
 
     private final IDeviseService deviseService;
+    private final ITauxChangeService tauxChangeService;
 
-    public DeviseController(IDeviseService deviseService) {
+    public DeviseController(IDeviseService deviseService, ITauxChangeService tauxChangeService) {
         this.deviseService = deviseService;
+        this.tauxChangeService = tauxChangeService;
     }
 
     @GetMapping
@@ -56,6 +59,11 @@ public class DeviseController {
     public ResponseEntity<Void> desactiver(@PathVariable("id") Long id) {
         deviseService.desactiver(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/maj-taux")
+    public ResponseEntity<List<DeviseResponse>> mettreAJourTaux() {
+        return ResponseEntity.ok(tauxChangeService.mettreAJourTauxDepuisApi());
     }
 
 }

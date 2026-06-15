@@ -69,12 +69,14 @@ export class ClotureCaisseComponent implements OnInit {
         // Load the actual theoretical balance computed by the backend
         this.caisse.consulterSoldeDuJour(this.agentEmail).subscribe({
           next: (solde) => {
-            // Round to 2dp so comparison with agent-entered value is exact
-            this.stats = { ...this.stats, theoretique: Math.round(Number(solde) * 100) / 100 };
+            // Round to the nearest MAD, matching the precision shown to the
+            // agent ("Solde théorique" is displayed with 0 decimals) so that
+            // entering the exact displayed value yields a gap of 0.
+            this.stats = { ...this.stats, theoretique: Math.round(Number(solde)) };
             this.loading = false;
           },
           error: () => {
-            this.stats = { ...this.stats, theoretique: Math.round((totalIn - totalOut) * 100) / 100 };
+            this.stats = { ...this.stats, theoretique: Math.round(totalIn - totalOut) };
             this.loading = false;
           },
         });

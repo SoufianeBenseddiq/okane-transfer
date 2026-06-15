@@ -63,7 +63,7 @@ export class CaisseComponent implements OnInit {
   }
 
   isCaisseOuverte(agent: UserResponse): boolean {
-    return (agent.soldeCaisse ?? 0) > 0;
+    return !!agent.caisseOuverteAujourdhui;
   }
 
   soldeCaisseLabel(agent: UserResponse): string {

@@ -160,6 +160,7 @@
       "adresse":   "العنوان",
       "pays":           "البلد",
       "plafond":        "الحد اليومي (درهم)",
+      "soldeCaisseAgence": "صندوق الوكالة (درهم)",
       "manager":        "المسؤول (المدير)",
       "noManager":      "— لا أحد —",
       "estCentrale":    "وكالة مركزية",
@@ -297,7 +298,12 @@
     },
     "btn": {
       "createDevise":   "إنشاء العملة",
-      "createCorridor": "إنشاء الممر"
+      "createCorridor": "إنشاء الممر",
+      "updateRates":    "تحديث عبر API"
+    },
+    "toast": {
+      "ratesUpdated":      "تم تحديث أسعار الصرف بنجاح.",
+      "ratesUpdateError":  "خطأ أثناء تحديث أسعار الصرف."
     },
     "error": {
       "create":         "خطأ أثناء إنشاء العملة.",

@@ -86,10 +86,6 @@ export class CaisseService {
     return this.http.put<ClotureCaisseResponse>(`${this.baseClotures}/update`, request);
   }
 
-  cloturerCaisse(email: string, request: ClotureCaisseRequest): Observable<ClotureCaisseResponse> {
-    return this.http.post<ClotureCaisseResponse>(`${this.baseClotures}/${email}/cloturer`, request);
-  }
-
   rapportCloture(email: string, date: string): Observable<ClotureCaisseResponse> {
     return this.http.get<ClotureCaisseResponse>(`${this.baseClotures}/${email}/rapport`, {
       params: { date }

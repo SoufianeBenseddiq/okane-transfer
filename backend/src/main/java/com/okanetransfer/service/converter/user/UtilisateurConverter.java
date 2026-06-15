@@ -9,6 +9,8 @@ import com.okanetransfer.service.dto.user.response.UserResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,6 +63,12 @@ public class UtilisateurConverter {
 
         if (u instanceof Agent agent) {
             r.setSoldeCaisse(agent.getSoldeCaisse());
+            r.setCaisseOuverteAujourdhui(
+                    agent.getDateOuverture() != null
+                            && agent.getDateOuverture().equals(LocalDate.now())
+                            && agent.getSoldeCaisse() != null
+                            && agent.getSoldeCaisse().compareTo(BigDecimal.ZERO) > 0
+            );
             if (agent.getAgence() != null) {
                 r.setAgenceId(agent.getAgence().getId());
             }

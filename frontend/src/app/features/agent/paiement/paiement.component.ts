@@ -3,6 +3,7 @@ import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { TransfertService } from '../../../core/services/transfert.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { TransfertResponse } from '../../../core/models/transfert';
 import {TypePiece} from "../../../core/models/enums";
 
@@ -27,10 +28,10 @@ export class PaiementComponent {
 
   typesPiece = Object.values(TypePiece);
 
-  // TODO: récupérer l'ID de l'agence connectée depuis AuthService / localStorage
-  private readonly agenceRetraitId = 1;
-
-  constructor(private transfertService: TransfertService) {}
+  constructor(
+    private transfertService: TransfertService,
+    private authService: AuthService,
+  ) {}
 
   // ── Onglets ────────────────────────────────────────────────────────────────
 
@@ -131,9 +132,12 @@ export class PaiementComponent {
 
     this.isLoading = true;
 
+    const currentUser = this.authService.currentUser;
+
     this.transfertService.payer({
       codeRetrait:             this.transfer.codeRetrait,
-      agenceRetraitId:         this.agenceRetraitId,
+      agentId:                 currentUser?.id,
+      agenceRetraitId:         currentUser?.agenceId ?? 1,
       typePieceBeneficiaire:   this.idType as TypePiece,
       numeroPieceBeneficiaire: this.idNumber,
     }).subscribe({

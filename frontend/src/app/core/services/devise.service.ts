@@ -48,6 +48,10 @@ export class DeviseService {
     return this.http.patch<void>(`${this.baseDevises}/${id}/desactiver`, null);
   }
 
+  mettreAJourTauxDepuisApi(): Observable<DeviseResponse[]> {
+    return this.http.post<DeviseResponse[]>(`${this.baseDevises}/maj-taux`, null);
+  }
+
   // ─── Corridors ─────────────────────────────────────────────────────────────
 
   getAllCorridors(): Observable<CorridorResponse[]> {

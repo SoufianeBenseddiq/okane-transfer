@@ -3,6 +3,7 @@ export interface AgenceRequest {
   adresse: string;
   pays: string;
   plafondJournalier: number;
+  soldeCaisseAgence?: number | null;
   responsableId?: number | null;
   estCentrale?: boolean;
   agenceCentraleId?: number | null;

@@ -160,6 +160,7 @@
       "adresse":   "Address",
       "pays":           "Country",
       "plafond":        "Daily limit (MAD)",
+      "soldeCaisseAgence": "Branch vault (MAD)",
       "manager":        "Manager (responsible)",
       "noManager":      "— None —",
       "estCentrale":    "Central agency",
@@ -297,7 +298,12 @@
     },
     "btn": {
       "createDevise":   "Create currency",
-      "createCorridor": "Create corridor"
+      "createCorridor": "Create corridor",
+      "updateRates":    "Update via API"
+    },
+    "toast": {
+      "ratesUpdated":      "Exchange rates updated successfully.",
+      "ratesUpdateError":  "Error updating exchange rates."
     },
     "error": {
       "create":         "Error creating the currency.",

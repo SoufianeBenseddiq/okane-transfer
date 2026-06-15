@@ -18,6 +18,8 @@ public class AgenceConverter {
         agence.setAdresse(request.getAdresse());
         agence.setPays(request.getPays());
         agence.setPlafondJournalier(request.getPlafondJournalier());
+        agence.setSoldeCaisseAgence(request.getSoldeCaisseAgence() != null
+                ? request.getSoldeCaisseAgence() : BigDecimal.ZERO);
         agence.setEstCentrale(Boolean.TRUE.equals(request.getEstCentrale()));
         return agence;
     }
@@ -73,6 +75,9 @@ public class AgenceConverter {
         agence.setAdresse(request.getAdresse());
         agence.setPays(request.getPays());
         agence.setPlafondJournalier(request.getPlafondJournalier());
+        if (request.getSoldeCaisseAgence() != null) {
+            agence.setSoldeCaisseAgence(request.getSoldeCaisseAgence());
+        }
         agence.setEstCentrale(Boolean.TRUE.equals(request.getEstCentrale()));
     }
 }
