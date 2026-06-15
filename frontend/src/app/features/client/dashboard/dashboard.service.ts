@@ -202,27 +202,23 @@ export class DashboardService {
 
   /**
    * Fetches dashboard statistics (sent this month, beneficiaries, etc.).
-   * 
-   * Backend needs new endpoint:
-   * GET /api/client/stats
-   * Response: {
-   *   sentThisMonth: BigDecimal,
-   *   currency: String,
-   *   changeVsLastMonth: BigDecimal,
-   *   activeBeneficiariesCount: Integer,
-   *   beneficiaries: List<BeneficiaireResponse>
-   * }
-   * 
-   * Logic:
-   * - Sum transfert.montantEnvoye WHERE expediteur.client.id = currentUser.id 
-   *   AND transfert.creeLe >= first day of current month
-   * - Compare to same sum for previous month
-   * - Count distinct beneficiaires from user's transfers
+   * Uses: GET /api/transferts/client/stats
    */
   getDashboardStats(): Observable<DashboardStats> {
-    // TODO: Create backend endpoint GET /api/client/stats
-    // For now return empty structure
-    return this.http.get<any>(`${this.apiBase}/transferts/stats`);
+    return this.http.get<any>(`${this.apiBase}/transferts/client/stats`).pipe(
+      map(stats => ({
+        sentThisMonth: stats.sentThisMonth || 0,
+        currency: stats.currency || 'MAD',
+        changeVsLastMonth: stats.changeVsLastMonth || 0,
+        activeBeneficiariesCount: stats.activeBeneficiariesCount || 0,
+        beneficiaries: (stats.beneficiaries || []).map((b: any) => ({
+          id: b.id?.toString() || '',
+          initials: this.getInitials(b.nom, b.prenom),
+          name: `${b.prenom} ${b.nom}`,
+          country: b.pays
+        }))
+      }))
+    );
     
     // return of(MOCK_STATS).pipe(delay(200));
   }
@@ -319,5 +315,11 @@ export class DashboardService {
         current: false 
       },
     ];
+  }
+
+  private getInitials(nom: string, prenom: string): string {
+    const n = nom?.charAt(0)?.toUpperCase() || '';
+    const p = prenom?.charAt(0)?.toUpperCase() || '';
+    return n + p;
   }
 }

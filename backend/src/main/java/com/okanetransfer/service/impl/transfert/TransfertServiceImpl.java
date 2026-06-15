@@ -1,5 +1,20 @@
 package com.okanetransfer.service.impl.transfert;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.okanetransfer.entity.agence.Agence;
 import com.okanetransfer.entity.caisse.CaisseOperation;
 import com.okanetransfer.entity.devise.Corridor;
@@ -20,12 +35,15 @@ import com.okanetransfer.repository.transfert.ExpediteurRepository;
 import com.okanetransfer.repository.transfert.TransfertRepository;
 import com.okanetransfer.repository.user.PieceIdentiteRepository;
 import com.okanetransfer.repository.user.UtilisateurRepository;
+import com.okanetransfer.service.converter.transfert.BeneficiaireConverter;
 import com.okanetransfer.service.converter.transfert.TransfertConverter;
-import com.okanetransfer.service.dto.transfert.request.CreateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.request.CreateTransfertAvecNouveauClientRequest;
+import com.okanetransfer.service.dto.transfert.request.CreateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.request.PaiementRequest;
 import com.okanetransfer.service.dto.transfert.request.SendTransfertReceiptEmailRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateTransfertRequest;
+import com.okanetransfer.service.dto.transfert.response.BeneficiaireResponse;
+import com.okanetransfer.service.dto.transfert.response.ClientStatsResponse;
 import com.okanetransfer.service.dto.transfert.response.TransfertResponse;
 import com.okanetransfer.service.dto.transfert.response.TransfertStatsResponse;
 import com.okanetransfer.service.dto.user.request.PieceIdentiteRequest;
@@ -37,22 +55,8 @@ import com.okanetransfer.shared.enums.StatutTransfert;
 import com.okanetransfer.shared.enums.TypeOperation;
 import com.okanetransfer.shared.exception.TransfertNotFoundException;
 import com.okanetransfer.shared.util.CodeGenerator;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Sort;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.mail.internet.MimeMessage;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @Transactional
@@ -935,6 +939,47 @@ public class TransfertServiceImpl implements ITransfertService {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ClientStatsResponse getClientStats(String email) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfMonth = now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime startOfLastMonth = startOfMonth.minusMonths(1);
+        LocalDateTime endOfLastMonth = startOfMonth.minusSeconds(1);
+
+        BigDecimal sentThisMonth = transfertRepository.sumMontantEnvoyeByClient(
+                email, startOfMonth, now
+        );
+        BigDecimal sentLastMonth = transfertRepository.sumMontantEnvoyeByClient(
+                email, startOfLastMonth, endOfLastMonth
+        );
+
+        BigDecimal change = sentThisMonth.subtract(sentLastMonth);
+        Long beneficiairesCount = transfertRepository.countDistinctBeneficiaires(email);
+
+        List<Transfert> recentTransferts = transfertRepository.findByExpediteurClientId(
+                utilisateurRepository.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"))
+                        .getId()
+        );
+
+        List<BeneficiaireResponse> beneficiaires = recentTransferts.stream()
+                .map(Transfert::getBeneficiaire)
+                .distinct()
+                .limit(4)
+                .map(BeneficiaireConverter::toResponse)
+                .toList();
+
+        ClientStatsResponse response = new ClientStatsResponse();
+        response.setSentThisMonth(sentThisMonth);
+        response.setCurrency("MAD");
+        response.setChangeVsLastMonth(change);
+        response.setActiveBeneficiariesCount(beneficiairesCount.intValue());
+        response.setBeneficiaries(beneficiaires);
+
+        return response;
     }
 
     // Je n'ai pas implémenté DELETE /api/transferts/{id} car les transactions doivent rester toujours traçables.
