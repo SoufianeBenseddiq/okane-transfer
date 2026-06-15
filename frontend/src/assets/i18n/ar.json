@@ -692,7 +692,29 @@
     "amount":            "المبلغ",
     "noResults":         "لا توجد عمليات",
     "showing":           "عرض",
-    "of":                "من"
+    "of":                "من",
+
+    "breadcrumb": "السجل",
+    "titre": "تحويلاتي",
+    "sousTitre": "تجد هنا جميع عملياتك السابقة والجارية.",
+    "toutesDestinations": "جميع الوجهات",
+    "reinitialiser": "إعادة التعيين",
+    "transfert": "تحويل",
+    "transferts": "تحويلات",
+    "envoyesAuTotal": "تم إرسالها إجمالاً",
+    "trieParDate": "مرتبة حسب التاريخ",
+    "chargement": "جاري تحميل تحويلاتك...",
+    "aucunTransfert": "لم تقم بأي تحويل حتى الآن.",
+    "aucunResultat": "لا يوجد تحويل يطابق الفلاتر المحددة.",
+    "agence": "الوكالة",
+    "statuts": {
+      "tous": "الكل",
+      "enAttente": "قيد الانتظار",
+      "paye": "مدفوع",
+      "annule": "ملغى",
+      "expire": "منتهي الصلاحية",
+      "bloque": "محظور"
+    }
   },
   "cloture": {
     "gapDetected":        "فارق مكتشف",
@@ -721,4 +743,5 @@
     "BENEFICIAIRES": "المستفيدون",
     "AIDE": "المساعدة"
   }
+
 }

@@ -676,8 +676,7 @@
       "OUVERTURE":"Ouverture"
     }
   },
-
-  "historique": {
+"historique": {
     "searchPlaceholder": "Rechercher par nom, référence...",
     "allTypes":          "Tous les types",
     "send":              "ENVOI",
@@ -700,7 +699,29 @@
     "amount":            "Montant",
     "noResults":         "Aucune opération trouvée",
     "showing":           "Affichage de",
-    "of":                "sur"
+    "of":                "sur",
+
+    "breadcrumb": "HISTORIQUE",
+    "titre": "Mes transferts",
+    "sousTitre": "Retrouvez ici l'ensemble de vos envois passés et en cours.",
+    "toutesDestinations": "Toutes destinations",
+    "reinitialiser": "Réinitialiser",
+    "transfert": "transfert",
+    "transferts": "transferts",
+    "envoyesAuTotal": "envoyés au total",
+    "trieParDate": "Trié par date",
+    "chargement": "Chargement de vos transferts...",
+    "aucunTransfert": "Vous n'avez encore effectué aucun transfert.",
+    "aucunResultat": "Aucun transfert ne correspond aux filtres sélectionnés.",
+    "agence": "Agence",
+    "statuts": {
+      "tous": "Tous",
+      "enAttente": "En attente",
+      "paye": "Payé",
+      "annule": "Annulé",
+      "expire": "Expiré",
+      "bloque": "Bloqué"
+    }
   },
   "cloture": {
     "gapDetected":        "Écart détecté",

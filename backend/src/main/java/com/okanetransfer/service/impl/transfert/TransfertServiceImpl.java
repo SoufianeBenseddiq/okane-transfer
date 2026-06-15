@@ -349,6 +349,7 @@ public class TransfertServiceImpl implements ITransfertService {
 
         transfert = transfertRepository.save(transfert);
 
+
         // Mise à jour du montant traité + soldeCaisseAgence (envoi = agence receives cash from sender)
         agenceEnvoi.setMontantTraiteAujourdhui(montantActuel.add(request.getMontant()));
         BigDecimal soldeAgence = agenceEnvoi.getSoldeCaisseAgence() != null
@@ -573,7 +574,7 @@ public class TransfertServiceImpl implements ITransfertService {
         transfert.setNumeroPieceBeneficiaire(request.getNumeroPieceBeneficiaire());
 
         transfert = transfertRepository.save(transfert);
-
+        envoyerNotificationStatutEmail(transfert, StatutTransfert.PAYE);
         // Pass original montantRecu for display; method converts to MAD internally for soldeCaisse
         enregistrerOperationCaisse(transfert, agentPaiement, TypeOperation.RETRAIT, transfert.getMontantRecu());
 
@@ -587,6 +588,7 @@ public class TransfertServiceImpl implements ITransfertService {
 
         transfert.setStatut(StatutTransfert.ANNULE);
         transfert = transfertRepository.save(transfert);
+        envoyerNotificationStatutEmail(transfert, StatutTransfert.ANNULE);
         return TransfertConverter.toResponse(transfert);
     }
 
@@ -939,4 +941,86 @@ public class TransfertServiceImpl implements ITransfertService {
 
     // Je n'ai pas implémenté DELETE /api/transferts/{id} car les transactions doivent rester toujours traçables.
     // À la place, j'ai créé un endpoint d'annulation de transaction.
+    private void envoyerNotificationStatutEmail(Transfert transfert, StatutTransfert nouveauStatut) {
+        if (transfert.getExpediteur() == null || transfert.getExpediteur().getClient() == null) {
+            return;
+        }
+        String email = transfert.getExpediteur().getClient().getEmail();
+        if (isBlank(email)) {
+            return;
+        }
+
+        String libelleStatut = switch (nouveauStatut) {
+            case PAYE -> "payé au bénéficiaire";
+            case ANNULE -> "annulé";
+            case EXPIRE -> "expiré";
+            case BLOQUE -> "bloqué pour vérification";
+            default -> nouveauStatut.name();
+        };
+
+        String html = buildNotificationStatutHtml(transfert, libelleStatut);
+
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+            helper.setFrom(mailFrom, "Okane Transfer");
+            helper.setTo(email.trim());
+            helper.setSubject("[Okane Transfer] Mise à jour de votre transfert - Réf: " + transfert.getNumeroReference());
+
+            String plainText = """
+                Okane Transfer - Mise à jour de statut
+
+                Votre transfert (réf. %s, code %s) est maintenant : %s
+
+                Connectez-vous à votre espace client pour plus de détails.
+                """.formatted(transfert.getNumeroReference(), transfert.getCodeRetrait(), libelleStatut);
+
+            helper.setText(plainText, html);
+            javaMailSender.send(message);
+        } catch (Exception exception) {
+            // Ne bloque jamais la transaction métier si l'email échoue
+            System.err.println("Échec envoi notification statut : " + exception.getMessage());
+        }
+    }
+
+    private String buildNotificationStatutHtml(Transfert transfert, String libelleStatut) {
+        return """
+            <html>
+            <body style="margin:0;padding:0;background-color:#f1f5f9;font-family:'Plus Jakarta Sans',Arial,sans-serif;">
+              <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+                <div style="background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
+                  <div style="background-color:#0f172a;padding:32px;text-align:center;">
+                    <h1 style="color:#ffffff;font-size:22px;font-weight:800;margin:0;text-transform:uppercase;">
+                      Okane <span style="color:#fbbf24;">Transfer</span>
+                    </h1>
+                  </div>
+                  <div style="padding:32px;text-align:center;">
+                    <p style="font-size:15px;color:#334155;margin:0 0 16px;">
+                      Le statut de votre transfert a changé :
+                    </p>
+                    <div style="display:inline-block;background-color:#fef3c7;color:#d97706;font-weight:700;
+                                padding:8px 20px;border-radius:9999px;font-size:14px;margin-bottom:16px;">
+                      %s
+                    </div>
+                    <p style="font-size:13px;color:#64748b;margin:16px 0 0;">
+                      Référence : <strong>%s</strong><br/>
+                      Code de retrait : <strong>%s</strong>
+                    </p>
+                  </div>
+                  <div style="background-color:#f8fafc;padding:20px 32px;text-align:center;border-top:1px solid #e2e8f0;">
+                    <p style="font-size:11px;color:#94a3b8;margin:0;">
+                      Connectez-vous à votre espace client pour suivre votre transfert.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </body>
+            </html>
+            """.formatted(
+                escapeHtml(libelleStatut),
+                escapeHtml(transfert.getNumeroReference()),
+                escapeHtml(transfert.getCodeRetrait())
+        );
+    }
 }

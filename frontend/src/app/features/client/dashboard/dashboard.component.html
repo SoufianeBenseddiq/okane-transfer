@@ -8,9 +8,9 @@
       <p style="color:#888; font-size:14px; margin:0;">Suivez vos transferts en temps réel et envoyez de l'argent à vos proches.</p>
     </div>
     <div class="flex gap-3">
-      <button class="btn-dark">
-        <span>🕐</span> Historique
-      </button>
+    <button class="btn-dark" routerLink="/client/historique">
+  <span>🕐</span> Historique
+</button>
       <button class="btn-orange">
         <span>✈️</span> Envoyer de l'argent
       </button>
@@ -94,7 +94,7 @@
         <h2 style="font-size:18px; font-weight:700; color:#1a1f36; margin:0;">Transferts récents</h2>
         <p style="font-size:13px; color:#aaa; margin:4px 0 0;">Vos 4 derniers envois</p>
       </div>
-      <a href="#" style="color:#F5A623; font-size:13px; text-decoration:none;">Voir tout l'historique →</a>
+     <a routerLink="/client/historique" style="color:#F5A623; font-size:13px; text-decoration:none; cursor:pointer;">Voir tout l'historique →</a>
     </div>
 
     <div class="flex gap-4">

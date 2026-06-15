@@ -675,7 +675,7 @@
     }
   },
 
-  "historique": {
+ "historique": {
     "searchPlaceholder": "Search by name, reference...",
     "allTypes":          "All types",
     "send":              "SEND",
@@ -698,7 +698,29 @@
     "amount":            "Amount",
     "noResults":         "No operations found",
     "showing":           "Showing",
-    "of":                "of"
+    "of":                "of",
+
+    "breadcrumb": "HISTORY",
+    "titre": "My transfers",
+    "sousTitre": "Find all your past and ongoing transfers here.",
+    "toutesDestinations": "All destinations",
+    "reinitialiser": "Reset",
+    "transfert": "transfer",
+    "transferts": "transfers",
+    "envoyesAuTotal": "sent in total",
+    "trieParDate": "Sorted by date",
+    "chargement": "Loading your transfers...",
+    "aucunTransfert": "You haven't made any transfers yet.",
+    "aucunResultat": "No transfer matches the selected filters.",
+    "agence": "Branch",
+    "statuts": {
+      "tous": "All",
+      "enAttente": "Pending",
+      "paye": "Paid",
+      "annule": "Cancelled",
+      "expire": "Expired",
+      "bloque": "Blocked"
+    }
   },
   "cloture": {
     "gapDetected":        "Gap detected",
