@@ -1,0 +1,120 @@
+.transfer-item {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+    transform: translateY(-2px);
+  }
+}
+
+/* ── Header ── */
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.country {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.flag {
+  font-size: 16px;
+}
+
+.status-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+
+  &.status-pending {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+  }
+  &.status-validated {
+    background: rgba(59, 130, 246, 0.12);
+    color: #2563eb;
+  }
+  &.status-paid {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+  }
+  &.status-expired {
+    background: rgba(107, 114, 128, 0.12);
+    color: #6b7280;
+  }
+}
+
+/* ── Body ── */
+.item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recipient {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.amount {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.currency {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* ── Footer ── */
+.item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.converted {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.ref-date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.date {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.ref {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.04em;
+}

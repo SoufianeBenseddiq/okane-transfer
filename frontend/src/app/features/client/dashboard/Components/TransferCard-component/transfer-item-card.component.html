@@ -1,0 +1,22 @@
+<div class="transfer-item" *ngIf="transfer">
+  <div class="item-header">
+    <span class="country">
+      <span class="flag">{{ transfer.destinationFlag }}</span>
+      {{ transfer.destinationCountry }}
+    </span>
+    <span class="status-pill" [ngClass]="statusClass">{{ statusLabel }}</span>
+  </div>
+
+  <div class="item-body">
+    <span class="recipient">{{ transfer.recipientName }}</span>
+    <span class="amount">{{ transfer.amount | number:'1.0-0' }} <span class="currency">{{ transfer.currency }}</span></span>
+  </div>
+
+  <div class="item-footer">
+    <span class="converted">{{ convertedDisplay }}</span>
+    <span class="ref-date">
+      <span class="date">{{ formattedDate }}</span>
+      <span class="ref">{{ transfer.reference }}</span>
+    </span>
+  </div>
+</div>

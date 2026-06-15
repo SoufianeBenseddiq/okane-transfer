@@ -6,6 +6,7 @@ import com.okanetransfer.service.dto.transfert.request.CreateTransfertAvecNouvea
 import com.okanetransfer.service.dto.transfert.request.PaiementRequest;
 import com.okanetransfer.service.dto.transfert.request.SendTransfertReceiptEmailRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateTransfertRequest;
+import com.okanetransfer.service.dto.transfert.response.ClientStatsResponse;
 import com.okanetransfer.service.dto.transfert.response.TransfertResponse;
 import com.okanetransfer.service.dto.transfert.response.TransfertStatsResponse;
 
@@ -40,4 +41,6 @@ public interface ITransfertService {
     TransfertResponse getByTelephoneBeneficiaire(String telephone);
 
     BigDecimal commissionsAgent(String email, LocalDate debut, LocalDate fin);
+
+    ClientStatsResponse getClientStats(String email);
 }

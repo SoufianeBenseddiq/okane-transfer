@@ -1,0 +1,180 @@
+.dashboard-page {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+ 
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ── Main grid ─────────────────────────── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+.transfer-col {
+  min-width: 0;
+}
+
+.stats-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── No active transfer placeholder ───── */
+.no-active-transfer {
+  background: #f9fafb;
+  border: 2px dashed #e5e7eb;
+  border-radius: 16px;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: #9ca3af;
+  text-align: center;
+
+  svg {
+    width: 36px;
+    height: 36px;
+    color: #d1d5db;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #7f8389;
+  }
+}
+
+/* ── Recent section ────────────────────── */
+.recent-section {
+  width: 100%;
+}
+
+/* ── Loading skeleton ──────────────────── */
+.dashboard-skeleton {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.skeleton-banner {
+  height: 80px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+}
+
+.skeleton-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeleton-block {
+  border-radius: 14px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  height: 120px;
+
+  &.tall {
+    height: 280px;
+  }
+
+  &.card {
+    height: 160px;
+  }
+}
+
+.skeleton-transfers {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Error state ───────────────────────── */
+.dashboard-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 20px;
+  gap: 14px;
+  text-align: center;
+
+  svg {
+    width: 44px;
+    height: 44px;
+    color: #ef4444;
+  }
+
+  p {
+    margin: 0;
+    font-size: 15px;
+    color: #374151;
+    font-weight: 500;
+  }
+
+  button {
+    background: #f59e0b;
+    color: #1f2937;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+
+    &:hover { opacity: 0.85; }
+  }
+}
+
+/* ── Responsive ────────────────────────── */
+@media (max-width: 900px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .skeleton-transfers {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-page {
+    padding: 20px 16px 40px;
+    gap: 24px;
+  }
+
+  .skeleton-transfers {
+    grid-template-columns: 1fr;
+  }
+}

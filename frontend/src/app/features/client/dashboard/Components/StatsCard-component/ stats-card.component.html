@@ -1,0 +1,16 @@
+<div class="stats-card">
+  <span class="card-label">ENVOYÉ CE MOIS</span>
+  <div class="amount-row">
+    <span class="amount">{{ sentThisMonth | number:'1.0-0' }}</span>
+    <span class="currency">{{ currency }}</span>
+  </div>
+  <span class="change" [class.positive]="isPositive" [class.negative]="!isPositive">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" stroke-width="2.5"
+      stroke-linecap="round" stroke-linejoin="round">
+      <polyline *ngIf="isPositive" points="18 15 12 9 6 15"/>
+      <polyline *ngIf="!isPositive" points="6 9 12 15 18 9"/>
+    </svg>
+    {{ changeLabel }}
+  </span>
+</div>
