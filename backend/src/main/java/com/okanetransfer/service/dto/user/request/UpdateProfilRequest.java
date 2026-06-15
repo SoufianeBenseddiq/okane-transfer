@@ -28,6 +28,8 @@ public class UpdateProfilRequest {
     @Size(min = 2, max = 60, message = "Le pays doit contenir entre 2 et 60 caractères")
     private String pays;
 
+    private String email;
+
     public String getNom() { return nom; }
     public void setNom(String nom) { this.nom = nom; }
 
@@ -39,4 +41,7 @@ public class UpdateProfilRequest {
 
     public String getPays() { return pays; }
     public void setPays(String pays) { this.pays = pays; }
+
+    public String getEmail() { return email;}
+    public void setEmail(String email) { this.email = email;}
 }

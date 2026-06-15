@@ -736,12 +736,70 @@
     "cancel":             "إلغاء",
     "validate":           "تأكيد الإغلاق"
   },
-  "NAV": {
-    "ACCUEIL": "الرئيسية",
-    "ENVOYER": "إرسال",
-    "MES_TRANSFERTS": "تحويلاتي",
-    "BENEFICIAIRES": "المستفيدون",
-    "AIDE": "المساعدة"
+"NAV": {
+  "ACCUEIL": "الرئيسية",
+  "ENVOYER": "إرسال",
+  "MES_TRANSFERTS": "تحويلاتي",
+  "BENEFICIAIRES": "المستفيدون",
+  "AIDE": "المساعدة",
+  "PROFIL": "الملف الشخصي"
+},"profil": {
+  "breadcrumb": "حسابي",
+  "title": "الملف الشخصي",
+  "subtitle": "إدارة معلوماتك الشخصية وأمانك وتفضيلاتك.",
+  "verified": "✓ حساب موثّق",
+  "logout": "تسجيل الخروج",
+  "personalInfo": {
+    "title": "المعلومات الشخصية",
+    "subtitle": "بياناتك وهويتك",
+    "fields": {
+      "nom": "اللقب",
+      "prenom": "الاسم",
+      "email": "البريد الإلكتروني",
+      "telephone": "الهاتف",
+      "pays": "بلد الإقامة"
+    },
+    "updateSuccess": "تم تحديث المعلومات.",
+    "updateError": "حدث خطأ ما."
+  },
+  "security": {
+    "title": "الأمان",
+    "subtitle": "كلمة المرور والمصادقة الثنائية",
+    "password": "كلمة المرور",
+    "passwordHidden": "············",
+    "change": "تغيير",
+    "currentPasswordPlaceholder": "كلمة المرور الحالية",
+    "newPasswordPlaceholder": "كلمة المرور الجديدة",
+    "confirmPasswordPlaceholder": "تأكيد كلمة المرور الجديدة",
+    "confirm": "تأكيد",
+    "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+    "passwordSuccess": "تم تغيير كلمة المرور بنجاح.",
+    "passwordIncorrect": "كلمة المرور الحالية غير صحيحة.",
+    "passwordError": "حدث خطأ ما.",
+    "twoFA": {
+      "title": "المصادقة الثنائية",
+      "badge": "مفعّلة",
+      "smsTo": "SMS إلى"
+    }
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "subtitle": "اختر كيفية إشعارك",
+    "event": "الحدث",
+    "email": "البريد الإلكتروني",
+    "sms": "SMS",
+    "required": "إلزامي",
+    "items": {
+      "transfertEnvoye": "تحويل مُرسل",
+      "transfertPaye": "تحويل مدفوع",
+      "codeRetraitCommunique": "تم إرسال رمز السحب",
+      "alerteSecurite": "تنبيه أمني",
+      "newsletter": "النشرة الإخبارية والعروض"
+    }
+  },
+  "language": {
+    "title": "اللغة",
+    "subtitle": "اختر لغة عرض التطبيق"
   }
-
+}
 }

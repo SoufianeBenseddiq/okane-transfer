@@ -186,4 +186,6 @@ public interface UtilisateurService {
      */
     void demanderEffacement(Long clientId);
     List<UserResponse> searchClients(String query);
+    UserResponse changePassword(String email, String currentPassword, String newPassword);
+
 }

@@ -742,12 +742,71 @@
     "cancel":             "Cancel",
     "validate":           "Validate closing"
   },
-  "NAV": {
-    "ACCUEIL": "Home",
-    "ENVOYER": "Send",
-    "MES_TRANSFERTS": "My transfers",
-    "BENEFICIAIRES": "Beneficiaries",
-    "AIDE": "Help"
+ "NAV": {
+  "ACCUEIL": "Home",
+  "ENVOYER": "Send",
+  "MES_TRANSFERTS": "My transfers",
+  "BENEFICIAIRES": "Beneficiaries",
+  "AIDE": "Help",
+  "PROFIL": "Profile"
+},"profil": {
+  "breadcrumb": "My Account",
+  "title": "Profile",
+  "subtitle": "Manage your personal information, security and preferences.",
+  "verified": "✓ VERIFIED ACCOUNT",
+  "logout": "Logout",
+  "personalInfo": {
+    "title": "Personal information",
+    "subtitle": "Your contact details and identity",
+    "fields": {
+      "nom": "Last name",
+      "prenom": "First name",
+      "email": "Email",
+      "telephone": "Phone",
+      "pays": "Country of residence"
+    },
+    "updateSuccess": "Information updated.",
+    "updateError": "An error occurred."
+  },
+  "security": {
+    "title": "Security",
+    "subtitle": "Password and two-factor authentication",
+    "password": "Password",
+    "passwordHidden": "············",
+    "change": "Change",
+    "currentPasswordPlaceholder": "Current password",
+    "newPasswordPlaceholder": "New password",
+    "confirmPasswordPlaceholder": "Confirm new password",
+    "confirm": "Confirm",
+    "passwordMismatch": "Passwords do not match.",
+    "passwordSuccess": "Password changed successfully.",
+    "passwordIncorrect": "Current password is incorrect.",
+    "passwordError": "An error occurred.",
+    "twoFA": {
+      "title": "Two-factor authentication",
+      "badge": "ENABLED",
+      "smsTo": "SMS to"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Choose how you want to be notified",
+    "event": "Event",
+    "email": "Email",
+    "sms": "SMS",
+    "required": "required",
+    "items": {
+      "transfertEnvoye": "Transfer sent",
+      "transfertPaye": "Transfer paid",
+      "codeRetraitCommunique": "Withdrawal code shared",
+      "alerteSecurite": "Security alert",
+      "newsletter": "Newsletter & offers"
+    }
+  },
+  "language": {
+    "title": "Language",
+    "subtitle": "Choose the display language of the application"
   }
+}
 
 }

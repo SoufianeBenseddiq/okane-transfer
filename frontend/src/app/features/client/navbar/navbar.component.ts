@@ -1,13 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {Router, RouterModule} from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import {AuthService} from "../../../core/services/auth.service";
-import {SidebarStateService} from "../../../core/services/sidebar-state.service";
+import { AuthService } from "../../../core/services/auth.service";
 
 interface NavItem {
   labelKey: string;
-  label: string;
   route: string;
   exact: boolean;
 }
@@ -24,38 +22,37 @@ interface NavItem {
   .lang-btn.active-lang { background: #1a1f36; color: #fff; }
 `]
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent {
 
   languages = ['fr', 'en', 'ar'];
   currentLang = 'fr';
 
   navItems: NavItem[] = [
-    { labelKey: 'NAV.ACCUEIL',       label: '', route: '/client/dashboard',     exact: true  },
-    { labelKey: 'NAV.ENVOYER',       label: '', route: '/client/envoyer',        exact: false },
-    { labelKey: 'NAV.MES_TRANSFERTS',label: '', route: '/client/historique',     exact: false },
-    { labelKey: 'NAV.BENEFICIAIRES', label: '', route: '/client/beneficiaires',  exact: false },
-    { labelKey: 'NAV.AIDE',          label: '', route: '/client/aide',           exact: false },
+    { labelKey: 'NAV.ACCUEIL',        route: '/client/dashboard',     exact: true  },
+    { labelKey: 'NAV.ENVOYER',        route: '/client/envoyer',        exact: false },
+    { labelKey: 'NAV.MES_TRANSFERTS', route: '/client/historique',     exact: false },
+    { labelKey: 'NAV.BENEFICIAIRES',  route: '/client/beneficiaires',  exact: false },
+    { labelKey: 'NAV.AIDE',           route: '/client/aide',           exact: false },
   ];
 
-  constructor(private translate: TranslateService,  public auth: AuthService) {}
+  constructor(private translate: TranslateService, public auth: AuthService) {
+    this.currentLang = this.translate.currentLang
+      || localStorage.getItem('appLang')
+      || 'fr';
 
-  ngOnInit(): void {
     this.translate.setDefaultLang('fr');
     this.translate.use(this.currentLang);
-    this.updateLabels();
-    this.translate.onLangChange.subscribe(() => this.updateLabels());
+    document.documentElement.dir = this.currentLang === 'ar' ? 'rtl' : 'ltr';
   }
 
   switchLang(lang: string): void {
+    if (lang === this.currentLang) return;
+
     this.currentLang = lang;
     this.translate.use(lang);
-    document.dir = lang === 'ar' ? 'rtl' : 'ltr';
-  }
-
-  private updateLabels(): void {
-    this.navItems.forEach(item => {
-      this.translate.get(item.labelKey).subscribe(val => item.label = val);
-    });
+    localStorage.setItem('appLang', lang);
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   }
 
   get userName(): string {
