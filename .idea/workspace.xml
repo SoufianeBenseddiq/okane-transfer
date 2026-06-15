@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="a3eb003a-893a-4117-8a7d-2a521cf408bd" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/okanetransfer/shared/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/okanetransfer/shared/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/features/client/dashboard/dashboard.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/features/client/dashboard/dashboard.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/features/client/dashboard/dashboard.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/features/client/dashboard/dashboard.component.scss" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,7 +44,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "Tomcat Server.Tomcat 10.1.521.executor": "Run",
-    "com.google.cloudcode.ide_session_index": "20260614_0003",
+    "com.google.cloudcode.ide_session_index": "20260615_0001",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "OT-51-implementation-dashboard-client-interface",
     "junie.onboarding.icon.badge.shown": "true",
@@ -193,7 +192,8 @@
       <workItem from="1780046082233" duration="410000" />
       <workItem from="1780501697479" duration="39000" />
       <workItem from="1781447574337" duration="1430000" />
-      <workItem from="1781449391513" duration="2961000" />
+      <workItem from="1781449391513" duration="3560000" />
+      <workItem from="1781515332233" duration="667000" />
     </task>
     <servers />
   </component>
