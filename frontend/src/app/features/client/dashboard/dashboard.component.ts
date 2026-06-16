@@ -53,7 +53,7 @@ export class DashboardComponent implements OnInit {
   }
 
   onViewHistory(): void {
-    this.router.navigate(['/transfers']);
+    this.router.navigate(['/client/historique']);
   }
 
   onManageBeneficiaries(): void {

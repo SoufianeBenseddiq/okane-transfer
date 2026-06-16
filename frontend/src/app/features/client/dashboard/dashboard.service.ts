@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, forkJoin } from 'rxjs';
 import { delay, map, switchMap } from 'rxjs/operators';
+import { environment } from '../../../../environments/environment';
 import {
   DashboardData,
   Transfer,
@@ -121,7 +122,8 @@ const MOCK_DASHBOARD_DATA: DashboardData = {
   providedIn: 'root',
 })
 export class DashboardService {
-  private apiBase = 'http://localhost:8080/okane_transfer_1_0_SNAPSHOT_war/api';
+  // private apiBase = 'http://localhost:8080/okane_transfer_war/api';
+   private readonly apiBase = `${environment.apiUrl}/api`;
 
   constructor(private http: HttpClient) {}
 

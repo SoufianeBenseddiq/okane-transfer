@@ -29,9 +29,7 @@ export class NavbarComponent {
 
   navItems: NavItem[] = [
     { labelKey: 'NAV.ACCUEIL',        route: '/client/dashboard',     exact: true  },
-    { labelKey: 'NAV.ENVOYER',        route: '/client/envoyer',        exact: false },
     { labelKey: 'NAV.MES_TRANSFERTS', route: '/client/historique',     exact: false },
-    { labelKey: 'NAV.BENEFICIAIRES',  route: '/client/beneficiaires',  exact: false },
     { labelKey: 'NAV.AIDE',           route: '/client/aide',           exact: false },
   ];
 
