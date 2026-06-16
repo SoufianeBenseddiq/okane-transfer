@@ -114,3 +114,4 @@ export class TwoFactorComponent implements OnInit, OnDestroy {
     // TODO: call authService.resendOtp() when endpoint is available
   }
 }
+// 
