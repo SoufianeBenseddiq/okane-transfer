@@ -131,6 +131,14 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
     }
 
     @Override
+    public ClotureCaisseResponse cloturerCaisse(ClotureCaisseRequest request) {
+        if (request.getDate() == null) {
+            request.setDate(LocalDate.now());
+        }
+        return save(request);
+    }
+
+    @Override
     public ClotureCaisseResponse rapportCloture(String agentEmail, LocalDate date) {
 
         ClotureCaisse cloture = repository.findByAgentEmailAndDate(agentEmail, date);
