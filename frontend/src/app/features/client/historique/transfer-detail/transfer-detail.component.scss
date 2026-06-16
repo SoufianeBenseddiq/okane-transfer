@@ -1,0 +1,602 @@
+/* =========================
+   ICON SIZING (Lucide PRO)
+========================= */
+lucide-angular {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-14 svg { width: 14px; height: 14px; }
+.icon-16 svg { width: 16px; height: 16px; }
+.icon-18 svg { width: 18px; height: 18px; }
+.icon-20 svg { width: 20px; height: 20px; }
+.icon-22 svg { width: 22px; height: 22px; }
+
+.transfer-wrapper {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background: #0d1b2a;
+  overflow-y: auto;
+
+  .breadcrumb {
+    font-size: 12px;
+    color: #4a6278;
+    margin-bottom: 12px;
+    font-weight: 500;
+    padding: 0 16px;
+
+    .separator {
+      margin: 0 8px;
+      color: #4a6278;
+    }
+
+    .active {
+      color: #c5cfd8;
+      font-weight: 600;
+    }
+  }
+
+  .back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    margin-bottom: 12px;
+    margin-left: 16px;
+    width: fit-content;
+    background: #152538;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #c5cfd8;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #1a2d40;
+      border-color: rgba(245, 166, 35, 0.30);
+      color: #f5a623;
+    }
+  }
+
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 16px;
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.08);
+      border-top: 3px solid #f5a623;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    p {
+      color: #7a92a8;
+      font-size: 14px;
+    }
+  }
+
+  .error-state {
+    background: rgba(232, 75, 75, 0.08);
+    border: 1px solid rgba(232, 75, 75, 0.20);
+    border-radius: 8px;
+    padding: 16px;
+    color: #e84b4b;
+    text-align: center;
+    font-weight: 500;
+    margin: 16px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.transfer-detail-page {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+
+  .back-btn {
+    display: inline-block;
+    margin-bottom: 24px;
+    padding: 8px 16px;
+    background-color: #152538;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    color: #c5cfd8;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: #1a2d40;
+      border-color: rgba(245, 166, 35, 0.30);
+      color: #f5a623;
+      transform: translateX(-2px);
+    }
+  }
+}
+
+.transfer-detail {
+  background: #152538;
+  border-radius: 12px;
+  overflow-y: auto;
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.30);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+  /* =========================
+     HERO NAVY (style dashboard)
+  ========================= */
+  .hero-section {
+    margin: 16px;
+    padding: 22px 24px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #0f1729 0%, #131c33 100%);
+    color: #e5e7eb;
+    box-shadow: 0 10px 30px rgba(15, 23, 41, 0.25);
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .hero-left { flex: 1; }
+
+    .hero-label {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .reference-number {
+      margin: 0 0 12px 0;
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      background: rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+
+      &.pending { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+      &.paid    { background: rgba(16, 185, 129, 0.18); color: #34d399; }
+      &.cancelled,
+      &.expired { background: rgba(239, 68, 68, 0.18); color: #f87171; }
+      &.blocked { background: rgba(99, 102, 241, 0.18); color: #a5b4fc; }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+
+      .action-btn {
+        width: 42px;
+        height: 42px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 10px;
+        cursor: pointer;
+        color: #e5e7eb;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.12);
+          transform: translateY(-2px);
+        }
+      }
+    }
+
+    /* Timeline de progression */
+    .hero-timeline {
+      display: flex;
+      align-items: flex-start;
+      margin: 22px 0 18px;
+
+      .step {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+
+        .step-marker {
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.12);
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #0f1729;
+          z-index: 2;
+          transition: all 0.25s ease;
+        }
+
+        .step-label {
+          margin-top: 8px;
+          font-size: 12px;
+          color: #94a3b8;
+          font-weight: 500;
+        }
+
+        .step-line {
+          position: absolute;
+          top: 13px;
+          left: 50%;
+          width: 100%;
+          height: 2px;
+          background: rgba(255, 255, 255, 0.15);
+          z-index: 1;
+        }
+
+        &.done {
+          .step-marker { background: #f9a825; border-color: #f9a825; }
+          .step-label { color: #e5e7eb; }
+          .step-line { background: #f9a825; }
+        }
+
+        &.active {
+          .step-marker {
+            background: #f9a825;
+            border-color: rgba(249, 168, 37, 0.45);
+            box-shadow: 0 0 0 4px rgba(249, 168, 37, 0.25);
+          }
+          .step-label { color: #fbbf24; font-weight: 600; }
+        }
+      }
+    }
+
+    .hero-description {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+  }
+
+  .timeline-section,
+  .withdrawal-section,
+  .financial-section,
+  .expiration-section {
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+    h3 {
+      margin: 0 0 20px 0;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: #7a92a8;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+  }
+
+  .timeline-section {
+    background: #1a2d40;
+  }
+
+  .parties-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+    .party-card {
+      position: relative;
+      background: #1a2d40;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      overflow: hidden;
+      box-shadow: none;
+      transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      &:hover {
+        transform: translateY(-3px);
+        border-color: rgba(255, 255, 255, 0.14);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+      }
+
+      &:first-child::before { background: linear-gradient(90deg, #0f1729, #1c2945); }
+      &:last-child::before  { background: linear-gradient(90deg, #f9a825, #ff9500); }
+
+      h3 {
+        margin: 0 0 16px 0;
+        font-size: 11px;
+        letter-spacing: 1px;
+        color: #7a92a8;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+
+      .party-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+        .avatar {
+          flex-shrink: 0;
+          width: 54px;
+          height: 54px;
+          border-radius: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #fff;
+          font-size: 19px;
+          font-weight: 700;
+          box-shadow: 0 6px 14px rgba(0, 0, 0, 0.20);
+        }
+
+        .party-info {
+          .name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #e8edf2;
+            margin-bottom: 4px;
+          }
+
+          .location {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #7a92a8;
+            font-weight: 500;
+
+            lucide-angular { color: #4a6278; }
+          }
+        }
+      }
+
+      .party-details .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        font-size: 13px;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+
+        &:last-child { border-bottom: none; }
+
+        .label {
+          color: #7a92a8;
+          font-weight: 500;
+          flex-shrink: 0;
+        }
+        .value {
+          color: #e8edf2;
+          font-weight: 600;
+          text-align: right;
+        }
+      }
+    }
+
+    .party-card:first-child .avatar {
+      background: linear-gradient(135deg, #0f1729 0%, #1c2945 100%);
+    }
+    .party-card:last-child .avatar {
+      background: linear-gradient(135deg, #f9a825 0%, #ff9500 100%);
+    }
+  }
+
+  /* =========================
+     CODE DE RETRAIT (BLEU)
+  ========================= */
+  .withdrawal-section {
+    .code-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+
+      .code-display {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: linear-gradient(135deg, #0f1729 0%, #131c33 100%);
+        padding: 16px;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+
+        .code-shield {
+          color: #cbd5e1;
+        }
+
+        .code-value {
+          font-size: 24px;
+          font-weight: 700;
+          color: #ffffff;
+          letter-spacing: 3px;
+          font-family: 'Courier New', monospace;
+        }
+      }
+
+      .code-action {
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: linear-gradient(135deg, #0f1729 0%, #131c33 100%);
+        color: #e5e7eb;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+          background: #1c2945;
+          transform: scale(1.05);
+        }
+      }
+    }
+
+    .code-info {
+      margin: 0;
+      font-size: 12px;
+      color: #999;
+      font-weight: 500;
+    }
+  }
+
+  .financial-section {
+    .financial-details .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+      .label { color: #7a92a8; font-weight: 500; }
+      .value { color: #e8edf2; font-weight: 600; }
+
+      &.total {
+        border-bottom: none;
+        border-top: 2px solid #f5a623;
+        padding: 16px 0 0 0;
+        margin-top: 12px;
+
+        .label, .value {
+          color: #f5a623;
+          font-size: 16px;
+          font-weight: 700;
+        }
+      }
+    }
+  }
+
+  .expiration-section {
+    background: #1a2d40;
+
+    .expiration-date {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+
+      .label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #7a92a8;
+        font-weight: 500;
+        font-size: 14px;
+      }
+      .value { color: #e8edf2; font-weight: 700; font-size: 16px; }
+    }
+  }
+
+  .footer-actions {
+    display: flex;
+    gap: 12px;
+    padding: 16px 24px;
+    background: #152538;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    flex-shrink: 0;
+
+    .btn {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      &.btn-primary {
+        background: linear-gradient(135deg, #f5a623 0%, #e09510 100%);
+        color: #0d1b2a;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 16px rgba(245, 166, 35, 0.30);
+        }
+      }
+
+      &.btn-close {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        color: #c5cfd8;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.10);
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .transfer-detail {
+    .hero-section .hero-top { flex-direction: column; gap: 16px; }
+    .parties-section { grid-template-columns: 1fr; }
+    .footer-actions { flex-direction: column; .btn { width: 100%; } }
+  }
+}

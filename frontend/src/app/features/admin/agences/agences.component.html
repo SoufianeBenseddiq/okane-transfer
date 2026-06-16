@@ -234,6 +234,13 @@
         </div>
 
         <div class="flex flex-col gap-1.5">
+          <label class="text-[12px] font-semibold">{{ 'agences.fields.soldeCaisseAgence' | translate }}</label>
+          <input formControlName="soldeCaisseAgence" type="number" min="0" placeholder="0"
+                 class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"
+                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#F3F4F8;" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold">{{ 'agences.fields.manager' | translate }}</label>
           <select formControlName="responsableId"
                   class="px-3 py-2 rounded-[10px] text-[13.5px] outline-none"

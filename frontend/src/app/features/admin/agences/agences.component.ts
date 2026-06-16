@@ -56,6 +56,7 @@ export class AgencesComponent implements OnInit {
     adresse:           ['', Validators.required],
     pays:              ['MA', Validators.required],
     plafondJournalier: [null as number | null, [Validators.required, Validators.min(1)]],
+    soldeCaisseAgence: [0 as number | null, [Validators.min(0)]],
     responsableId:     [null as number | null],
     estCentrale:       [false],
     agenceCentraleId:  [null as number | null],
@@ -134,7 +135,7 @@ export class AgencesComponent implements OnInit {
     this.detailAgence = null;
     this.modalMode = 'create';
     this.editingId = null;
-    this.form.reset({ pays: 'MA', estCentrale: false, agenceCentraleId: null });
+    this.form.reset({ pays: 'MA', soldeCaisseAgence: 0, estCentrale: false, agenceCentraleId: null });
     this.error = null;
     this.showModal = true;
   }
@@ -150,6 +151,7 @@ export class AgencesComponent implements OnInit {
       adresse:           a.adresse,
       pays:              a.pays,
       plafondJournalier: a.plafondJournalier,
+      soldeCaisseAgence: a.soldeCaisseAgence ?? 0,
       responsableId:     a.responsableId ?? null,
       estCentrale:       a.estCentrale ?? false,
       agenceCentraleId:  a.agenceCentraleId ?? null,

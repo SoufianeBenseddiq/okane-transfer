@@ -18,6 +18,9 @@ public class AgenceRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "Le plafond doit être positif")
     private BigDecimal plafondJournalier;
 
+    @DecimalMin(value = "0.0", message = "La caisse agence ne peut pas être négative")
+    private BigDecimal soldeCaisseAgence;
+
     private Long responsableId;
 
     private Boolean estCentrale = false;
@@ -35,6 +38,9 @@ public class AgenceRequest {
 
     public BigDecimal getPlafondJournalier() { return plafondJournalier; }
     public void setPlafondJournalier(BigDecimal plafondJournalier) { this.plafondJournalier = plafondJournalier; }
+
+    public BigDecimal getSoldeCaisseAgence() { return soldeCaisseAgence; }
+    public void setSoldeCaisseAgence(BigDecimal soldeCaisseAgence) { this.soldeCaisseAgence = soldeCaisseAgence; }
 
     public Long getResponsableId() { return responsableId; }
     public void setResponsableId(Long responsableId) { this.responsableId = responsableId; }

@@ -77,7 +77,22 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
         // signaler automatiquement si écart non nul
         cloture.setEcartSignale(cloture.getEcart().compareTo(BigDecimal.ZERO) != 0);
 
-        return converter.toResponse(repository.save(cloture));
+        ClotureCaisseResponse response = converter.toResponse(repository.save(cloture));
+
+        // remise en fin de journée : l'argent compté physiquement retourne au coffre de l'agence
+        Agence agence = agent.getAgence();
+        if (agence != null && request.getSoldeSaisi().compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal pool = agence.getSoldeCaisseAgence() != null
+                    ? agence.getSoldeCaisseAgence() : BigDecimal.ZERO;
+            agence.setSoldeCaisseAgence(pool.add(request.getSoldeSaisi()));
+            agenceRepository.save(agence);
+        }
+
+        // la caisse de l'agent est vidée jusqu'à la prochaine ouverture par le manager
+        agent.setSoldeCaisse(BigDecimal.ZERO);
+        utilisateurRepository.save(agent);
+
+        return response;
     }
 
     @Override
@@ -116,6 +131,14 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
     }
 
     @Override
+    public ClotureCaisseResponse cloturerCaisse(ClotureCaisseRequest request) {
+        if (request.getDate() == null) {
+            request.setDate(LocalDate.now());
+        }
+        return save(request);
+    }
+
+    @Override
     public ClotureCaisseResponse rapportCloture(String agentEmail, LocalDate date) {
 
         ClotureCaisse cloture = repository.findByAgentEmailAndDate(agentEmail, date);
@@ -127,50 +150,6 @@ public class ClotureCaisseServiceImpl implements ClotureCaisseService {
         }
 
         return converter.toResponse(cloture);
-    }
-
-    @Override
-    public ClotureCaisseResponse cloturerCaisse(ClotureCaisseRequest request) {
-
-        Agent agent = resolveAgent(request.getAgentEmail());
-
-        if (repository.findByAgentEmailAndDate(agent.getEmail(), request.getDate()) != null) {
-            throw new IllegalArgumentException(
-                    "Une clôture existe déjà pour cette date"
-            );
-        }
-
-        BigDecimal soldeTheorique = caisseOperationService
-            .consulterSoldePourDate(agent.getEmail(), request.getDate());
-
-        ClotureCaisse cloture = new ClotureCaisse();
-
-        cloture.setAgent(agent);
-        cloture.setDate(request.getDate());
-        cloture.setSoldeTheorique(soldeTheorique);
-        cloture.setSoldeSaisi(request.getSoldeSaisi());
-
-        BigDecimal ecart = request.getSoldeSaisi()
-                .subtract(soldeTheorique);
-
-        cloture.setEcart(ecart);
-        cloture.setEcartSignale(ecart.compareTo(BigDecimal.ZERO) != 0);
-
-        ClotureCaisseResponse response = converter.toResponse(repository.save(cloture));
-
-        // Return agent's remaining cash to soldeCaisseAgence
-        BigDecimal soldeAgent = agent.getSoldeCaisse() != null ? agent.getSoldeCaisse() : BigDecimal.ZERO;
-        Agence agence = agent.getAgence();
-        if (agence != null && soldeAgent.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal pool = agence.getSoldeCaisseAgence() != null
-                    ? agence.getSoldeCaisseAgence() : BigDecimal.ZERO;
-            agence.setSoldeCaisseAgence(pool.add(soldeAgent));
-            agenceRepository.save(agence);
-        }
-        agent.setSoldeCaisse(BigDecimal.ZERO);
-        utilisateurRepository.save(agent);
-
-        return response;
     }
 
     private Agent resolveAgent(String agentEmail) {

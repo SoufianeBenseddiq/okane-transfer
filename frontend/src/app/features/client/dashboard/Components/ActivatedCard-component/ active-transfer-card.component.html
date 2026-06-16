@@ -1,0 +1,65 @@
+<div class="transfer-card" *ngIf="transfer">
+  <div class="card-header">
+    <span class="card-label">TRANSFERT EN COURS</span>
+    <span class="status-badge" [ngClass]="statusClass">● {{ statusLabel }}</span>
+  </div>
+
+  <div class="card-body">
+    <div class="amount-block">
+      <span class="amount">{{ transfer.amount | number:'1.0-0' }}</span>
+      <span class="currency">{{ transfer.currency }}</span>
+    </div>
+    <p class="recipient">
+      vers <strong>{{ transfer.recipientName }}</strong>
+      · {{ transfer.convertedAmount | number:'1.0-0' }} {{ transfer.convertedCurrency }}
+      au {{ transfer.destinationCountry }}
+    </p>
+
+    <!-- Progress tracker -->
+    <div class="progress-tracker">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+      </div>
+      <div class="steps">
+        <div
+          *ngFor="let step of transfer.steps"
+          class="step"
+          [class.completed]="step.completed"
+          [class.current]="step.current"
+        >
+          <div class="step-dot">
+            <svg *ngIf="step.completed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="step-info">
+            <span class="step-label">{{ step.label }}</span>
+            <span class="step-time" *ngIf="step.time">{{ step.time }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Withdrawal code -->
+  <div class="withdrawal-section">
+    <span class="withdrawal-label">CODE DE RETRAIT</span>
+    <div class="withdrawal-row">
+      <span class="withdrawal-code">{{ displayCode }}</span>
+      <button class="reveal-btn" (click)="onRevealCode()" [disabled]="codeRevealed || isRevealing">
+        <svg *ngIf="!isRevealing" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <span *ngIf="isRevealing" class="spinner"></span>
+        <span *ngIf="!isRevealing">{{ codeRevealed ? 'Affiché' : 'Afficher' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <button class="detail-btn" (click)="goToDetail()">
+    Voir les détails →
+  </button>
+</div>

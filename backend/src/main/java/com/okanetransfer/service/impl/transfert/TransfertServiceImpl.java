@@ -1,5 +1,20 @@
 package com.okanetransfer.service.impl.transfert;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.okanetransfer.entity.agence.Agence;
 import com.okanetransfer.entity.caisse.CaisseOperation;
 import com.okanetransfer.entity.devise.Corridor;
@@ -20,12 +35,15 @@ import com.okanetransfer.repository.transfert.ExpediteurRepository;
 import com.okanetransfer.repository.transfert.TransfertRepository;
 import com.okanetransfer.repository.user.PieceIdentiteRepository;
 import com.okanetransfer.repository.user.UtilisateurRepository;
+import com.okanetransfer.service.converter.transfert.BeneficiaireConverter;
 import com.okanetransfer.service.converter.transfert.TransfertConverter;
-import com.okanetransfer.service.dto.transfert.request.CreateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.request.CreateTransfertAvecNouveauClientRequest;
+import com.okanetransfer.service.dto.transfert.request.CreateTransfertRequest;
 import com.okanetransfer.service.dto.transfert.request.PaiementRequest;
 import com.okanetransfer.service.dto.transfert.request.SendTransfertReceiptEmailRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateTransfertRequest;
+import com.okanetransfer.service.dto.transfert.response.BeneficiaireResponse;
+import com.okanetransfer.service.dto.transfert.response.ClientStatsResponse;
 import com.okanetransfer.service.dto.transfert.response.TransfertResponse;
 import com.okanetransfer.service.dto.transfert.response.TransfertStatsResponse;
 import com.okanetransfer.service.dto.user.request.PieceIdentiteRequest;
@@ -37,22 +55,8 @@ import com.okanetransfer.shared.enums.StatutTransfert;
 import com.okanetransfer.shared.enums.TypeOperation;
 import com.okanetransfer.shared.exception.TransfertNotFoundException;
 import com.okanetransfer.shared.util.CodeGenerator;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Sort;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.mail.internet.MimeMessage;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @Transactional
@@ -349,6 +353,7 @@ public class TransfertServiceImpl implements ITransfertService {
 
         transfert = transfertRepository.save(transfert);
 
+
         // Mise à jour du montant traité + soldeCaisseAgence (envoi = agence receives cash from sender)
         agenceEnvoi.setMontantTraiteAujourdhui(montantActuel.add(request.getMontant()));
         BigDecimal soldeAgence = agenceEnvoi.getSoldeCaisseAgence() != null
@@ -573,7 +578,7 @@ public class TransfertServiceImpl implements ITransfertService {
         transfert.setNumeroPieceBeneficiaire(request.getNumeroPieceBeneficiaire());
 
         transfert = transfertRepository.save(transfert);
-
+        envoyerNotificationStatutEmail(transfert, StatutTransfert.PAYE);
         // Pass original montantRecu for display; method converts to MAD internally for soldeCaisse
         enregistrerOperationCaisse(transfert, agentPaiement, TypeOperation.RETRAIT, transfert.getMontantRecu());
 
@@ -587,6 +592,7 @@ public class TransfertServiceImpl implements ITransfertService {
 
         transfert.setStatut(StatutTransfert.ANNULE);
         transfert = transfertRepository.save(transfert);
+        envoyerNotificationStatutEmail(transfert, StatutTransfert.ANNULE);
         return TransfertConverter.toResponse(transfert);
     }
 
@@ -937,6 +943,129 @@ public class TransfertServiceImpl implements ITransfertService {
         return value == null || value.trim().isEmpty();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public ClientStatsResponse getClientStats(String email) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfMonth = now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime startOfLastMonth = startOfMonth.minusMonths(1);
+        LocalDateTime endOfLastMonth = startOfMonth.minusSeconds(1);
+
+        BigDecimal sentThisMonth = transfertRepository.sumMontantEnvoyeByClient(
+                email, startOfMonth, now
+        );
+        BigDecimal sentLastMonth = transfertRepository.sumMontantEnvoyeByClient(
+                email, startOfLastMonth, endOfLastMonth
+        );
+
+        BigDecimal change = sentThisMonth.subtract(sentLastMonth);
+        Long beneficiairesCount = transfertRepository.countDistinctBeneficiaires(email);
+
+        List<Transfert> recentTransferts = transfertRepository.findByExpediteurClientId(
+                utilisateurRepository.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"))
+                        .getId()
+        );
+
+        List<BeneficiaireResponse> beneficiaires = recentTransferts.stream()
+                .map(Transfert::getBeneficiaire)
+                .distinct()
+                .limit(4)
+                .map(BeneficiaireConverter::toResponse)
+                .toList();
+
+        ClientStatsResponse response = new ClientStatsResponse();
+        response.setSentThisMonth(sentThisMonth);
+        response.setCurrency("MAD");
+        response.setChangeVsLastMonth(change);
+        response.setActiveBeneficiariesCount(beneficiairesCount.intValue());
+        response.setBeneficiaries(beneficiaires);
+
+        return response;
+    }
+
     // Je n'ai pas implémenté DELETE /api/transferts/{id} car les transactions doivent rester toujours traçables.
     // À la place, j'ai créé un endpoint d'annulation de transaction.
+    private void envoyerNotificationStatutEmail(Transfert transfert, StatutTransfert nouveauStatut) {
+        if (transfert.getExpediteur() == null || transfert.getExpediteur().getClient() == null) {
+            return;
+        }
+        String email = transfert.getExpediteur().getClient().getEmail();
+        if (isBlank(email)) {
+            return;
+        }
+
+        String libelleStatut = switch (nouveauStatut) {
+            case PAYE -> "payé au bénéficiaire";
+            case ANNULE -> "annulé";
+            case EXPIRE -> "expiré";
+            case BLOQUE -> "bloqué pour vérification";
+            default -> nouveauStatut.name();
+        };
+
+        String html = buildNotificationStatutHtml(transfert, libelleStatut);
+
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+            helper.setFrom(mailFrom, "Okane Transfer");
+            helper.setTo(email.trim());
+            helper.setSubject("[Okane Transfer] Mise à jour de votre transfert - Réf: " + transfert.getNumeroReference());
+
+            String plainText = """
+                Okane Transfer - Mise à jour de statut
+
+                Votre transfert (réf. %s, code %s) est maintenant : %s
+
+                Connectez-vous à votre espace client pour plus de détails.
+                """.formatted(transfert.getNumeroReference(), transfert.getCodeRetrait(), libelleStatut);
+
+            helper.setText(plainText, html);
+            javaMailSender.send(message);
+        } catch (Exception exception) {
+            // Ne bloque jamais la transaction métier si l'email échoue
+            System.err.println("Échec envoi notification statut : " + exception.getMessage());
+        }
+    }
+
+    private String buildNotificationStatutHtml(Transfert transfert, String libelleStatut) {
+        return """
+            <html>
+            <body style="margin:0;padding:0;background-color:#f1f5f9;font-family:'Plus Jakarta Sans',Arial,sans-serif;">
+              <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+                <div style="background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
+                  <div style="background-color:#0f172a;padding:32px;text-align:center;">
+                    <h1 style="color:#ffffff;font-size:22px;font-weight:800;margin:0;text-transform:uppercase;">
+                      Okane <span style="color:#fbbf24;">Transfer</span>
+                    </h1>
+                  </div>
+                  <div style="padding:32px;text-align:center;">
+                    <p style="font-size:15px;color:#334155;margin:0 0 16px;">
+                      Le statut de votre transfert a changé :
+                    </p>
+                    <div style="display:inline-block;background-color:#fef3c7;color:#d97706;font-weight:700;
+                                padding:8px 20px;border-radius:9999px;font-size:14px;margin-bottom:16px;">
+                      %s
+                    </div>
+                    <p style="font-size:13px;color:#64748b;margin:16px 0 0;">
+                      Référence : <strong>%s</strong><br/>
+                      Code de retrait : <strong>%s</strong>
+                    </p>
+                  </div>
+                  <div style="background-color:#f8fafc;padding:20px 32px;text-align:center;border-top:1px solid #e2e8f0;">
+                    <p style="font-size:11px;color:#94a3b8;margin:0;">
+                      Connectez-vous à votre espace client pour suivre votre transfert.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </body>
+            </html>
+            """.formatted(
+                escapeHtml(libelleStatut),
+                escapeHtml(transfert.getNumeroReference()),
+                escapeHtml(transfert.getCodeRetrait())
+        );
+    }
 }

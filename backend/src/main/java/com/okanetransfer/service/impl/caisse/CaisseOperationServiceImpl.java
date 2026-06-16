@@ -70,8 +70,10 @@ public class CaisseOperationServiceImpl implements CaisseOperationService {
             agenceRepository.save(agence);
         }
 
-        // Set agent's starting balance
-        agent.setSoldeCaisse(montantInitial);
+        // Ajoute le fonds de caisse du jour au solde existant (préserve un éventuel reliquat non clôturé)
+        BigDecimal soldeActuel = agent.getSoldeCaisse() != null ? agent.getSoldeCaisse() : BigDecimal.ZERO;
+        agent.setSoldeCaisse(soldeActuel.add(montantInitial));
+        agent.setDateOuverture(LocalDate.now());
         utilisateurRepository.save(agent);
 
         CaisseOperation operation = new CaisseOperation();

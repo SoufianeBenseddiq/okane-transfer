@@ -16,6 +16,7 @@ public class UserResponse {
     private String role;
     private Boolean actif;
     private BigDecimal soldeCaisse; // non-null for ROLE_AGENT only
+    private Boolean caisseOuverteAujourdhui; // non-null for ROLE_AGENT only
     private Long agenceId;          // non-null for ROLE_AGENT and ROLE_MANAGER
     private LocalDateTime creeLe;
 
@@ -51,6 +52,9 @@ public class UserResponse {
 
     public BigDecimal getSoldeCaisse() { return soldeCaisse; }
     public void setSoldeCaisse(BigDecimal soldeCaisse) { this.soldeCaisse = soldeCaisse; }
+
+    public Boolean getCaisseOuverteAujourdhui() { return caisseOuverteAujourdhui; }
+    public void setCaisseOuverteAujourdhui(Boolean caisseOuverteAujourdhui) { this.caisseOuverteAujourdhui = caisseOuverteAujourdhui; }
 
     public Long getAgenceId() { return agenceId; }
     public void setAgenceId(Long agenceId) { this.agenceId = agenceId; }

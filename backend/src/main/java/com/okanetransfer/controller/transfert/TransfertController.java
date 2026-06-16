@@ -5,6 +5,7 @@ import com.okanetransfer.service.dto.transfert.request.CreateTransfertAvecNouvea
 import com.okanetransfer.service.dto.transfert.request.PaiementRequest;
 import com.okanetransfer.service.dto.transfert.request.SendTransfertReceiptEmailRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateTransfertRequest;
+import com.okanetransfer.service.dto.transfert.response.ClientStatsResponse;
 import com.okanetransfer.service.dto.transfert.response.TransfertResponse;
 import com.okanetransfer.service.dto.transfert.response.TransfertStatsResponse;
 import com.okanetransfer.service.facade.transfert.ITransfertService;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -194,5 +196,14 @@ public class TransfertController {
             @RequestBody @Valid SendTransfertReceiptEmailRequest request) {
         transfertService.envoyerRecuParEmail(request);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/client/stats")
+    @Operation(summary = "Statistiques d'un client", description = "Retourne les statistiques de transferts du client authentifié.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Statistiques retournées")
+    })
+    public ResponseEntity<ClientStatsResponse> getClientStats(Authentication auth) {
+        return ResponseEntity.ok(transfertService.getClientStats(auth.getName()));
     }
 }

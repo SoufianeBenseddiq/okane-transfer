@@ -12,6 +12,7 @@ export interface UserResponse {
   role: RoleUtilisateur;
   actif: boolean;
   soldeCaisse?: number | null; // ROLE_AGENT only
+  caisseOuverteAujourdhui?: boolean | null; // ROLE_AGENT only
   agenceId?: number;
   creeLe: string;
 }

@@ -52,4 +52,25 @@ public interface TransfertRepository extends JpaRepository<Transfert, Long> {
             @Param("to")   LocalDateTime to
     );
 
+    @Query("""
+            SELECT COALESCE(SUM(t.montantEnvoye), 0)
+            FROM Transfert t
+            WHERE t.expediteur.client.email = :email
+            AND t.creeLe BETWEEN :from AND :to
+            AND t.statut <> 'ANNULE'
+            """)
+    BigDecimal sumMontantEnvoyeByClient(
+            @Param("email") String email,
+            @Param("from") LocalDateTime from,
+            @Param("to")   LocalDateTime to
+    );
+
+    @Query("""
+            SELECT COUNT(DISTINCT t.beneficiaire.id)
+            FROM Transfert t
+            WHERE t.expediteur.client.email = :email
+            AND t.statut = 'PAYE'
+            """)
+    Long countDistinctBeneficiaires(@Param("email") String email);
+
 }

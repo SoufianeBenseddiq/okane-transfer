@@ -68,62 +68,63 @@ export class AgentsComponent implements OnInit, OnDestroy {
           console.error('Erreur chargement transferts:', err);
           return of([]);
         })
+      ),
+      caisseOperations: this.agentsService.getCaisseOperations().pipe(
+        catchError(err => {
+          console.error('Erreur chargement opérations de caisse:', err);
+          return of([]);
+        })
       )
-    }).subscribe(({ agents, transferts }) => {
+    }).subscribe(({ agents, transferts, caisseOperations }) => {
 
       // Filter to ROLE_AGENT only AND belonging to this manager's agence
       const agentsOnly = (agents as Agent[]).filter(a =>
         a.role === 'ROLE_AGENT' && (this.agenceId == null || a.agenceId === this.agenceId)
       );
 
-      // Calculer les stats par agent
-      const statsParAgent = new Map<number, any>();
+      const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+      const isToday = (dateHeure?: string) => !!dateHeure && dateHeure.slice(0, 10) === today;
 
-      if (transferts && (transferts as any[]).length > 0) {
-        (transferts as any[]).forEach(t => {
-          const agentId = t.agentId;
-          if (agentId) {
-            if (!statsParAgent.has(agentId)) {
-              statsParAgent.set(agentId, {
-                transferts: 0,
-                commissions: 0,
-                payees: 0,
-                total: 0
-              });
-            }
-            const stats = statsParAgent.get(agentId)!;
-            stats.total++;
-            if (t.statut === 'PAYE') {
-              stats.transferts++;
-              stats.commissions += t.frais || 0;
-              stats.payees++;
-            }
-          }
-        });
-      }
+      // Transferts envoyés (créés) aujourd'hui
+      const envoisAujourdhui = (transferts as any[]).filter(t => isToday(t.creeLe));
 
-      // Calculer les totaux globaux
-      const totalPayees = Array.from(statsParAgent.values()).reduce((sum, s) => sum + s.payees, 0);
+      // Retraits (paiements) effectués aujourd'hui
+      const retraitsAujourdhui = (caisseOperations as any[]).filter(
+        op => op.type === 'RETRAIT' && isToday(op.dateHeure)
+      );
 
-      // Transformer les agents avec les stats
-      this.agents = [...agentsOnly.map(agent => {
-        const stats = statsParAgent.get(agent.id);
+      // Transformer les agents avec les stats du jour
+      this.agents = agentsOnly.map(agent => {
+        const envois = envoisAujourdhui.filter(t => t.agentId === agent.id);
+        const retraits = retraitsAujourdhui.filter(op => op.agentId === agent.id);
+
+        const commissionsJour = envois
+          .filter(t => t.statut === 'PAYE')
+          .reduce((sum, t) => sum + (t.frais || 0), 0);
+
         return {
           ...agent,
-          transferts: stats?.total || 0,  // ✅ TOUS les transferts (pas seulement PAYÉS)
-          commissionsJour: stats?.commissions || 0,
-          performance: totalPayees > 0 ? Math.round((stats?.payees || 0) / totalPayees * 100) : 0,  // ✅ % du total global PAYÉS
+          transferts: envois.length + retraits.length,  // ✅ envois créés + retraits payés, aujourd'hui
+          commissionsJour,
+          performance: 0, // calculée ci-dessous, une fois le total connu
           status: agent.actif ? 'active' : 'inactive'
         } as AgentDisplay;
-      })];
+      });
 
-      // Calculer le total des transferts de tous les agents
+      // Calculer le total des transferts (envois + retraits) de tous les agents, aujourd'hui
       this.totalAgentsTransferts = this.agents.reduce((sum, a) => sum + a.transferts, 0);
 
-      // Identifier le meilleur agent (plus de commissions)
+      // Performance = part de l'activité du jour (envois + retraits) gérée par cet agent
+      this.agents.forEach(a => {
+        a.performance = this.totalAgentsTransferts > 0
+          ? Math.round((a.transferts / this.totalAgentsTransferts) * 100)
+          : 0;
+      });
+
+      // Identifier le meilleur agent (le plus de transferts, envois + retraits)
       if (this.agents.length > 0) {
         this.topAgent = this.agents.reduce((best, current) =>
-          (current.commissionsJour > best.commissionsJour) ? current : best
+          (current.transferts > best.transferts) ? current : best
         );
         this.otherAgents = this.agents.filter(a => a.id !== this.topAgent?.id);
       } else {

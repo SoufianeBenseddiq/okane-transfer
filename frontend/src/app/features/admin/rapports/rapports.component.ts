@@ -95,4 +95,29 @@ export class RapportsComponent implements OnInit {
     const c = this.statutColors[statut] ?? '#9CA3AF';
     return `${c}18`;
   }
+
+  exportCsv(): void {
+    const headers = ['Référence', 'Expéditeur', 'Bénéficiaire', 'Montant (MAD)', 'Devise reçue', 'Statut', 'Date'];
+    const rows = this.filtered.map(t => [
+      t.numeroReference,
+      t.nomExpediteur,
+      t.nomBeneficiaire,
+      t.montantEnvoye.toFixed(2),
+      t.deviseReception,
+      t.statut,
+      new Date(t.creeLe).toLocaleString('fr-FR'),
+    ]);
+
+    const csv = [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';'))
+      .join('\n');
+
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `transferts_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 }

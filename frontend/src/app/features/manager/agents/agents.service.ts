@@ -31,6 +31,7 @@ export interface AgentPerformance {
 export class AgentsService {
   private readonly apiUrl = `${environment.apiUrl}/api/utilisateurs`;
   private readonly transfertsUrl = `${environment.apiUrl}/api/transferts`;
+  private readonly caisseOperationsUrl = `${environment.apiUrl}/api/caisse-operations`;
 
   constructor(private http: HttpClient) {}
 
@@ -44,6 +45,11 @@ export class AgentsService {
   // Récupérer les performances des agents basées sur les transferts
   getAgentsPerformance(): Observable<any[]> {
     return this.http.get<any[]>(this.transfertsUrl);
+  }
+
+  // Récupérer toutes les opérations de caisse (ENVOI/RETRAIT/...) pour tous les agents
+  getCaisseOperations(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.caisseOperationsUrl}/all`);
   }
 
   // Récupérer un agent par ID

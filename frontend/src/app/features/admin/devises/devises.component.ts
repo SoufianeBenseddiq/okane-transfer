@@ -9,6 +9,7 @@ import { CorridorResponse } from '../../../core/models/devise/corridor-response.
 import { PaysResponse } from '../../../core/models/pays/pays-response.model';
 import { TopbarComponent } from '../../../shared/components/topbar/topbar.component';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { ToastService } from '../../../core/services/toast.service';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 
 type MainTab  = 'corridors' | 'pays-devises';
@@ -27,6 +28,7 @@ export class DevisesComponent implements OnInit {
   pays:      PaysResponse[]     = [];
   loading  = true;
   saving   = false;
+  updatingRates = false;
   error: string | null = null;
 
   mainTab:   MainTab   = 'corridors';
@@ -85,6 +87,7 @@ export class DevisesComponent implements OnInit {
     private paysService:   PaysService,
     private fb: FormBuilder,
     private translate: TranslateService,
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -142,6 +145,22 @@ export class DevisesComponent implements OnInit {
       ? this.deviseService.desactiverDevise(d.id)
       : this.deviseService.activerDevise(d.id);
     obs.subscribe({ next: () => { d.active = !d.active; } });
+  }
+
+  updateRatesFromApi(): void {
+    if (this.updatingRates) return;
+    this.updatingRates = true;
+    this.deviseService.mettreAJourTauxDepuisApi().subscribe({
+      next: updated => {
+        this.devises = updated;
+        this.updatingRates = false;
+        this.toast.show(this.translate.instant('devises.toast.ratesUpdated'), 'success');
+      },
+      error: () => {
+        this.updatingRates = false;
+        this.toast.show(this.translate.instant('devises.toast.ratesUpdateError'), 'error');
+      },
+    });
   }
 
   openCreateDevise(): void {

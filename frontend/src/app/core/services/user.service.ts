@@ -80,5 +80,12 @@ export class UserService {
   }
  searchClients(query: string): Observable<UserResponse[]> {
   return this.http.get<UserResponse[]>(`${this.base}/search/${encodeURIComponent(query)}`);
-}
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<UserResponse> {
+    return this.http.put<UserResponse>(`${this.base}/change-password`, {
+      currentPassword,
+      newPassword
+    });
+  }
 }

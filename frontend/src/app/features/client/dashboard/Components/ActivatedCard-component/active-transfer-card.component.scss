@@ -1,0 +1,264 @@
+.transfer-card {
+  background: #1f2937;
+  border-radius: 16px;
+  padding: 24px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Header ────────────────────────────── */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+.status-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+
+  &.status-pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+  }
+  &.status-validated {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+  }
+  &.status-paid {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+  }
+  &.status-expired {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+  }
+}
+
+/* ── Body ──────────────────────────────── */
+.amount-block {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.amount {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.currency {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+.recipient {
+  margin: 0;
+  font-size: 13px;
+  color: #9ca3af;
+
+  strong {
+    color: #d1d5db;
+    font-weight: 600;
+  }
+}
+
+/* ── Progress tracker ──────────────────── */
+.progress-tracker {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progress-bar {
+  height: 3px;
+  background: #374151;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #f59e0b;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.steps {
+  display: flex;
+  justify-content: space-between;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.step-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #374151;
+  background: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 11px;
+    height: 11px;
+    color: #ffffff;
+  }
+}
+
+.step.completed .step-dot {
+  background: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.step.current .step-dot {
+  border-color: #f59e0b;
+  background: transparent;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.step-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.step-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #d1d5db;
+}
+
+.step-time {
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.step.current .step-label {
+  color: #f59e0b;
+}
+
+/* ── Withdrawal ────────────────────────── */
+.withdrawal-section {
+  background: #111827;
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.withdrawal-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.withdrawal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.withdrawal-code {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #f9fafb;
+  font-family: 'Courier New', monospace;
+}
+
+.reveal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f59e0b;
+  color: #1f2937;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover:not(:disabled) {
+    opacity: 0.85;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #1f2937;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Detail button ─────────────────────── */
+.detail-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+  color: #f59e0b;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  letter-spacing: 0.01em;
+
+  &:hover {
+    background: rgba(245, 158, 11, 0.08);
+    border-color: rgba(245, 158, 11, 0.6);
+  }
+}

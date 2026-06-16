@@ -39,8 +39,8 @@ export const routes: Routes = [
   // ─── Client ────────────────────────────────────────────────────────────────
   {
     path: 'client',
-    canActivate: [authGuard, roleGuard],
-    data: { roles: [RoleUtilisateur.ROLE_CLIENT] },
+    //canActivate: [authGuard, roleGuard],
+    //data: { roles: [RoleUtilisateur.ROLE_CLIENT] },
     loadChildren: () => import('./features/client/client.routes').then(m => m.clientRoutes)
   },
 

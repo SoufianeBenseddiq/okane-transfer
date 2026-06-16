@@ -105,11 +105,6 @@ export class CaisseService {
     return this.http.post<ClotureResponse>(`${this.cloturePath}/add-one`, data);
   }
 
-  // Cloturer la caisse d'un agent
-  cloturerCaisse(email: string): Observable<ClotureResponse> {
-    return this.http.post<ClotureResponse>(`${this.cloturePath}/${email}/cloturer`, {});
-  }
-
   // Modifier une cloture
   updateCloture(data: Partial<ClotureResponse>): Observable<ClotureResponse> {
     return this.http.put<ClotureResponse>(`${this.cloturePath}/update`, data);

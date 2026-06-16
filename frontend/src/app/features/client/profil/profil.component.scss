@@ -1,0 +1,132 @@
+/* ────────────────────────────────────────────────────────────────
+   Profil component — dark theme overrides for Tailwind classes
+   Angular's [_ngcontent-xxx] scoping gives these higher specificity
+   than the global Tailwind utilities, so !important is not needed.
+──────────────────────────────────────────────────────────────── */
+
+/* Page background */
+.min-h-screen, .bg-gray-50 {
+  background: #0d1b2a;
+}
+
+/* Cards */
+.bg-white {
+  background: #152538;
+  box-shadow: none;
+}
+
+/* Borders */
+.border-gray-100, .border-gray-50 {
+  border-color: rgba(255, 255, 255, 0.07);
+}
+.border-gray-200 {
+  border-color: rgba(255, 255, 255, 0.10);
+}
+.shadow-sm {
+  box-shadow: none;
+}
+
+/* Dividers */
+.divide-gray-50 > * + * {
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Text */
+.text-gray-900 { color: #e8edf2; }
+.text-gray-800 { color: #e0e5eb; }
+.text-gray-700 { color: #c5cfd8; }
+.text-gray-600 { color: #b0bcc9; }
+.text-gray-500, .text-gray-400 { color: #7a92a8; }
+
+/* Emerald → Amber */
+.text-emerald-600, .text-emerald-700 { color: #f5a623; }
+.bg-emerald-500 { background-color: #f5a623; }
+.bg-emerald-50  { background-color: rgba(245, 166, 35, 0.10); }
+.bg-emerald-100 { background-color: rgba(245, 166, 35, 0.15); }
+.border-emerald-200 { border-color: rgba(245, 166, 35, 0.25); }
+.border-emerald-300 { border-color: rgba(245, 166, 35, 0.40); }
+
+/* Toggle active state (bg-emerald-500 applied via [ngClass]) */
+button.bg-emerald-500 {
+  background-color: #f5a623;
+}
+
+/* Toggle inactive state */
+.bg-gray-200 {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Red / danger */
+.text-red-500, .text-red-600 { color: #e84b4b; }
+.bg-red-50   { background-color: rgba(232, 75, 75, 0.08); }
+.border-red-200 { border-color: rgba(232, 75, 75, 0.25); }
+
+/* Inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input {
+  background: #1a2d40;
+  color: #e8edf2;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+input::placeholder {
+  color: #4a6278;
+}
+input:focus {
+  border-color: rgba(245, 166, 35, 0.50);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(245, 166, 35, 0.12);
+}
+
+/* Logout button */
+button.text-red-500, button.text-red-600 {
+  color: #e84b4b;
+  border-color: rgba(232, 75, 75, 0.25);
+  background: transparent;
+
+  &:hover {
+    background-color: rgba(232, 75, 75, 0.08);
+  }
+}
+
+/* Change-password / edit button */
+button.border-gray-200 {
+  border-color: rgba(255, 255, 255, 0.10);
+  color: #7a92a8;
+  background: transparent;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+}
+
+/* Edit pencil icon button (no border) */
+button.text-gray-400 {
+  color: #4a6278;
+  &:hover { color: #f5a623; }
+}
+
+/* Eye toggle button inside input */
+button.text-gray-400.absolute {
+  color: #4a6278;
+  &:hover { color: #7a92a8; }
+}
+
+/* Save / confirm buttons (emerald → amber) */
+button.bg-emerald-500:not([class*="h-6"]) {
+  background-color: #f5a623;
+  color: #0d1b2a;
+  &:hover { background-color: #e09510; }
+}
+
+/* Cancel text button */
+button.text-gray-500 { color: #7a92a8; }
+
+/* Verified badge */
+.text-emerald-600.bg-emerald-50.border-emerald-200 {
+  color: #f5a623;
+  background-color: rgba(245, 166, 35, 0.10);
+  border-color: rgba(245, 166, 35, 0.25);
+}

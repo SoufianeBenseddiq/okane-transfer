@@ -160,6 +160,7 @@
       "adresse":   "Address",
       "pays":           "Country",
       "plafond":        "Daily limit (MAD)",
+      "soldeCaisseAgence": "Branch vault (MAD)",
       "manager":        "Manager (responsible)",
       "noManager":      "— None —",
       "estCentrale":    "Central agency",
@@ -297,7 +298,12 @@
     },
     "btn": {
       "createDevise":   "Create currency",
-      "createCorridor": "Create corridor"
+      "createCorridor": "Create corridor",
+      "updateRates":    "Update via API"
+    },
+    "toast": {
+      "ratesUpdated":      "Exchange rates updated successfully.",
+      "ratesUpdateError":  "Error updating exchange rates."
     },
     "error": {
       "create":         "Error creating the currency.",
@@ -675,7 +681,7 @@
     }
   },
 
-  "historique": {
+ "historique": {
     "searchPlaceholder": "Search by name, reference...",
     "allTypes":          "All types",
     "send":              "SEND",
@@ -698,7 +704,29 @@
     "amount":            "Amount",
     "noResults":         "No operations found",
     "showing":           "Showing",
-    "of":                "of"
+    "of":                "of",
+
+    "breadcrumb": "HISTORY",
+    "titre": "My transfers",
+    "sousTitre": "Find all your past and ongoing transfers here.",
+    "toutesDestinations": "All destinations",
+    "reinitialiser": "Reset",
+    "transfert": "transfer",
+    "transferts": "transfers",
+    "envoyesAuTotal": "sent in total",
+    "trieParDate": "Sorted by date",
+    "chargement": "Loading your transfers...",
+    "aucunTransfert": "You haven't made any transfers yet.",
+    "aucunResultat": "No transfer matches the selected filters.",
+    "agence": "Branch",
+    "statuts": {
+      "tous": "All",
+      "enAttente": "Pending",
+      "paye": "Paid",
+      "annule": "Cancelled",
+      "expire": "Expired",
+      "bloque": "Blocked"
+    }
   },
   "cloture": {
     "gapDetected":        "Gap detected",
@@ -719,6 +747,72 @@
     "warningSuffix":      "will be reported to Karim Benjelloun (Manager).",
     "cancel":             "Cancel",
     "validate":           "Validate closing"
+  },
+ "NAV": {
+  "ACCUEIL": "Home",
+  "ENVOYER": "Send",
+  "MES_TRANSFERTS": "My transfers",
+  "BENEFICIAIRES": "Beneficiaries",
+  "AIDE": "Help",
+  "PROFIL": "Profile"
+},"profil": {
+  "breadcrumb": "My Account",
+  "title": "Profile",
+  "subtitle": "Manage your personal information, security and preferences.",
+  "verified": "✓ VERIFIED ACCOUNT",
+  "logout": "Logout",
+  "personalInfo": {
+    "title": "Personal information",
+    "subtitle": "Your contact details and identity",
+    "fields": {
+      "nom": "Last name",
+      "prenom": "First name",
+      "email": "Email",
+      "telephone": "Phone",
+      "pays": "Country of residence"
+    },
+    "updateSuccess": "Information updated.",
+    "updateError": "An error occurred."
+  },
+  "security": {
+    "title": "Security",
+    "subtitle": "Password and two-factor authentication",
+    "password": "Password",
+    "passwordHidden": "············",
+    "change": "Change",
+    "currentPasswordPlaceholder": "Current password",
+    "newPasswordPlaceholder": "New password",
+    "confirmPasswordPlaceholder": "Confirm new password",
+    "confirm": "Confirm",
+    "passwordMismatch": "Passwords do not match.",
+    "passwordSuccess": "Password changed successfully.",
+    "passwordIncorrect": "Current password is incorrect.",
+    "passwordError": "An error occurred.",
+    "twoFA": {
+      "title": "Two-factor authentication",
+      "badge": "ENABLED",
+      "smsTo": "SMS to"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Choose how you want to be notified",
+    "event": "Event",
+    "email": "Email",
+    "sms": "SMS",
+    "required": "required",
+    "items": {
+      "transfertEnvoye": "Transfer sent",
+      "transfertPaye": "Transfer paid",
+      "codeRetraitCommunique": "Withdrawal code shared",
+      "alerteSecurite": "Security alert",
+      "newsletter": "Newsletter & offers"
+    }
+  },
+  "language": {
+    "title": "Language",
+    "subtitle": "Choose the display language of the application"
   }
+}
 
 }
