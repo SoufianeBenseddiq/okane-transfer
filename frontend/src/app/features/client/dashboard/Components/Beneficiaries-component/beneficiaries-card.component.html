@@ -1,0 +1,21 @@
+<div class="beneficiaries-card">
+  <span class="card-label">BÉNÉFICIAIRES ACTIFS</span>
+
+  <div class="count-row">
+    <span class="count">{{ count }}</span>
+    <div class="avatars">
+      <div
+        *ngFor="let b of beneficiaries; let i = index"
+        class="avatar"
+        [style.background]="getAvatarColor(i)"
+        [title]="b.name"
+      >
+        {{ b.initials }}
+      </div>
+    </div>
+  </div>
+
+  <button class="manage-link" (click)="manageBeneficiaries.emit()">
+    Gérer mes bénéficiaires →
+  </button>
+</div>

@@ -1,0 +1,53 @@
+.stats-card {
+  background: #152538;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #7a92a8;
+  text-transform: uppercase;
+}
+
+.amount-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.amount {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #e8edf2;
+  letter-spacing: -0.02em;
+}
+
+.currency {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #7a92a8;
+}
+
+.change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+
+  svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+  }
+
+  &.positive { color: #1cc8a0; }
+  &.negative { color: #e84b4b; }
+}

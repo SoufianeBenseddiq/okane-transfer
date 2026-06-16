@@ -15,10 +15,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.context.annotation.Import;
 
 import java.util.List;
 
 @Configuration
+@Import(AppConfig.class)
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {

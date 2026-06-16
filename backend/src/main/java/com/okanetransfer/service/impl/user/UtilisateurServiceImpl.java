@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -348,5 +349,19 @@ public class UtilisateurServiceImpl implements UtilisateurService {
                 .stream()
                 .map(utilisateurConverter::toResponse)
                 .toList();
+    }
+
+    @Override
+    public UserResponse changePassword(String email, String currentPassword, String newPassword) {
+        Utilisateur user = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        if (!passwordEncoder.matches(currentPassword, user.getMotDePasseHash())) {
+            throw new RuntimeException("Mot de passe actuel incorrect");
+        }
+
+        user.setMotDePasseHash(passwordEncoder.encode(newPassword));
+
+        return utilisateurConverter.toResponse(utilisateurRepository.save(user));
     }
 }

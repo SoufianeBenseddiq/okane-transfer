@@ -682,8 +682,7 @@
       "OUVERTURE":"Ouverture"
     }
   },
-
-  "historique": {
+"historique": {
     "searchPlaceholder": "Rechercher par nom, référence...",
     "allTypes":          "Tous les types",
     "send":              "ENVOI",
@@ -706,7 +705,29 @@
     "amount":            "Montant",
     "noResults":         "Aucune opération trouvée",
     "showing":           "Affichage de",
-    "of":                "sur"
+    "of":                "sur",
+
+    "breadcrumb": "HISTORIQUE",
+    "titre": "Mes transferts",
+    "sousTitre": "Retrouvez ici l'ensemble de vos envois passés et en cours.",
+    "toutesDestinations": "Toutes destinations",
+    "reinitialiser": "Réinitialiser",
+    "transfert": "transfert",
+    "transferts": "transferts",
+    "envoyesAuTotal": "envoyés au total",
+    "trieParDate": "Trié par date",
+    "chargement": "Chargement de vos transferts...",
+    "aucunTransfert": "Vous n'avez encore effectué aucun transfert.",
+    "aucunResultat": "Aucun transfert ne correspond aux filtres sélectionnés.",
+    "agence": "Agence",
+    "statuts": {
+      "tous": "Tous",
+      "enAttente": "En attente",
+      "paye": "Payé",
+      "annule": "Annulé",
+      "expire": "Expiré",
+      "bloque": "Bloqué"
+    }
   },
   "cloture": {
     "gapDetected":        "Écart détecté",
@@ -727,5 +748,72 @@
     "warningSuffix":      "sera signalé à Karim Benjelloun (Manager).",
     "cancel":             "Annuler",
     "validate":           "Valider la clôture"
+  },
+  "NAV": {
+  "ACCUEIL": "Accueil",
+  "ENVOYER": "Envoyer",
+  "MES_TRANSFERTS": "Mes transferts",
+  "BENEFICIAIRES": "Bénéficiaires",
+  "AIDE": "Aide",
+  "PROFIL": "Profil"
+},
+  "profil": {
+  "breadcrumb": "Mon Compte",
+  "title": "Profil",
+  "subtitle": "Gérez vos informations personnelles, votre sécurité et vos préférences.",
+  "verified": "✓ COMPTE VÉRIFIÉ",
+  "logout": "Déconnexion",
+  "personalInfo": {
+    "title": "Informations personnelles",
+    "subtitle": "Vos coordonnées et identité",
+    "fields": {
+      "nom": "Nom",
+      "prenom": "Prénom",
+      "email": "Email",
+      "telephone": "Téléphone",
+      "pays": "Pays de résidence"
+    },
+    "updateSuccess": "Informations mises à jour.",
+    "updateError": "Une erreur est survenue."
+  },
+  "security": {
+    "title": "Sécurité",
+    "subtitle": "Mot de passe et double facteur",
+    "password": "Mot de passe",
+    "passwordHidden": "············",
+    "change": "Changer",
+    "currentPasswordPlaceholder": "Mot de passe actuel",
+    "newPasswordPlaceholder": "Nouveau mot de passe",
+    "confirmPasswordPlaceholder": "Confirmer le nouveau mot de passe",
+    "confirm": "Confirmer",
+    "passwordMismatch": "Les mots de passe ne correspondent pas.",
+    "passwordSuccess": "Mot de passe modifié avec succès.",
+    "passwordIncorrect": "Mot de passe actuel incorrect.",
+    "passwordError": "Une erreur est survenue.",
+    "twoFA": {
+      "title": "Authentification 2FA",
+      "badge": "ACTIVÉE",
+      "smsTo": "SMS vers"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Choisissez comment être informé",
+    "event": "Événement",
+    "email": "Email",
+    "sms": "SMS",
+    "required": "obligatoire",
+    "items": {
+      "transfertEnvoye": "Transfert envoyé",
+      "transfertPaye": "Transfert payé",
+      "codeRetraitCommunique": "Code de retrait communiqué",
+      "alerteSecurite": "Alerte sécurité",
+      "newsletter": "Newsletter & offres"
+    }
+  },
+  "language": {
+    "title": "Langue",
+    "subtitle": "Choisissez la langue d'affichage de l'application"
   }
+}
 }

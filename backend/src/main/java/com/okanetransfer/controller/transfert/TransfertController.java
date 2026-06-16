@@ -6,11 +6,13 @@ import com.okanetransfer.service.dto.transfert.request.CreateTransfertAvecNouvea
 import com.okanetransfer.service.dto.transfert.request.PaiementRequest;
 import com.okanetransfer.service.dto.transfert.request.SendTransfertReceiptEmailRequest;
 import com.okanetransfer.service.dto.transfert.request.UpdateTransfertRequest;
+import com.okanetransfer.service.dto.transfert.response.ClientStatsResponse;
 import com.okanetransfer.service.dto.transfert.response.TransfertResponse;
 import com.okanetransfer.service.dto.transfert.response.TransfertStatsResponse;
 import com.okanetransfer.service.facade.transfert.ITransfertService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -139,12 +141,19 @@ public class TransfertController {
         );
     }
 
-        @PostMapping("/email-recu")
-        public ResponseEntity<Void> envoyerRecuParEmail(
-                        @RequestBody @Valid SendTransfertReceiptEmailRequest request) {
+    @GetMapping("/email-recu")
+    public ResponseEntity<Void> envoyerRecuParEmail(
+                    @RequestBody @Valid SendTransfertReceiptEmailRequest request) {
 
-                transfertService.envoyerRecuParEmail(request);
-                return ResponseEntity.ok().build();
-        }
+            transfertService.envoyerRecuParEmail(request);
+            return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/client/stats")
+    public ResponseEntity<ClientStatsResponse> getClientStats(Authentication auth) {
+        return ResponseEntity.ok(
+                transfertService.getClientStats(auth.getName())
+        );
+    }
 
 }
