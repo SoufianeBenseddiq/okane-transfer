@@ -125,6 +125,13 @@
       <version>2.5.0</version>
     </dependency>
 
+    <!-- Webjars version resolution (required for npm-style webjars used by springdoc) -->
+    <dependency>
+      <groupId>org.webjars</groupId>
+      <artifactId>webjars-locator-core</artifactId>
+      <version>0.59</version>
+    </dependency>
+
     <!-- Servlet API -->
     <dependency>
       <groupId>jakarta.servlet</groupId>

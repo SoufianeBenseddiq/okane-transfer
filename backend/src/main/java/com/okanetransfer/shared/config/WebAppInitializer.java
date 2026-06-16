@@ -17,7 +17,9 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[]{AppConfig.class, JpaConfig.class};
+        // OpenApiConfig is explicitly listed here (NOT via component scan)
+        // so that springdoc beans live only in the servlet context.
+        return new Class[]{AppConfig.class, JpaConfig.class, OpenApiConfig.class};
     }
 
     @Override
